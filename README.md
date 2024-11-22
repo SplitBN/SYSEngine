@@ -169,7 +169,7 @@ The library offers deep functionalities such as `CommandHelpProvider` and requir
     }
 ```
 
-**Example of a custom CommandArgument:**
+**Example of a World CommandArgument:**
 ```java
 public class WorldArgument implements CommandArgument<World> {
 
