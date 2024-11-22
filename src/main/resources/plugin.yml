@@ -1,0 +1,4 @@
+name: SYSEngine
+version: '${project.version}'
+main: dev.splityosis.sysengine.SYSEngine
+api-version: '1.13'
