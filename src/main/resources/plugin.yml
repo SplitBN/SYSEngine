@@ -2,3 +2,5 @@ name: SYSEngine
 version: '${project.version}'
 main: dev.splityosis.sysengine.SYSEngine
 api-version: '1.13'
+author: 01Henry
+description: 'A plugin that allows you to create custom systems for your server.'
