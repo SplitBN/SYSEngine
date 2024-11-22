@@ -5,16 +5,25 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>dev.splityosis</groupId>
-    <artifactId>SYSEngine</artifactId>
+    <artifactId>sysengine</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>SYSEngine</name>
 
+
     <properties>
         <java.version>1.8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub OctanePvP Apache Maven Packages</name>
+            <url>https://maven.pkg.github.com/OctanePvP/SYSEngine</url>
+        </repository>
+    </distributionManagement>
 
     <build>
         <plugins>
