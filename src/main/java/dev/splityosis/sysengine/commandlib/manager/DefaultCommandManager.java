@@ -121,7 +121,7 @@ public class DefaultCommandManager implements CommandManager {
         List<CommandArgument<?>> commandArgumentList = new ArrayList<>(Arrays.asList(command.getArguments()));
         commandArgumentList.addAll(Arrays.asList(command.getOptionalArguments()));
 
-        CommandContext context = new CommandContext(label, parentCommands, rawArgs, parsedArgs);
+        CommandContext context = new CommandContext(command, label, parentCommands, rawArgs, parsedArgs);
 
         // Put raw args before parsing so more info is passed to argument.parse()
         for (int i = 0; i < args.length; i++) {
@@ -217,7 +217,7 @@ public class DefaultCommandManager implements CommandManager {
             rawArgs.put(argument.getName(), args[i]);
         }
 
-        RawCommandContext context = new RawCommandContext(label, parentCommands, rawArgs);
+        RawCommandContext context = new RawCommandContext(command, label, parentCommands, rawArgs);
 
         List<String> completions = arg.tabComplete(commandSender, args[args.length - 1], command, args.length - 1, context);
         if (completions != null)
