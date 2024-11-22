@@ -21,7 +21,7 @@
         <repository>
             <id>github</id>
             <name>GitHub OctanePvP Apache Maven Packages</name>
-            <url>https://maven.pkg.github.com/OctanePvP/SYSEngine</url>
+            <url>https://maven.pkg.github.com/SplitYoSis/SYSEngine</url>
         </repository>
     </distributionManagement>
 
