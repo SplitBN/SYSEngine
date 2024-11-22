@@ -12,17 +12,32 @@ import java.util.regex.Pattern;
 
 public interface AbstractMapper<T> {
 
-    T getFromConfig(ConfigManager manager, ConfigurationSection section, String path);
+    T getFromConfig(ConfigManager manager, ConfigurationSection section, String path); // Get the object from the config
 
-    void setInConfig(ConfigManager manager, T instance, ConfigurationSection section, String path);
+    void setInConfig(ConfigManager manager, T instance, ConfigurationSection section, String path); // Set the object in the config
 
-    @SuppressWarnings("unchecked")
+    /**
+     * Retrieves the generic class type of the current instance.
+     * 
+     * @return the Class object representing the generic type parameter of the current instance.
+     * @throws ClassCastException if the generic superclass is not parameterized or if the type argument is not a class.
+     */
+    @SuppressWarnings("unchecked") 
     default Class<?> getGenericClass(){
         ParameterizedType superClass = (ParameterizedType) getClass().getGenericSuperclass();
         return (Class<T>) superClass.getActualTypeArguments()[0];
     }
 
-    Pattern HEX_PATTERN = Pattern.compile("&(#\\w{6})");
+    Pattern HEX_PATTERN = Pattern.compile("&(#\\w{6})"); // Pattern for matching hex color codes
+    /**
+     * Translates color codes in the given string and applies color formatting.
+     * 
+     * This method translates alternate color codes using the '&' character and
+     * replaces hex color codes with their corresponding ChatColor values.
+     * 
+     * @param str The input string containing color codes.
+     * @return The colorized string with applied color formatting, or null if the input string is null.
+     */
     default String colorize(String str) {
         if (str == null) return null;
         Matcher matcher = HEX_PATTERN.matcher(net.md_5.bungee.api.ChatColor.translateAlternateColorCodes('&', str));
@@ -34,6 +49,12 @@ public interface AbstractMapper<T> {
         return ChatColor.translateAlternateColorCodes('&', matcher.appendTail(buffer).toString());
     }
 
+    /**
+     * Applies colorization to each string in the provided list.
+     *
+     * @param lst the list of strings to be colorized; if null, the method returns null
+     * @return a new list with each string colorized, or null if the input list is null
+     */
     default List<String> colorize(List<String> lst){
         if (lst == null) return null;
         List<String> newList = new ArrayList<>();
@@ -43,6 +64,13 @@ public interface AbstractMapper<T> {
         return newList;
     }
 
+    /**
+     * Reverses the colorization of each string in the provided list.
+     * If the input list is null, it returns null.
+     *
+     * @param lst the list of strings to be reverse colorized
+     * @return a new list with each string reverse colorized, or null if the input list is null
+     */
     default List<String> reverseColorize(List<String> lst) {
         if (lst == null) return null;
         List<String> newLst = new ArrayList<>();
@@ -51,7 +79,16 @@ public interface AbstractMapper<T> {
         return newLst;
     }
 
-    Pattern patternAll = Pattern.compile("§x(§[0-9a-fA-F]){6}");
+    Pattern patternAll = Pattern.compile("§x(§[0-9a-fA-F]){6}"); // Pattern for matching hex color codes
+    /**
+     * Reverses the color codes in the given input string.
+     * 
+     * This method converts Minecraft color codes (prefixed with '§') to HTML-like color codes (prefixed with '&#').
+     * For example, '§a' becomes '&#a'.
+     * 
+     * @param input the input string containing Minecraft color codes
+     * @return the input string with Minecraft color codes replaced by HTML-like color codes
+     */
     default String reverseColorize(String input) {
         Matcher matcher = patternAll.matcher(input);
 
