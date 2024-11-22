@@ -11,9 +11,9 @@ public interface CommandManager {
 
     JavaPlugin getPlugin();
 
-    void registerCommand(Command... commands);
+    void registerCommands(Command... commands);
 
-    void unregisterCommand(Command... commands);
+    void unregisterCommands(Command... commands);
 
     void process(CommandSender commandSender, List<Command> parentCommands, Command command, String[] args, String label);
 

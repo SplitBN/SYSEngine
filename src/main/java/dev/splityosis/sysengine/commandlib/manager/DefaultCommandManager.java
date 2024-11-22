@@ -33,7 +33,7 @@ public class DefaultCommandManager implements CommandManager {
     }
 
     @Override
-    public void registerCommand(Command... commands) {
+    public void registerCommands(Command... commands) {
         for (Command command : commands) {
             PluginCommand pluginCommand = CommandUtil.createPluginCommand(command.getName(), getPlugin());
             if (pluginCommand == null)
@@ -56,7 +56,7 @@ public class DefaultCommandManager implements CommandManager {
     }
 
     @Override
-    public void unregisterCommand(Command... commands) {
+    public void unregisterCommands(Command... commands) {
 
     }
 

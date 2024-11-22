@@ -26,6 +26,7 @@
     </distributionManagement>
 
     <build>
+        <finalName>SYSEngine-${project.version}</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

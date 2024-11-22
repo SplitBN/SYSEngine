@@ -165,7 +165,7 @@ The library offers deep functionalities such as `CommandHelpProvider` and requir
 **Register the command using the CommandManager:**
 ```java
     public void registerCommands() {
-        commandManager.registerCommand(giveCommand);
+        commandManager.registerCommands(giveCommand);
     }
 ```
 

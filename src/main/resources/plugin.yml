@@ -3,4 +3,3 @@ version: '${project.version}'
 author: SplitYoSis
 main: dev.splityosis.sysengine.SYSEngine
 api-version: '1.13'
-author: SplitYoSis
