@@ -29,9 +29,8 @@ public class WorldArgument implements CommandArgument<World> {
     public World parse(CommandSender sender, String input, Command command, int index, CommandContext context) throws InvalidInputException {
         World world = Bukkit.getWorld(input);
 
-        if (world == null) {
+        if (world == null)
             throw new InvalidInputException();
-        }
 
         return world;
     }

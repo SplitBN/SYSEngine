@@ -162,6 +162,12 @@ public class DefaultCommandManager implements CommandManager {
         return processTabComplete(new HashSet<>(), commandSender, parentCommands, command, args, label);
     }
 
+    @Override
+    public CommandManager setCommandHelpProvider(CommandHelpProvider commandHelpProvider) {
+        this.commandHelpProvider = commandHelpProvider;
+        return this;
+    }
+
     public List<String> processTabComplete(Set<Class<?>> processedArgumentsClasses, CommandSender commandSender, List<Command> parentCommands, Command command, String[] args, String label) {
 
         // Check permission

@@ -19,5 +19,7 @@ public interface CommandManager {
 
     List<String> processTabComplete(CommandSender commandSender, List<Command> parentCommands, Command command, String[] args, String label);
 
+    CommandManager setCommandHelpProvider(CommandHelpProvider commandHelpProvider);
+
     CommandHelpProvider getCommandHelpProvider();
 }
