@@ -6,7 +6,7 @@ import dev.splityosis.sysengine.configlib.configuration.AbstractMapper;
 import dev.splityosis.sysengine.configlib.manager.MapperRegistry;
 
 /**
- * The ConfigAPI class provides a centralized interface for managing configuration
+ * The ConfigLib class provides a centralized interface for managing configuration
  * and mappers within the application. It allows for the creation of configuration
  * managers and the registration of mappers.
  */
