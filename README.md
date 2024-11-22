@@ -1,7 +1,8 @@
 # Minecraft Plugin Engine
+![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)
 
 ## Overview
-**Minecraft Command Engine** is a flexible and powerful library designed to help you build Minecraft plugins that are compatible with Minecraft versions 1.8+. It offers convenient and fluent utilities for handling commands, configuration management, versioning, and time operations, making plugin development easier and more efficient.
+**Minecraft Command Engine** is a flexible and powerful library designed to help you build Minecraft plugins that are compatible with Minecraft versions 1.8 - 1.21. It offers convenient and fluent utilities for handling commands, configuration management, versioning, and time operations, making plugin development easier and more efficient.
 
 This engine includes the following main components:
 
@@ -21,7 +22,7 @@ Add the following Maven dependency to your `pom.xml` file under `dependencies`:
 <dependency>
     <groupId>dev.splityosis</groupId>
     <artifactId>sysengine</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0</version>
     <scope>provided</scope>
 </dependency>
 ```
@@ -38,4 +39,11 @@ dependencies {
 While shading the library into your plugin’s JAR file is possible, it is not recommended in most cases. This is because some cross-plugin features that rely on dynamically loaded classes or plugin-to-plugin interactions might not work as expected when shaded (e.g, ConfigMappers, CommandArguments etc...).
 
 # Documentation
-coming soon...
+## ConfigLib
+### Create a `ConfigManager` instance in your main plugin class:
+```java
+    private ConfigManager configManager = ConfigLib.createConfigManager()
+            .setConfigOptions(new ConfigOptions()
+                    .setSectionSpacing(1)
+                    .setFieldSpacing(0));
+```
