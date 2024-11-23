@@ -83,7 +83,7 @@ public class YMLProfile {
                 if (mapperAnnotation != null)
                     mapper = mapperAnnotation.value();
 
-                config.put(absolutePath, new MapperClassValue(mapper, declaredField.getType(), declaredField.get(object)));
+                config.put(absolutePath, new MapperClassValue(mapper, declaredField, declaredField.get(object)));
             }
         }
 
@@ -182,12 +182,14 @@ public class YMLProfile {
     public static class MapperClassValue {
 
         private String mapper;
+        private Field field;
         private Class<?> fieldClass;
         private Object value;
 
-        public MapperClassValue(String mapper, Class<?> fieldClass, Object value) {
+        public MapperClassValue(String mapper, Field field, Object value) {
             this.mapper = mapper;
-            this.fieldClass = fieldClass;
+            this.field = field;
+            this.fieldClass = field.getType();
             this.value = value;
         }
 
@@ -197,6 +199,10 @@ public class YMLProfile {
 
         public Class<?> getFieldClass() {
             return fieldClass;
+        }
+
+        public Field getField() {
+            return field;
         }
 
         public Object getValue() {

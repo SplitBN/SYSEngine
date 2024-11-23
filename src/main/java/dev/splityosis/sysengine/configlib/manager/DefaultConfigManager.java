@@ -5,6 +5,7 @@ import dev.splityosis.sysengine.configlib.ConfigLib;
 import dev.splityosis.sysengine.configlib.configuration.YMLProfile;
 import dev.splityosis.sysengine.configlib.configuration.Configuration;
 import dev.splityosis.sysengine.configlib.configuration.AbstractMapper;
+import dev.splityosis.sysengine.utils.ReflectionUtil;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -115,22 +116,39 @@ public class DefaultConfigManager implements ConfigManager {
 
         ymlProfile.getConfig().forEach((string, value) -> {
             String mapper = value.getMapper();
+            String absolutePath = finalPath + string;
 
-            if (value.getFieldClass() == List.class) {
-                // TODO Handle list
+            if ((value.getFieldClass() == List.class || value.getFieldClass() == Set.class) && !isPrimative(ReflectionUtil.getGenericTypes(value.getField())[0])) {
+                Collection<?> collection = (Collection<?>) value.getValue();
+
+                ConfigurationSection collectionSection = config.createSection(absolutePath);
+
+                if (collection != null) {
+                    Class<?> genericClass = ReflectionUtil.getGenericTypes(value.getField())[0];
+                    int i = 0;
+                    for (Object o : collection)
+                        setObjectCorrectly(genericClass, o, collectionSection, String.valueOf(i++), mapper);
+                }
             }
 
-            else if (value.getFieldClass() == Set.class) {
-                // TODO Handle Set
+            else if (value.getFieldClass() == Map.class && !isPrimative(ReflectionUtil.getGenericTypes(value.getField())[1])) {
+                Class<?>[] genericClasses = ReflectionUtil.getGenericTypes(value.getField());
+                if (genericClasses[0] != String.class) {
+                    new RuntimeException("Map key class must be of type String at '"+value.getField().getName()+"'").printStackTrace();
+                    return;
+                }
+                Map<String, ?> map = (Map<String, ?>) value.getValue();
+
+                ConfigurationSection mapSection = config.createSection(absolutePath);
+
+                if (map != null)
+                    map.forEach((key, object) -> {
+                        setObjectCorrectly(genericClasses[1], object, mapSection, key, mapper);
+                    });
             }
 
-            else if (value.getFieldClass() == Map.class) {
-                // TODO Handle Map
-            }
-
-            else {
-                setObjectCorrectly(value, config, finalPath + string, mapper);
-            }
+            else
+                setObjectCorrectly(value.getFieldClass(), value.getValue(), config, absolutePath, mapper);
         });
 
         ymlProfile.getComments().forEach((string, strings) -> config.setComments(finalPath + string, strings));
@@ -163,20 +181,23 @@ public class DefaultConfigManager implements ConfigManager {
             declaredField.setAccessible(true);
             String absolutePath = currentSectionPath + YMLProfile.getFieldPath(declaredField, fieldAnnotation);
 
-            if (declaredField.getType() == List.class) {
-                // TODO handle List
+            if ((declaredField.getType() == List.class || declaredField.getDeclaringClass() == Set.class) && ! isPrimative(ReflectionUtil.getGenericTypes(declaredField)[0])) {
+                Collection<?> collection = getList(declaredField, section, absolutePath, mapper);
+                declaredField.set(configuration, collection);
             }
+            else if (declaredField.getType() == Map.class && ! isPrimative(ReflectionUtil.getGenericTypes(declaredField)[1])) {
+                Class<?>[] genericClasses = ReflectionUtil.getGenericTypes(declaredField);
+                if (genericClasses[0] != String.class) {
+                    new RuntimeException("Map key class must be of type String at '"+declaredField.getName()+"'").printStackTrace();
+                    return;
+                }
 
-            else if (declaredField.getType() == Set.class) {
-                // TODO handle set
-            }
-
-            else if (declaredField.getType() == Map.class) {
-                // TODO handle Map
+                Map<String, ?> map = getMap(genericClasses[1], section, absolutePath, mapper);
+                declaredField.set(configuration, map);
             }
 
             else {
-                Object o = getObjectCorrectly(declaredField, mapper, section, absolutePath);
+                Object o = getObjectCorrectly(declaredField.getType(), mapper, section, absolutePath);
                 declaredField.set(configuration, o);
             }
         }
@@ -200,45 +221,93 @@ public class DefaultConfigManager implements ConfigManager {
         return configOptions;
     }
 
-    private void setObjectCorrectly(YMLProfile.MapperClassValue value, ConfigurationSection section, String path, String mapper) {
-        AbstractMapper abstractMapper = getMapperRegistry().getMapper(value.getFieldClass(), mapper);
+    private void setObjectCorrectly(Class<?> clazz, Object object, ConfigurationSection section, String path, String mapper) {
+        AbstractMapper abstractMapper = getMapperRegistry().getMapper(clazz, mapper);
         if (abstractMapper != null) {
             // Handle custom Mapper
-            abstractMapper.setInConfig(this, value.getValue(), section, path);
+            abstractMapper.setInConfig(this, clazz, section, path);
         }
-        if (value.getFieldClass().isEnum()) {
+        if (clazz.isEnum()) {
             // Handle enum
-            Enum<?> enumValue = (Enum<?>) value.getValue();
+            Enum<?> enumValue = (Enum<?>) object;
             section.set(path, enumValue.name());
-        }
-        else {
+        } else {
             // Let the fallback types be handled
-            section.set(path, value.getValue());
+            section.set(path, object);
         }
     }
 
-    private Object getObjectCorrectly(Field declaredField, String mapper, ConfigurationSection section, String absolutePath) {
-        AbstractMapper abstractMapper = getMapperRegistry().getMapper(declaredField.getType(), mapper);
-        Object o;
+    private <T> T getObjectCorrectly(Class<T> clazz, String mapper, ConfigurationSection section, String absolutePath) {
+        AbstractMapper<T> abstractMapper = getMapperRegistry().getMapper(clazz, mapper);
+        T o;
         if (abstractMapper != null) {
             // Handle custom Mapper
             o = abstractMapper.getFromConfig(this, section, absolutePath);
         }
-        else if (declaredField.getType().isEnum()) {
+        else if (clazz.isEnum()) {
             // Handle enum
             String enumValue = section.getString(absolutePath);
             if (enumValue != null) {
                 @SuppressWarnings("unchecked")
-                Enum<?> enumConstant = Enum.valueOf((Class<Enum>) declaredField.getType(), enumValue);
-                o = enumConstant;
+                Enum<?> enumConstant = Enum.valueOf((Class<Enum>) clazz, enumValue);
+                o = (T) enumConstant;
             } else
                 o = null;
         }
         else {
             // Let the fallback types be handled
-            o = section.get(absolutePath);
+            o = (T) section.get(absolutePath);
         }
         return o;
+    }
+
+    private <T> Collection<?> getList(Field declaredField, ConfigurationSection section, String absolutePath, String mapper) {
+        Class<T> genericClass = (Class<T>) ReflectionUtil.getGenericTypes(declaredField)[0];
+        Collection<T> collection;
+
+        if (declaredField.getType() == List.class)
+            collection = new ArrayList<>();
+        else
+            collection = new LinkedHashSet<>();
+
+        ConfigurationSection collectionSection = section.getConfigurationSection(absolutePath);
+
+        if (collectionSection != null) {
+            for (String key : collectionSection.getKeys(false)) {
+                collection.add(getObjectCorrectly(genericClass, mapper, collectionSection, key));
+            }
+        }
+
+        return collection;
+    }
+
+    private <T> Map<String, T> getMap(Class<T> value, ConfigurationSection section, String absolutePath, String mapper) {
+        Map<String, T> map = new LinkedHashMap<>();
+        ConfigurationSection mapSection = section.getConfigurationSection(absolutePath);
+
+        if (mapSection != null)
+            for (String key : mapSection.getKeys(false))
+                map.put(key, getObjectCorrectly(value, mapper, mapSection, key));
+
+        return map;
+    }
+
+    private static Set<Class<?>> primitiveClasses = new HashSet<>(Arrays.asList(
+            String.class,
+            Integer.class,
+            Long.class,
+            Double.class,
+            Float.class,
+            Character.class,
+            Boolean.class,
+            Byte.class,
+            Short.class,
+            Void.class
+    ));
+
+    private boolean isPrimative(Class<?> clazz) {
+        if (clazz.isPrimitive()) return true;
+        return primitiveClasses.contains(clazz);
     }
 
 }
