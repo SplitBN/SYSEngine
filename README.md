@@ -2,15 +2,15 @@
 ![Version](https://img.shields.io/badge/version-1.0.6-blue.svg)
 
 ## Overview
-**Minecraft Command Engine** is a flexible and powerful library designed to help you build Minecraft plugins that are compatible with Minecraft versions 1.8 - 1.21. It offers convenient and fluent utilities for handling commands, configuration management, versioning, and time operations, making plugin development easier and more efficient.
+**Minecraft Command Engine** is a flexible and powerful library designed to help you build Minecraft plugins that are compatible with Minecraft versions 1.8 - 1.21. It offers convenient and fluent utilities for handling commands, configuration management, versioning, and much more, making plugin development easier and more efficient.
 
 This engine includes the following main components:
 
 - [**ConfigLib**](#configlib): Simplified, annotation-based configuration management.
 - [**CommandLib**](#commandlib): A command handling system supporting dynamic command registration, subcommands, and tab completion.
-- **Util Classes**: A collection of useful utilities, including time and version helpers.
-- **XSeries**: The engine shades in the XSeries library which provides multi-version supported objects such as `XMaterial`, `XSound`, `XBlock`, `XItemStack`, etc.
-
+- **Util Classes**: A collection of useful utilities, including [ColorUtil](https://github.com/SplitYoSis/SYSEngine/blob/master/src/main/java/dev/splityosis/sysengine/utils/ColorUtil.java), [TimeUtil](https://github.com/SplitYoSis/SYSEngine/blob/master/src/main/java/dev/splityosis/sysengine/utils/TimeUtil.java), [VersionUtil](https://github.com/SplitYoSis/SYSEngine/blob/master/src/main/java/dev/splityosis/sysengine/utils/VersionUtil.java), [Symbol](https://github.com/SplitYoSis/SYSEngine/blob/master/src/main/java/dev/splityosis/sysengine/utils/Symbol.java) and more...
+- **XSeries**: Shaded and relocated library which provides cross-version supported util classes such as `XMaterial`, `XSound`, `XBlock`, `XItemStack`, see more: https://github.com/CryptoMorin/XSeries
+- **NBT API**: Shaded and relocated library which provides a nice and fluent api to manage NBTs, see more: https://github.com/tr7zw/Item-NBT-API
 ## Installation
 
 To use the Minecraft Command Engine in your project, you can include the following dependencies based on your build system.
