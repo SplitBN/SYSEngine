@@ -46,10 +46,9 @@ public class DefaultHelpMenuCommandHelper extends HelpMenuCommandHelper{
         for (Command subcommand : subcommands) {
             StringBuilder lineBuilder = new StringBuilder("&c* " + path + " ");
 
-            if (!first) {
+            if (!first)
                 lineBuilder.append(subcommand.getName()).append(" ");
-                first = false;
-            }
+            first = false;
 
             // Do args
             for (CommandArgument<?> argument : subcommand.getArguments())
