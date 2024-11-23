@@ -6,7 +6,7 @@
 
     <groupId>dev.splityosis</groupId>
     <artifactId>sysengine</artifactId>
-    <version>1.0.5</version>
+    <version>1.0.6</version>
     <packaging>jar</packaging>
 
     <name>SYSEngine</name>
@@ -57,11 +57,16 @@
                                     <pattern>org.bukkit.configuration</pattern>
                                     <shadedPattern>dev.splityosis.sysengine.configlib.bukkit</shadedPattern>
                                 </relocation>
+                                <relocation>
+                                    <pattern>de.tr7zw.changeme.nbtapi</pattern>
+                                    <shadedPattern>dev.splityosis.sysengine.nbtapi</shadedPattern>
+                                </relocation>
                             </relocations>
                             <artifactSet>
                                 <includes>
                                     <include>org.spigotmc:spigot-api</include>
                                     <include>com.github.cryptomorin:XSeries</include>
+                                    <include>de.tr7zw:item-nbt-api</include>
                                 </includes>
                             </artifactSet>
                             <filters>
@@ -94,6 +99,11 @@
             <id>sonatype</id>
             <url>https://oss.sonatype.org/content/groups/public/</url>
         </repository>
+        <repository>
+            <id>codemc-repo</id>
+            <url>https://repo.codemc.io/repository/maven-public/</url>
+            <layout>default</layout>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -117,6 +127,12 @@
             <artifactId>XSeries</artifactId>
             <version>11.3.0</version>
             <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>de.tr7zw</groupId>
+            <artifactId>item-nbt-api</artifactId>
+            <version>2.14.0</version>
         </dependency>
 
     </dependencies>
