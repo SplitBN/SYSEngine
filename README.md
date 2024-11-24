@@ -1,5 +1,5 @@
 # Minecraft Plugin Engine
-![Version](https://img.shields.io/badge/version-1.0.6-blue.svg)
+![Version](https://img.shields.io/badge/version-1.0.7-blue.svg)
 
 ## Overview
 **Minecraft Command Engine** is a flexible and powerful library designed to help you build Minecraft plugins that are compatible with Minecraft versions 1.8 - 1.21. It offers convenient and fluent utilities for handling commands, configuration management, versioning, and much more, making plugin development easier and more efficient.
@@ -22,7 +22,7 @@ Add the following Maven dependency to your `pom.xml` file under `dependencies`:
 <dependency>
     <groupId>dev.splityosis</groupId>
     <artifactId>sysengine</artifactId>
-    <version>1.0.6</version>
+    <version>1.0.7</version>
     <scope>provided</scope>
 </dependency>
 ```
@@ -185,7 +185,7 @@ public class WorldArgument implements CommandArgument<World> {
     }
 
     @Override
-    public World parse(CommandSender sender, String input, Command command, int index, CommandContext context) throws InvalidInputException {
+    public World parse(CommandSender sender, String input, Command command, int index, CommandContext context, InvalidInputException inputException) throws InvalidInputException {
         World world = Bukkit.getWorld(input);
 
         if (world == null)
@@ -195,7 +195,7 @@ public class WorldArgument implements CommandArgument<World> {
     }
 
     @Override
-    public void onInvalidInput(CommandSender sender, String input, Command command, int index, CommandContext context) {
+    public void onInvalidInput(CommandSender sender, String input, Command command, int index, CommandContext context, InvalidInputException inputException) {
         sender.sendMessage(ChatColor.RED + "Invalid world name! Please enter a valid world name.");
     }
 
