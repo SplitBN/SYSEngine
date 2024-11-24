@@ -33,7 +33,7 @@ public class IntegerArgument implements CommandArgument<Integer> {
     }
 
     @Override
-    public void onInvalidInput(CommandSender sender, String input, Command command, int index, CommandContext context) {
+    public void onInvalidInput(CommandSender sender, String input, Command command, int index, CommandContext context, InvalidInputException inputException) {
         sender.sendMessage(ChatColor.RED + "Invalid input! Please enter a valid integer.");
     }
 

@@ -35,7 +35,7 @@ public class PlayerArgument implements CommandArgument<Player> {
     }
 
     @Override
-    public void onInvalidInput(CommandSender sender, String input, Command command, int index, CommandContext context) {
+    public void onInvalidInput(CommandSender sender, String input, Command command, int index, CommandContext context, InvalidInputException inputException) {
         sender.sendMessage(ChatColor.RED + "Player '" + input + "' is not online!");
     }
 

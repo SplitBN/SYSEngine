@@ -33,7 +33,7 @@ public class DoubleArgument implements CommandArgument<Double> {
     }
 
     @Override
-    public void onInvalidInput(CommandSender sender, String input, Command command, int index, CommandContext context) {
+    public void onInvalidInput(CommandSender sender, String input, Command command, int index, CommandContext context, InvalidInputException inputException) {
         sender.sendMessage(ChatColor.RED + "Invalid input! Please enter a valid decimal number.");
     }
 

@@ -36,7 +36,7 @@ public class WorldArgument implements CommandArgument<World> {
     }
 
     @Override
-    public void onInvalidInput(CommandSender sender, String input, Command command, int index, CommandContext context) {
+    public void onInvalidInput(CommandSender sender, String input, Command command, int index, CommandContext context, InvalidInputException inputException) {
         sender.sendMessage(ChatColor.RED + "Invalid world name! Please enter a valid world name.");
     }
 

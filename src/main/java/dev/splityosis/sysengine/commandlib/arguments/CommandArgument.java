@@ -51,8 +51,9 @@ public interface CommandArgument<T> {
      * @param command the command being executed.
      * @param index the index of this argument in the command's argument list.
      * @param context the command context containing any pre-processed data and parsed previous arguments.
+     * @param inputException the exception thrown by the failed parse method.
      */
-    void onInvalidInput(CommandSender sender, String input, Command command, int index, CommandContext context);
+    void onInvalidInput(CommandSender sender, String input, Command command, int index, CommandContext context, InvalidInputException inputException);
 
     /**
      * Provides a list of tab-completion options based on the current input.

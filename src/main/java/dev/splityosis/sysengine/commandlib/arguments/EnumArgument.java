@@ -36,7 +36,7 @@ public class EnumArgument<T extends Enum<T>> implements CommandArgument<T> {
     }
 
     @Override
-    public void onInvalidInput(CommandSender sender, String input, Command command, int index, CommandContext context) {
+    public void onInvalidInput(CommandSender sender, String input, Command command, int index, CommandContext context, InvalidInputException inputException) {
         String validValues = Arrays.stream(enumType.getEnumConstants())
                 .map(Enum::name)
                 .collect(Collectors.joining(", "));

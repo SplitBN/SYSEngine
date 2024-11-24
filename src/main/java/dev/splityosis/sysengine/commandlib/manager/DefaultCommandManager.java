@@ -136,7 +136,7 @@ public class DefaultCommandManager implements CommandManager {
                 parsedArgs.put(argument.getName(), argument.parse(commandSender, args[i], command, i, context));
                 context.update();
             } catch (InvalidInputException e) {
-                argument.onInvalidInput(commandSender, args[i], command, i, context);
+                argument.onInvalidInput(commandSender, args[i], command, i, context, e);
                 return;
             }
         }
