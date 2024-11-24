@@ -4,7 +4,8 @@ import dev.splityosis.sysengine.commandlib.arguments.CommandArgument;
 import dev.splityosis.sysengine.commandlib.command.Command;
 import dev.splityosis.sysengine.commandlib.command.CommandContext;
 import dev.splityosis.sysengine.commandlib.command.RawCommandContext;
-import dev.splityosis.sysengine.commandlib.conditions.CommandCondition;
+import dev.splityosis.sysengine.commandlib.requirements.CommandRequirement;
+import dev.splityosis.sysengine.commandlib.exception.RequirementNotMetException;
 import dev.splityosis.sysengine.commandlib.helper.CommandHelpProvider;
 import dev.splityosis.sysengine.commandlib.exception.InvalidInputException;
 import dev.splityosis.sysengine.commandlib.consumers.CommandConsumer;
@@ -109,6 +110,7 @@ public class DefaultCommandManager implements CommandManager {
         // Try to parse context and execute command
         LinkedHashMap<String, String> rawArgs = new LinkedHashMap<>();
         LinkedHashMap<String, Object> parsedArgs = new LinkedHashMap<>();
+        List<Object> requirementValues = new ArrayList<>();
 
         int minArgs = command.getArguments().length;
         int maxArgs = minArgs + command.getOptionalArguments().length;
@@ -121,7 +123,7 @@ public class DefaultCommandManager implements CommandManager {
         List<CommandArgument<?>> commandArgumentList = new ArrayList<>(Arrays.asList(command.getArguments()));
         commandArgumentList.addAll(Arrays.asList(command.getOptionalArguments()));
 
-        CommandContext context = new CommandContext(command, label, parentCommands, rawArgs, parsedArgs);
+        CommandContext context = new CommandContext(command, label, parentCommands, rawArgs, parsedArgs, requirementValues);
 
         // Put raw args before parsing so more info is passed to argument.parse()
         for (int i = 0; i < args.length; i++) {
@@ -141,10 +143,13 @@ public class DefaultCommandManager implements CommandManager {
             }
         }
 
-        // Check conditions
-        for (CommandCondition condition : command.getConditions()) {
-            if (!condition.isMet(commandSender, command, context)) {
-                condition.onNotMet(commandSender, command, context);
+        // Check requirements
+        for (CommandRequirement<?> requirement : command.getRequirements()) {
+            try {
+                Object value = requirement.evaluate(commandSender, command, context);
+                requirementValues.add(value);
+            } catch (RequirementNotMetException e) {
+                requirement.onNotMet(commandSender, command, context, e);
                 return;
             }
         }

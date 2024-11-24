@@ -1,7 +1,7 @@
 package dev.splityosis.sysengine.commandlib.command;
 
 import dev.splityosis.sysengine.commandlib.arguments.CommandArgument;
-import dev.splityosis.sysengine.commandlib.conditions.CommandCondition;
+import dev.splityosis.sysengine.commandlib.requirements.CommandRequirement;
 import dev.splityosis.sysengine.commandlib.consumers.CommandConsumer;
 import dev.splityosis.sysengine.commandlib.consumers.PlayerCommandConsumer;
 
@@ -12,7 +12,7 @@ import java.util.TreeMap;
 /**
  * Represents a command in the command library.
  * Each command has a name, optional aliases, permission requirements, description, arguments, and execution logic.
- * Commands can be customized with conditions, required and optional arguments, and different executors for various contexts.
+ * Commands can be customized with requirements, required and optional arguments, and different executors for various contexts.
  */
 public class Command implements Cloneable{
 
@@ -22,7 +22,7 @@ public class Command implements Cloneable{
     private String permission;
     private CommandArgument<?>[] arguments;
     private CommandArgument<?>[] optionalArguments;
-    private CommandCondition[] conditions;
+    private CommandRequirement<?>[] requirements;
     private CommandConsumer commandConsumer;
     private PlayerCommandConsumer playerCommandConsumer;
     private Map<String, Map<Integer, Command>> subCommands;
@@ -38,7 +38,7 @@ public class Command implements Cloneable{
         this.aliases = (aliases != null) ? aliases : new String[0];
         this.arguments = new CommandArgument[0];
         this.optionalArguments = new CommandArgument[0];
-        this.conditions = new CommandCondition[0];
+        this.requirements = new CommandRequirement[0];
         this.description = "";
         this.subCommands = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
     }
@@ -66,13 +66,13 @@ public class Command implements Cloneable{
     }
 
     /**
-     * Sets the conditions that must be met to execute the command.
+     * Sets the requirements that must be met to execute the command.
      *
-     * @param conditions the conditions to be met before command execution.
+     * @param requirements the requirements to be met before command execution.
      * @return the command instance, for chaining.
      */
-    public Command conditions(CommandCondition... conditions) {
-        this.conditions = conditions;
+    public Command requirements(CommandRequirement<?>... requirements) {
+        this.requirements = requirements;
         return this;
     }
 
@@ -168,12 +168,12 @@ public class Command implements Cloneable{
      * Creates and returns a copy of this Command instance.
      * <p>
      * The clone includes all properties of the command, such as the name, aliases,
-     * description, permission, arguments, optional arguments, conditions, and executors.
+     * description, permission, arguments, optional arguments, requirements, and executors.
      * </p>
      *
      * <p><b>Note:</b> This method performs a shallow copy of the command's data, which is
      * sufficient for immutable and independent fields such as Strings and arrays of command arguments
-     * and conditions. Modifications to cloned arrays (like aliases, arguments, or conditions) will
+     * and requirements. Modifications to cloned arrays (like aliases, arguments, or requirements) will
      * not affect the original arrays in this instance, as they are cloned separately.</p>
      *
      * @return A new Command instance that is a copy of this command.
@@ -194,8 +194,8 @@ public class Command implements Cloneable{
             clonedCommand.optionalArguments = this.optionalArguments.clone();
         }
 
-        if (this.conditions != null) {
-            clonedCommand.conditions = this.conditions.clone();
+        if (this.requirements != null) {
+            clonedCommand.requirements = this.requirements.clone();
         }
 
         return clonedCommand;
@@ -227,8 +227,8 @@ public class Command implements Cloneable{
         return optionalArguments;
     }
 
-    public CommandCondition[] getConditions() {
-        return conditions;
+    public CommandRequirement<?>[] getRequirements() {
+        return requirements;
     }
 
     public CommandConsumer getCommandConsumer() {
