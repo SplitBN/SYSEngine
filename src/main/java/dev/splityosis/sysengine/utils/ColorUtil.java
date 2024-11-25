@@ -42,7 +42,7 @@ public class ColorUtil {
      * @param lst The list of strings to colorize.
      * @return A list of colorized strings.
      */
-    public List<String> colorize(List<String> lst) {
+    public static List<String> colorize(List<String> lst) {
         if (VersionUtil.isServerAtLeast("1.16"))
             lst = colorizeHex(lst);
         return colorizeStandard(lst);

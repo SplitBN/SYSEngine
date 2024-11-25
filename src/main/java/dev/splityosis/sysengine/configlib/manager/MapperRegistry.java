@@ -1,7 +1,11 @@
 package dev.splityosis.sysengine.configlib.manager;
 
+import com.cryptomorin.xseries.XItemStack;
 import dev.splityosis.sysengine.configlib.configuration.AbstractMapper;
+import dev.splityosis.sysengine.utils.ReflectionUtil;
 
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,7 +31,11 @@ public class MapperRegistry {
      *                          making this mapper the main or default mapper for this type.
      */
     public void registerMapper(AbstractMapper<?> mapper, String mapperIdentifier) {
-        Map<String, AbstractMapper<?>> mappers = mappersMap.get(mapper.getGenericClass());
+        Class<?> claz = getMapperGenericType(mapper.getClass());
+        if (claz == null)
+            throw new RuntimeException("Mapper is not if any generic type");
+
+        Map<String, AbstractMapper<?>> mappers = mappersMap.get(claz);
         if (mappers == null) {
             mappers = new HashMap<>();
         }
@@ -35,7 +43,7 @@ public class MapperRegistry {
         mapperIdentifier = (mapperIdentifier == null) ? "" : mapperIdentifier.trim();
 
         mappers.put(mapperIdentifier.toLowerCase(), mapper);
-        mappersMap.put(mapper.getGenericClass(), mappers);
+        mappersMap.put(claz, mappers);
     }
 
     /**
@@ -88,5 +96,19 @@ public class MapperRegistry {
      */
     public Map<Class<?>, Map<String, AbstractMapper<?>>> getMappersMap() {
         return mappersMap;
+    }
+
+    public static <T> Class<T> getMapperGenericType(Class<?> clazz) {
+        Type[] genericInterfaces = clazz.getGenericInterfaces();
+        for (Type type : genericInterfaces) {
+            if (type instanceof ParameterizedType) {
+                ParameterizedType parameterizedType = (ParameterizedType) type;
+
+                if (parameterizedType.getRawType() == AbstractMapper.class) {
+                    return (Class<T>) parameterizedType.getActualTypeArguments()[0];
+                }
+            }
+        }
+        return null;
     }
 }

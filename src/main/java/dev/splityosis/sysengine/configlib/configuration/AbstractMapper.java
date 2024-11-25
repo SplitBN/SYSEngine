@@ -16,18 +16,6 @@ public interface AbstractMapper<T> {
 
     void setInConfig(ConfigManager manager, T instance, ConfigurationSection section, String path); // Set the object in the config
 
-    /**
-     * Retrieves the generic class type of the current instance.
-     * 
-     * @return the Class object representing the generic type parameter of the current instance.
-     * @throws ClassCastException if the generic superclass is not parameterized or if the type argument is not a class.
-     */
-    @SuppressWarnings("unchecked") 
-    default Class<?> getGenericClass(){
-        ParameterizedType superClass = (ParameterizedType) getClass().getGenericSuperclass();
-        return (Class<T>) superClass.getActualTypeArguments()[0];
-    }
-
     Pattern HEX_PATTERN = Pattern.compile("&(#\\w{6})"); // Pattern for matching hex color codes
     /**
      * Translates color codes in the given string and applies color formatting.
