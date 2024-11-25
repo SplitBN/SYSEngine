@@ -154,6 +154,8 @@ public class DefaultConfigManager implements ConfigManager {
         ymlProfile.getComments().forEach((string, strings) -> config.setComments(finalPath + string, strings));
         ymlProfile.getInlineComments().forEach((string, strings) -> config.setInlineComments(finalPath + string, strings));
 
+        if (ymlProfile.getConfiguration() != null)
+            ymlProfile.getConfiguration().onSave(file, config.getConfigurationSection(path));
         config.save(file);
     }
 
@@ -201,6 +203,7 @@ public class DefaultConfigManager implements ConfigManager {
                 declaredField.set(configuration, o);
             }
         }
+        configuration.onLoad(section);
     }
 
     @Override

@@ -1,7 +1,10 @@
 package dev.splityosis.sysengine.configlib.configuration;
 
 import dev.splityosis.sysengine.configlib.manager.MapperRegistry;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.file.FileConfiguration;
 
+import java.io.File;
 import java.lang.annotation.*;
 
 /**
@@ -19,6 +22,22 @@ public interface Configuration {
      * This value is typically used internally and shouldn't be required for general use.
      */
     String PATH_FROM_NAME_SECRET = "GENERATE_PATH_FROM_NAME_5410"; // If you actually need this path then you have problems
+
+    /**
+     * Gets called after this config is loaded.
+     * Used to define logic right after this config is loaded/reloaded.
+     * @param config the config that is loaded.
+     */
+    default void onLoad(ConfigurationSection config) {}
+
+    /**
+     * Gets called before this config is saved.
+     * Used to define logic right before this config is saved.
+     * @param file the file that this config will be saved to.
+     * @param config the pre-processed config (already processed the annotated fields).
+     */
+    default void onSave(File file, ConfigurationSection config) {}
+
 
     /**
      * Annotation used to attach a comment to a configuration section.
