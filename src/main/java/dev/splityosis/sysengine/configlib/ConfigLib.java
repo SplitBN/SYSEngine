@@ -4,6 +4,7 @@ import dev.splityosis.sysengine.configlib.manager.DefaultConfigManager;
 import dev.splityosis.sysengine.configlib.manager.ConfigManager;
 import dev.splityosis.sysengine.configlib.configuration.AbstractMapper;
 import dev.splityosis.sysengine.configlib.manager.MapperRegistry;
+import dev.splityosis.sysengine.configlib.mappers.*;
 
 /**
  * The ConfigLib class provides a centralized interface for managing configuration
@@ -11,6 +12,8 @@ import dev.splityosis.sysengine.configlib.manager.MapperRegistry;
  * managers and the registration of mappers.
  */
 public class ConfigLib {
+
+    private static boolean initialized = false;
 
     // A registry to hold all the mappers.
     private static final MapperRegistry mapperRegistry = new MapperRegistry();
@@ -56,5 +59,25 @@ public class ConfigLib {
      */
     public static void registerMapper(AbstractMapper<?> mapper, String identifier) {
         mapperRegistry.registerMapper(mapper, identifier);
+    }
+
+    /**
+     * Initializes whatever needs to be initialized for this library.
+     * You only need to call this if you are shading in the engine, else this gets called for you.
+     */
+    public static void initialize(){
+        if (initialized) return;
+        initialized = true;
+
+        getMapperRegistry().registerMapper(new AWTColorMapper());
+        getMapperRegistry().registerMapper(new ColorMapper());
+        getMapperRegistry().registerMapper(new InstantMapper());
+        getMapperRegistry().registerMapper(new LocalDateMapper());
+        getMapperRegistry().registerMapper(new LocalDateTimeMapper());
+        getMapperRegistry().registerMapper(new LocalTimeMapper());
+        getMapperRegistry().registerMapper(new LocationMapper());
+        getMapperRegistry().registerMapper(new PotionEffectMapper());
+        getMapperRegistry().registerMapper(new UUIDMapper());
+        getMapperRegistry().registerMapper(new VectorMapper());
     }
 }

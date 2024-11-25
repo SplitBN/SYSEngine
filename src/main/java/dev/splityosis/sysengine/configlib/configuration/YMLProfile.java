@@ -8,11 +8,19 @@ public class YMLProfile {
     private Map<String, List<String>> comments;
     private Map<String, List<String>> inlineComments;
     private Map<String, MapperClassValue> config;
+    private Configuration configuration;
 
     public YMLProfile(Map<String, List<String>> comments, Map<String, List<String>> inlineComments, Map<String, MapperClassValue> config) {
         this.comments = comments;
         this.inlineComments = inlineComments;
         this.config = config;
+    }
+
+    public YMLProfile(Map<String, List<String>> comments, Map<String, List<String>> inlineComments, Map<String, MapperClassValue> config, Configuration configuration) {
+        this.comments = comments;
+        this.inlineComments = inlineComments;
+        this.config = config;
+        this.configuration = configuration;
     }
 
     public Map<String, List<String>> getComments() {
@@ -25,6 +33,10 @@ public class YMLProfile {
 
     public Map<String, List<String>> getInlineComments() {
         return inlineComments;
+    }
+
+    public Configuration getConfiguration() {
+        return configuration;
     }
 
     // Method to generate YMLProfile from object fields
@@ -87,6 +99,8 @@ public class YMLProfile {
             }
         }
 
+        if (object instanceof Configuration configuration)
+            return new YMLProfile(comments, inlineComments, config, configuration);
         return new YMLProfile(comments, inlineComments, config);
     }
 
