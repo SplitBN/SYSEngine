@@ -42,6 +42,9 @@ public class DefaultCommandManager implements CommandManager {
 
             pluginCommand.setAliases(Arrays.asList(command.getAliases()));
             pluginCommand.setPermission(command.getPermission());
+            if (!command.getDescription().isEmpty())
+                pluginCommand.setDescription(command.getDescription());
+
 
             pluginCommand.setExecutor((sender, command1, label, args) -> {
                 process(sender, new ArrayList<>(), command, args, label);

@@ -155,10 +155,10 @@ public class Command implements Cloneable{
             int minArgs = command.getArguments().length;
             int maxArgs = minArgs + command.getOptionalArguments().length;
 
-            addCommandForAlias(command.getName(), command, minArgs, maxArgs);
+            addSubCommandForAlias(command.getName(), command, minArgs, maxArgs);
 
             for (String alias : command.getAliases())
-                addCommandForAlias(alias, command, minArgs, maxArgs);
+                addSubCommandForAlias(alias, command, minArgs, maxArgs);
         }
 
         return this;
@@ -243,7 +243,7 @@ public class Command implements Cloneable{
         return subCommands;
     }
 
-    private void addCommandForAlias(String alias, Command command, int minArgs, int maxArgs) {
+    private void addSubCommandForAlias(String alias, Command command, int minArgs, int maxArgs) {
         Map<Integer, Command> commandsByArgCount = subCommands.computeIfAbsent(alias, k -> new HashMap<>());
 
         for (int argCount = minArgs; argCount <= maxArgs; argCount++)
