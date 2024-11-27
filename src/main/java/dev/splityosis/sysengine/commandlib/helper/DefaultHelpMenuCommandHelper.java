@@ -58,8 +58,8 @@ public class DefaultHelpMenuCommandHelper extends HelpMenuCommandHelper{
                 lineBuilder.append("[<").append(argument.getName()).append(">] ");
 
             String desc = subcommand.getDescription().endsWith(".") ? subcommand.getDescription() : subcommand.getDescription() + ".";
-
-            lineBuilder.append("- ").append(desc);
+            if (!desc.equals("."))
+                lineBuilder.append("- ").append(desc);
             commandSender.sendMessage(ColorUtil.colorize(lineBuilder.toString()));
         }
     }
