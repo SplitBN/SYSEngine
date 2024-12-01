@@ -22,47 +22,79 @@ public class DefaultHelpMenuCommandHelper extends HelpMenuCommandHelper{
         commandSender.sendMessage(ColorUtil.colorize("&c&m-------------------------".replace("-", " ")));
     }
 
+
     @Override
     public void sendHelpLines(CommandSender commandSender, List<Command> parentCommands, Command command, String[] args, String label) {
-        Set<Command> subcommands = new HashSet<>();
-        subcommands.add(command);
-        command.getSubCommands().values().forEach(map -> subcommands.addAll(map.values()));
+        Set<Command> tempSubcommands = new HashSet<>();
+        command.getSubCommands().values().forEach(map -> tempSubcommands.addAll(map.values()));
 
-        if (args.length > 0)
-            out: for (Command subCommand : new ArrayList<>(subcommands)) {
-                if (args[0].equalsIgnoreCase(subCommand.getName())) continue;
-                for (String alias : subCommand.getAliases())
-                    if (args[0].equalsIgnoreCase(alias))
-                        continue out;
-                subcommands.remove(subCommand);
+        Set<Command> subcommands = new HashSet<>(tempSubcommands);
+
+        if (args.length > 0) {
+            String firstArg = args[0];
+            List<Command> filteredSubcommands = new ArrayList<>();
+            for (Command subCommand : subcommands) {
+                if (firstArg.equalsIgnoreCase(subCommand.getName())) {
+                    filteredSubcommands.add(subCommand);
+                } else {
+                    for (String alias : subCommand.getAliases()) {
+                        if (firstArg.equalsIgnoreCase(alias)) {
+                            filteredSubcommands.add(subCommand);
+                            break;
+                        }
+                    }
+                }
             }
+            if (!filteredSubcommands.isEmpty()) {
+                subcommands = new HashSet<>(filteredSubcommands);
+            }
+        }
 
-        if (subcommands.size() == 1)
-            command.getSubCommands().values().forEach(map -> subcommands.addAll(map.values()));
+        if (subcommands.isEmpty() && command.getSubCommands().size() > 0) {
+            Set<Command> additionalSubcommands = new HashSet<>();
+            command.getSubCommands().values().forEach(map -> additionalSubcommands.addAll(map.values()));
+            subcommands.addAll(additionalSubcommands);
+        }
+
+        Map<String, List<Command>> groupedSubcommands = new HashMap<>();
+        for (Command subCommand : subcommands) {
+            String baseName = subCommand.getName().split(" ")[0];
+            groupedSubcommands.computeIfAbsent(baseName, k -> new ArrayList<>()).add(subCommand);
+        }
+
+        for (List<Command> group : groupedSubcommands.values()) {
+            group.sort(Comparator.comparingInt(command1 -> command1.getArguments().length + command1.getOptionalArguments().length));
+        }
 
         String path = getCommandPath(parentCommands, command);
 
-        boolean first = true;
-        for (Command subcommand : subcommands) {
-            StringBuilder lineBuilder = new StringBuilder("&c* " + path + " ");
+        String parentDesc = command.getDescription().endsWith(".") ? command.getDescription() : command.getDescription() + ".";
+        String parentLine = "&c* " + path + " - " + parentDesc;
+        commandSender.sendMessage(ColorUtil.colorize(parentLine));
 
-            if (!first)
-                lineBuilder.append(subcommand.getName()).append(" ");
-            first = false;
+        for (List<Command> group : groupedSubcommands.values()) {
+            for (Command subCommand : group) {
+                StringBuilder lineBuilder = new StringBuilder("&c* ").append(path).append(" ").append(subCommand.getName()).append(" ");
 
-            // Do args
-            for (CommandArgument<?> argument : subcommand.getArguments())
-                lineBuilder.append("<").append(argument.getName()).append("> ");
+                for (CommandArgument<?> argument : subCommand.getArguments()) {
+                    lineBuilder.append("<").append(argument.getName()).append("> ");
+                }
 
-            for (CommandArgument<?> argument : subcommand.getOptionalArguments())
-                lineBuilder.append("[<").append(argument.getName()).append(">] ");
+                for (CommandArgument<?> argument : subCommand.getOptionalArguments()) {
+                    lineBuilder.append("[<").append(argument.getName()).append(">] ");
+                }
 
-            String desc = subcommand.getDescription().endsWith(".") ? subcommand.getDescription() : subcommand.getDescription() + ".";
-            if (!desc.equals("."))
-                lineBuilder.append("- ").append(desc);
-            commandSender.sendMessage(ColorUtil.colorize(lineBuilder.toString()));
+                String desc = subCommand.getDescription().endsWith(".") ? subCommand.getDescription() : subCommand.getDescription() + ".";
+                if (!desc.equals(".")) {
+                    lineBuilder.append("- ").append(desc);
+                }
+
+                commandSender.sendMessage(ColorUtil.colorize(lineBuilder.toString()));
+            }
         }
     }
+
+
 
     private String getCommandPath(List<Command> parents, Command command) {
         StringBuilder builder = new StringBuilder("/");
