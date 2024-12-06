@@ -1,10 +1,12 @@
 package dev.splityosis.sysengine.configlib;
 
+import dev.splityosis.sysengine.SYSEngine;
 import dev.splityosis.sysengine.configlib.manager.DefaultConfigManager;
 import dev.splityosis.sysengine.configlib.manager.ConfigManager;
 import dev.splityosis.sysengine.configlib.configuration.AbstractMapper;
 import dev.splityosis.sysengine.configlib.manager.MapperRegistry;
 import dev.splityosis.sysengine.configlib.mappers.*;
+import org.bukkit.plugin.java.JavaPlugin;
 
 /**
  * The ConfigLib class provides a centralized interface for managing configuration
@@ -13,7 +15,7 @@ import dev.splityosis.sysengine.configlib.mappers.*;
  */
 public class ConfigLib {
 
-    private static boolean initialized = false;
+    private static boolean isInitialized = false;
 
     // A registry to hold all the mappers.
     private static final MapperRegistry mapperRegistry = new MapperRegistry();
@@ -63,11 +65,11 @@ public class ConfigLib {
 
     /**
      * Initializes whatever needs to be initialized for this library.
-     * You only need to call this if you are shading in the engine, else this gets called for you.
+     * You should never call this, look at {@link SYSEngine#initialize(JavaPlugin)}.
      */
     public static void initialize(){
-        if (initialized) return;
-        initialized = true;
+        if (isInitialized) return;
+        isInitialized = true;
 
         getMapperRegistry().registerMapper(new AWTColorMapper());
         getMapperRegistry().registerMapper(new ColorMapper());
