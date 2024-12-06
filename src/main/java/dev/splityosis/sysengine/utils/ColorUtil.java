@@ -1,7 +1,8 @@
 package dev.splityosis.sysengine.utils;
 
 import org.bukkit.ChatColor;
-import java.util.List;
+
+import java.util.Collection;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -36,16 +37,20 @@ public class ColorUtil {
     }
 
     /**
-     * Colorizes a list of strings by applying standard and hex color codes.
+     * Colorizes a collection of strings by applying standard and hex color codes.
      * Supports Minecraft 1.16+ hex color codes if the server version allows.
+     * <p>
+     * Modifies the collection in place and returns the same collection.
      *
-     * @param lst The list of strings to colorize.
-     * @return A list of colorized strings.
+     * @param collection The collection of strings to colorize.
+     * @param <T> The type of the collection (e.g., List, Set).
+     * @return The modified collection of colorized strings.
      */
-    public static List<String> colorize(List<String> lst) {
+    public static <T extends Collection<String>> T colorize(T collection) {
         if (VersionUtil.isServerAtLeast("1.16"))
-            lst = colorizeHex(lst);
-        return colorizeStandard(lst);
+            colorizeHex(collection);
+        colorizeStandard(collection);
+        return collection;
     }
 
     /**
@@ -62,16 +67,20 @@ public class ColorUtil {
     }
 
     /**
-     * Reverses colorization in a list of strings, converting color codes
+     * Reverses colorization in a collection of strings, converting color codes
      * back to the format prefixed with '&'.
+     * <p>
+     * Modifies the collection in place and returns the same collection.
      *
-     * @param lst The list of strings to reverse colorize.
-     * @return A list of reverse-colorized strings.
+     * @param collection The collection of strings to reverse colorize.
+     * @param <T> The type of the collection (e.g., List, Set).
+     * @return The modified collection of reverse-colorized strings.
      */
-    public static List<String> reverseColorize(List<String> lst) {
+    public static <T extends Collection<String>> T reverseColorize(T collection) {
         if (VersionUtil.isServerAtLeast("1.16"))
-            lst = reverseColorizeHex(lst);
-        return reverseColorizeStandard(lst);
+            reverseColorizeHex(collection);
+        reverseColorizeStandard(collection);
+        return collection;
     }
 
     /**
@@ -85,13 +94,20 @@ public class ColorUtil {
     }
 
     /**
-     * Colorizes a list of strings using standard Minecraft color codes with '&' as a prefix.
+     * Colorizes a collection of strings using standard Minecraft color codes with '&' as a prefix.
+     * <p>
+     * Modifies the collection in place and returns the same collection.
      *
-     * @param lst The list of strings to colorize.
-     * @return A list of colorized strings.
+     * @param collection The collection of strings to colorize.
+     * @param <T> The type of the collection (e.g., List, Set).
+     * @return The modified collection of colorized strings.
      */
-    public static List<String> colorizeStandard(List<String> lst) {
-        return lst.stream().map(string -> string == null ? null : colorizeStandard(string)).toList();
+    public static <T extends Collection<String>> T colorizeStandard(T collection) {
+        for (String string : collection) {
+            collection.remove(string); // Remove the old string
+            collection.add(string == null ? null : colorizeStandard(string)); // Add the modified string
+        }
+        return collection;
     }
 
     /**
@@ -105,13 +121,20 @@ public class ColorUtil {
     }
 
     /**
-     * Reverses standard colorization in a list of strings by replacing '§' codes with '&' codes.
+     * Reverses standard colorization in a collection of strings by replacing '§' codes with '&' codes.
+     * <p>
+     * Modifies the collection in place and returns the same collection.
      *
-     * @param lst The list of strings to reverse colorize.
-     * @return A list of reverse-colorized strings.
+     * @param collection The collection of strings to reverse colorize.
+     * @param <T> The type of the collection (e.g., List, Set).
+     * @return The modified collection of reverse-colorized strings.
      */
-    public static List<String> reverseColorizeStandard(List<String> lst) {
-        return lst.stream().map(string -> string == null ? null : reverseColorizeStandard(string)).toList();
+    public static <T extends Collection<String>> T reverseColorizeStandard(T collection) {
+        for (String string : collection) {
+            collection.remove(string);
+            collection.add(string == null ? null : reverseColorizeStandard(string));
+        }
+        return collection;
     }
 
     /**
@@ -132,14 +155,21 @@ public class ColorUtil {
     }
 
     /**
-     * Colorizes a list of strings by converting hex color codes with '&' prefix
+     * Colorizes a collection of strings by converting hex color codes with '&' prefix
      * to Minecraft-compatible hex codes.
+     * <p>
+     * Modifies the collection in place and returns the same collection.
      *
-     * @param lst The list of strings to colorize.
-     * @return A list of hex-colorized strings.
+     * @param collection The collection of strings to colorize.
+     * @param <T> The type of the collection (e.g., List, Set).
+     * @return The modified collection of hex-colorized strings.
      */
-    public static List<String> colorizeHex(List<String> lst) {
-        return lst.stream().map(string -> string == null ? null : colorizeHex(string)).toList();
+    public static <T extends Collection<String>> T colorizeHex(T collection) {
+        for (String string : collection) {
+            collection.remove(string);
+            collection.add(string == null ? null : colorizeHex(string));
+        }
+        return collection;
     }
 
     /**
@@ -162,13 +192,20 @@ public class ColorUtil {
     }
 
     /**
-     * Reverses hex colorization in a list of strings by converting Minecraft hex color codes
+     * Reverses hex colorization in a collection of strings by converting Minecraft hex color codes
      * back to the format with '&' and hex values.
+     * <p>
+     * Modifies the collection in place and returns the same collection.
      *
-     * @param lst The list of strings to reverse colorize.
-     * @return A list of reverse-colorized hex strings.
+     * @param collection The collection of strings to reverse colorize.
+     * @param <T> The type of the collection (e.g., List, Set).
+     * @return The modified collection of reverse-colorized hex strings.
      */
-    public static List<String> reverseColorizeHex(List<String> lst) {
-        return lst.stream().map(string -> string == null ? null : reverseColorizeHex(string)).toList();
+    public static <T extends Collection<String>> T reverseColorizeHex(T collection) {
+        for (String string : collection) {
+            collection.remove(string);
+            collection.add(string == null ? null : reverseColorizeHex(string));
+        }
+        return collection;
     }
 }
