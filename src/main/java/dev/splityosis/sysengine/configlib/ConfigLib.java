@@ -81,5 +81,8 @@ public class ConfigLib {
         getMapperRegistry().registerMapper(new PotionEffectMapper());
         getMapperRegistry().registerMapper(new UUIDMapper());
         getMapperRegistry().registerMapper(new VectorMapper());
+        getMapperRegistry().registerMapper(new XMaterialMapper());
+        getMapperRegistry().registerMapper(new XEnchantmentMapper());
+        getMapperRegistry().registerMapper(new ItemStackMapper());
     }
 }
