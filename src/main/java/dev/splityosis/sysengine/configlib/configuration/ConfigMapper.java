@@ -5,9 +5,9 @@ import org.bukkit.configuration.ConfigurationSection;
 
 public interface ConfigMapper<T> extends Configuration, AbstractMapper<T>{
 
-    T compile();
+    T compile(ConfigManager manager, ConfigurationSection section, String path);
 
-    void decompile(T instance);
+    void decompile(ConfigManager manager, T instance, ConfigurationSection section, String path);
 
     /**
      * Sets the configuration values in the provided ConfigurationSection based on the given instance.
@@ -20,7 +20,7 @@ public interface ConfigMapper<T> extends Configuration, AbstractMapper<T>{
      */
     @Override
     default void setInConfig(ConfigManager manager, T instance, ConfigurationSection section, String path){
-        decompile(instance);
+        decompile(manager, instance, section, path);
         try {
             section.set(path, null);
             YMLProfile ymlProfile = YMLProfile.readConfigObject(instance, manager.getConfigOptions().getSectionSpacing(), manager.getConfigOptions().getFieldSpacing());
@@ -33,7 +33,7 @@ public interface ConfigMapper<T> extends Configuration, AbstractMapper<T>{
             });
 
             ymlProfile.getInlineComments().forEach((string, comments) -> {
-                section.setComments(path + "." + string, comments);
+                section.setInlineComments(path + "." + string, comments);
             });
 
         } catch (IllegalAccessException e) {
@@ -57,6 +57,6 @@ public interface ConfigMapper<T> extends Configuration, AbstractMapper<T>{
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         }
-        return compile();
+        return compile(manager, section, path);
     }
 }
