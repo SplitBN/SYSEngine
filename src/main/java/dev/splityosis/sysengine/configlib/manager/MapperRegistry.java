@@ -2,6 +2,7 @@ package dev.splityosis.sysengine.configlib.manager;
 
 import com.cryptomorin.xseries.XItemStack;
 import dev.splityosis.sysengine.configlib.configuration.AbstractMapper;
+import dev.splityosis.sysengine.configlib.configuration.ConfigMapper;
 import dev.splityosis.sysengine.utils.ReflectionUtil;
 
 import java.lang.reflect.ParameterizedType;
@@ -33,7 +34,7 @@ public class MapperRegistry {
     public void registerMapper(AbstractMapper<?> mapper, String mapperIdentifier) {
         Class<?> claz = getMapperGenericType(mapper.getClass());
         if (claz == null)
-            throw new RuntimeException("Mapper is not if any generic type");
+            throw new RuntimeException("Mapper is not of any generic type");
 
         Map<String, AbstractMapper<?>> mappers = mappersMap.get(claz);
         if (mappers == null) {
@@ -103,6 +104,10 @@ public class MapperRegistry {
         for (Type type : genericInterfaces) {
             if (type instanceof ParameterizedType) {
                 ParameterizedType parameterizedType = (ParameterizedType) type;
+
+                if (parameterizedType.getRawType() == ConfigMapper.class) {
+                    return (Class<T>) parameterizedType.getActualTypeArguments()[0];
+                }
 
                 if (parameterizedType.getRawType() == AbstractMapper.class) {
                     return (Class<T>) parameterizedType.getActualTypeArguments()[0];
