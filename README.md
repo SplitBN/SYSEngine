@@ -31,7 +31,7 @@ Add the following Maven dependency to your `pom.xml` file under `dependencies`:
 If you're using Gradle, add this to your `build.gradle` file under `dependencies`:
 ```gradle
 dependencies {
-    compileOnly 'dev.splityosis:sysengine:1.0.3-SNAPSHOT'
+    compileOnly 'dev.splityosis:sysengine:1.0.14-SNAPSHOT'
 }
 ```
 
