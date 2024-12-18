@@ -22,78 +22,82 @@ public class DefaultHelpMenuCommandHelper extends HelpMenuCommandHelper{
         commandSender.sendMessage(ColorUtil.colorize("&c&m-------------------------".replace("-", " ")));
     }
 
-
     @Override
     public void sendHelpLines(CommandSender commandSender, List<Command> parentCommands, Command command, String[] args, String label) {
-        Set<Command> tempSubcommands = new HashSet<>();
-        command.getSubCommands().values().forEach(map -> tempSubcommands.addAll(map.values()));
-
-        Set<Command> subcommands = new HashSet<>(tempSubcommands);
+        Set<Command> allSubCommands = new HashSet<>();
+        Set<Command> finalAllSubCommands = allSubCommands;
+        command.getSubCommands().values().forEach(map -> finalAllSubCommands.addAll(map.values()));
 
         if (args.length > 0) {
             String firstArg = args[0];
-            List<Command> filteredSubcommands = new ArrayList<>();
-            for (Command subCommand : subcommands) {
+            Set<Command> filteredSubCommands = new HashSet<>();
+
+            for (Command subCommand : allSubCommands) {
                 if (firstArg.equalsIgnoreCase(subCommand.getName())) {
-                    filteredSubcommands.add(subCommand);
-                } else {
+                    filteredSubCommands.add(subCommand);
+                }
+                else {
                     for (String alias : subCommand.getAliases()) {
                         if (firstArg.equalsIgnoreCase(alias)) {
-                            filteredSubcommands.add(subCommand);
+                            filteredSubCommands.add(subCommand);
                             break;
                         }
                     }
                 }
             }
-            if (!filteredSubcommands.isEmpty()) {
-                subcommands = new HashSet<>(filteredSubcommands);
+
+            if (!filteredSubCommands.isEmpty()) {
+                allSubCommands = filteredSubCommands;
             }
         }
 
-        if (subcommands.isEmpty() && command.getSubCommands().size() > 0) {
-            Set<Command> additionalSubcommands = new HashSet<>();
-            command.getSubCommands().values().forEach(map -> additionalSubcommands.addAll(map.values()));
-            subcommands.addAll(additionalSubcommands);
-        }
-
-        Map<String, List<Command>> groupedSubcommands = new HashMap<>();
-        for (Command subCommand : subcommands) {
+        Map<String, List<Command>> groupedSubCommands = new HashMap<>();
+        for (Command subCommand : allSubCommands) {
             String baseName = subCommand.getName().split(" ")[0];
-            groupedSubcommands.computeIfAbsent(baseName, k -> new ArrayList<>()).add(subCommand);
+            groupedSubCommands.computeIfAbsent(baseName, k -> new ArrayList<>()).add(subCommand);
         }
 
-        for (List<Command> group : groupedSubcommands.values()) {
-            group.sort(Comparator.comparingInt(command1 -> command1.getArguments().length + command1.getOptionalArguments().length));
+        for (List<Command> group : groupedSubCommands.values()) {
+            group.sort(Comparator.comparingInt(cmd -> cmd.getArguments().length + cmd.getOptionalArguments().length));
         }
 
-        String path = getCommandPath(parentCommands, command);
+        String commandPath = getCommandPath(parentCommands, command);
+        StringBuilder parentLineBuilder = new StringBuilder("&c* ").append(commandPath).append(" ");
 
-        String parentDesc = command.getDescription().endsWith(".") ? command.getDescription() : command.getDescription() + ".";
-        String parentLine = "&c* " + path + " - " + parentDesc;
-        commandSender.sendMessage(ColorUtil.colorize(parentLine));
+        for (CommandArgument<?> argument : command.getArguments()) {
+            parentLineBuilder.append("<").append(argument.getName()).append("> ");
+        }
 
-        for (List<Command> group : groupedSubcommands.values()) {
+        for (CommandArgument<?> argument : command.getOptionalArguments()) {
+            parentLineBuilder.append("[<").append(argument.getName()).append(">] ");
+        }
+
+        String parentDescription = command.getDescription().endsWith(".") ? command.getDescription() : command.getDescription() + ".";
+        parentLineBuilder.append("- ").append(parentDescription);
+
+        commandSender.sendMessage(ColorUtil.colorize(parentLineBuilder.toString()));
+
+        for (List<Command> group : groupedSubCommands.values()) {
             for (Command subCommand : group) {
-                StringBuilder lineBuilder = new StringBuilder("&c* ").append(path).append(" ").append(subCommand.getName()).append(" ");
+                StringBuilder subCommandLine = new StringBuilder("&c* ").append(commandPath).append(" ").append(subCommand.getName()).append(" ");
 
                 for (CommandArgument<?> argument : subCommand.getArguments()) {
-                    lineBuilder.append("<").append(argument.getName()).append("> ");
+                    subCommandLine.append("<").append(argument.getName()).append("> ");
                 }
 
                 for (CommandArgument<?> argument : subCommand.getOptionalArguments()) {
-                    lineBuilder.append("[<").append(argument.getName()).append(">] ");
+                    subCommandLine.append("[<").append(argument.getName()).append(">] ");
                 }
 
-                String desc = subCommand.getDescription().endsWith(".") ? subCommand.getDescription() : subCommand.getDescription() + ".";
-                if (!desc.equals(".")) {
-                    lineBuilder.append("- ").append(desc);
+                String subDescription = subCommand.getDescription().endsWith(".") ? subCommand.getDescription() : subCommand.getDescription() + ".";
+                if (!subDescription.equals(".")) {
+                    subCommandLine.append("- ").append(subDescription);
                 }
 
-                commandSender.sendMessage(ColorUtil.colorize(lineBuilder.toString()));
+                commandSender.sendMessage(ColorUtil.colorize(subCommandLine.toString()));
             }
         }
     }
-
 
 
     private String getCommandPath(List<Command> parents, Command command) {
