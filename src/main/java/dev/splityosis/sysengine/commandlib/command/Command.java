@@ -25,7 +25,7 @@ public class Command implements Cloneable{
     private CommandRequirement<?>[] requirements;
     private CommandConsumer commandConsumer;
     private PlayerCommandConsumer playerCommandConsumer;
-    private Map<String, Map<Integer, Command>> subCommands;
+    private Map<String, Map<Integer, Command>> subCommands;   // name to arg count to command
 
     /**
      * Creates a new command with the specified name and optional aliases.
@@ -209,6 +209,21 @@ public class Command implements Cloneable{
 
     public String[] getAliases() {
         return aliases;
+    }
+
+    /**
+     * @return True if this command can be run by console OR a player. otherwise, false.
+     */
+    public boolean isExecutable() {
+        return getCommandConsumer() != null || getPlayerCommandConsumer() != null;
+    }
+
+    /**
+     * @param argumentsCount The amount of arguments.
+     * @return True if this command handles this amount of arguments.
+     */
+    public boolean doesHandle(int argumentsCount) {
+        return argumentsCount >= getArguments().length && argumentsCount <= getArguments().length + getOptionalArguments().length;
     }
 
     public String getPermission() {

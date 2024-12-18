@@ -11,7 +11,6 @@ import dev.splityosis.sysengine.commandlib.exception.InvalidInputException;
 import dev.splityosis.sysengine.commandlib.consumers.CommandConsumer;
 import dev.splityosis.sysengine.utils.CommandUtil;
 import org.bukkit.ChatColor;
-import org.bukkit.Chunk;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Player;
@@ -23,6 +22,7 @@ public class DefaultCommandManager implements CommandManager {
 
     private CommandHelpProvider commandHelpProvider;
     private JavaPlugin plugin;
+    private Map<Command, PluginCommand> registeredPluginCommands = new HashMap<>();
 
     public DefaultCommandManager(JavaPlugin plugin, CommandHelpProvider commandHelpProvider) {
         this.plugin = plugin;
@@ -54,15 +54,20 @@ public class DefaultCommandManager implements CommandManager {
 
             pluginCommand.setTabCompleter((sender, command1, label, args) -> processTabComplete(sender, new ArrayList<>(), command, args, label));
 
-//             pluginCommand.unregister(CommandUtil.getCommandMap());
+
             pluginCommand.register(CommandUtil.getCommandMap());
+            registeredPluginCommands.put(command, pluginCommand);
             CommandUtil.getCommandMap().register(command.getName(), pluginCommand);
         }
     }
 
     @Override
     public void unregisterCommands(Command... commands) {
-
+        for (Command command : commands) {
+            PluginCommand pluginCommand = registeredPluginCommands.remove(command);
+            if (pluginCommand != null)
+                pluginCommand.unregister(CommandUtil.getCommandMap());
+        }
     }
 
     @Override
@@ -70,100 +75,96 @@ public class DefaultCommandManager implements CommandManager {
         return commandHelpProvider;
     }
 
+
     @Override
-    public void process(CommandSender commandSender, List<Command> parentCommands, Command command, String[] args, String label) {
+    public void process(CommandSender commandSender, List<Command> parentCommands, Command root, String[] inputArgs, String label) {
+
         if (parentCommands == null)
             parentCommands = new ArrayList<>();
 
-        // Check permission
-        if (command.getPermission() != null && !commandSender.hasPermission(command.getPermission())) {
+        if (root.getPermission() != null && !commandSender.hasPermission(root.getPermission())) {
             commandSender.sendMessage(ChatColor.RED + "You don't have permission to use this command.");
             return;
         }
 
-        // Check for sub commands
-        if (args.length > 0) {
-            Command subcommand = command.getSubCommands().getOrDefault(args[0], new HashMap<>()).get(args.length - 1);
-            if (subcommand != null) {
-                parentCommands.add(command);
-                process(commandSender, parentCommands, subcommand, Arrays.copyOfRange(args, 1, args.length), label);
-                return;
-            }
-        }
-
-        // Check if the command is executable
-        if (command.getCommandConsumer() == null && command.getPlayerCommandConsumer() == null) {
-            getCommandHelpProvider().sendHelp(commandSender, parentCommands, command, args, label);
+        FindCommandResult findCommandResult = findCommand(commandSender, root, inputArgs);
+        if (findCommandResult.getStatus() == FindCommandStatus.MISSING_PERMISSION) {
+            commandSender.sendMessage(ChatColor.RED + "You don't have permission to use this command.");
             return;
         }
 
-        // Get the right executor
-        CommandConsumer commandExecutor = null;
-        if (commandSender instanceof Player) {
-            commandExecutor = command.getPlayerCommandConsumer();
-            if (commandExecutor == null)
+        if (findCommandResult.getStatus() == FindCommandStatus.USAGE_ERROR) {
+            List<Command> parents = findCommandResult.getPath();
+            if (!parents.isEmpty())
+                parents.remove(parents.size() - 1);
+            getCommandHelpProvider().sendHelp(commandSender, parents, findCommandResult.getCommand(), findCommandResult.getArgs(), label);
+            return;
+        }
+
+        Command command = findCommandResult.getCommand();
+        String[] args = findCommandResult.getArgs();
+
+            // Get the right executor
+            CommandConsumer commandExecutor;
+            if (commandSender instanceof Player) {
+                commandExecutor = command.getPlayerCommandConsumer();
+                if (commandExecutor == null)
+                    commandExecutor = command.getCommandConsumer();
+            } else {
                 commandExecutor = command.getCommandConsumer();
-        } else {
-            commandExecutor = command.getCommandConsumer();
-            if (commandExecutor == null) {
-                commandSender.sendMessage(ChatColor.RED + "Only players can run this command.");
-                return;
+                if (commandExecutor == null) {
+                    commandSender.sendMessage(ChatColor.RED + "Only players can run this command.");
+                    return;
+                }
             }
-        }
 
-        // Try to parse context and execute command
-        LinkedHashMap<String, String> rawArgs = new LinkedHashMap<>();
-        LinkedHashMap<String, Object> parsedArgs = new LinkedHashMap<>();
-        List<Object> requirementValues = new ArrayList<>();
+            // Try to parse context and execute command
+            LinkedHashMap<String, String> rawArgs = new LinkedHashMap<>();
+            LinkedHashMap<String, Object> parsedArgs = new LinkedHashMap<>();
+            List<Object> requirementValues = new ArrayList<>();
 
-        int minArgs = command.getArguments().length;
-        int maxArgs = minArgs + command.getOptionalArguments().length;
 
-        if (args.length < minArgs || args.length > maxArgs) {
-            getCommandHelpProvider().sendHelp(commandSender, parentCommands, command, args, label);
-            return;
-        }
+            List<CommandArgument<?>> commandArgumentList = new ArrayList<>(Arrays.asList(command.getArguments()));
+            commandArgumentList.addAll(Arrays.asList(command.getOptionalArguments()));
 
-        List<CommandArgument<?>> commandArgumentList = new ArrayList<>(Arrays.asList(command.getArguments()));
-        commandArgumentList.addAll(Arrays.asList(command.getOptionalArguments()));
+            CommandContext context = new CommandContext(command, label, parentCommands, rawArgs, parsedArgs, requirementValues);
 
-        CommandContext context = new CommandContext(command, label, parentCommands, rawArgs, parsedArgs, requirementValues);
-
-        // Put raw args before parsing so more info is passed to argument.parse()
-        for (int i = 0; i < args.length; i++) {
-            CommandArgument<?> argument = commandArgumentList.get(i);
-            rawArgs.put(argument.getName(), args[i]);
-            context.update();
-        }
-
-        for (int i = 0; i < args.length; i++) {
-            CommandArgument<?> argument = commandArgumentList.get(i);
-            try {
-                parsedArgs.put(argument.getName(), argument.parse(commandSender, args[i], command, i, context));
+            // Put raw args before parsing so more info is passed to argument.parse()
+            for (int i = 0; i < args.length; i++) {
+                CommandArgument<?> argument = commandArgumentList.get(i);
+                rawArgs.put(argument.getName(), args[i]);
                 context.update();
-            } catch (InvalidInputException e) {
-                argument.onInvalidInput(commandSender, args[i], command, i, context, e);
-                return;
             }
-        }
 
-        // Check requirements
-        for (CommandRequirement<?> requirement : command.getRequirements()) {
+            for (int i = 0; i < args.length; i++) {
+                CommandArgument<?> argument = commandArgumentList.get(i);
+                try {
+                    parsedArgs.put(argument.getName(), argument.parse(commandSender, args[i], command, i, context));
+                    context.update();
+                } catch (InvalidInputException e) {
+                    argument.onInvalidInput(commandSender, args[i], command, i, context, e);
+                    return;
+                }
+            }
+
+            // Check requirements
+            for (CommandRequirement<?> requirement : command.getRequirements()) {
+                try {
+                    Object value = requirement.evaluate(commandSender, command, context);
+                    requirementValues.add(value);
+                } catch (RequirementNotMetException e) {
+                    requirement.onNotMet(commandSender, command, context, e);
+                    return;
+                }
+            }
+
             try {
-                Object value = requirement.evaluate(commandSender, command, context);
-                requirementValues.add(value);
-            } catch (RequirementNotMetException e) {
-                requirement.onNotMet(commandSender, command, context, e);
-                return;
+                commandExecutor.execute(commandSender, context);
+            } catch (Exception e) {
+                commandSender.sendMessage(ChatColor.RED + "An internal error occurred while processing the command.");
+                e.printStackTrace();
             }
-        }
 
-        try {
-            commandExecutor.execute(commandSender, context);
-        } catch (Exception e) {
-            commandSender.sendMessage(ChatColor.RED + "An internal error occurred while processing the command.");
-            e.printStackTrace();
-        }
     }
 
     @Override
@@ -239,5 +240,136 @@ public class DefaultCommandManager implements CommandManager {
             finalList.addAll(completions);
 
         return finalList;
+    }
+
+    /**
+     * Find the final command to execute, checking permissions along the way.
+     * <p>
+     * If successful, returns a SUCCESS result with the path and final args.
+     * If failed due to missing permission, returns MISSING_PERMISSION result.
+     * If failed due to usage/args error, returns USAGE_ERROR with the relevant command and path.
+     *
+     * @param sender The CommandSender executing the command.
+     * @param rootCommand The starting command (root).
+     * @param args The arguments supplied.
+     * @return The result of the command resolution.
+     */
+    public static FindCommandResult findCommand(CommandSender sender, Command rootCommand, String[] args) {
+        return findCommand(sender, rootCommand, args, new ArrayList<>());
+    }
+
+    private static FindCommandResult findCommand(CommandSender sender, Command currentCommand, String[] args, List<Command> pathSoFar) {
+        if (currentCommand.getPermission() != null && !sender.hasPermission(currentCommand.getPermission())) {
+            // Missing permission for this node
+            return FindCommandResult.missingPermission(currentCommand);
+        }
+
+        pathSoFar.add(currentCommand);
+
+        if (args.length > 0) {
+            Map<String, Map<Integer, Command>> subs = currentCommand.getSubCommands();
+            String nextArg = args[0];
+
+            if (subs.containsKey(nextArg)) {
+                Map<Integer, Command> variants = subs.get(nextArg);
+                int remainingArgCount = args.length - 1;
+                String[] subArgs = new String[remainingArgCount];
+                System.arraycopy(args, 1, subArgs, 0, remainingArgCount);
+
+                Set<Command> alrChecked = new HashSet<>();
+
+                for (Command candidate : variants.values()) {
+                    if (!alrChecked.add(candidate)) continue;
+
+                    if (candidate.getPermission() != null && !sender.hasPermission(candidate.getPermission())) {
+                        return FindCommandResult.missingPermission(candidate);
+                    }
+
+                    List<Command> newPath = new ArrayList<>(pathSoFar);
+                    FindCommandResult result = findCommand(sender, candidate, subArgs, newPath);
+                    if (result != null && result.getStatus() != null) {
+                        if (result.getStatus() == FindCommandStatus.SUCCESS
+                                || result.getStatus() == FindCommandStatus.MISSING_PERMISSION) {
+                            return result;
+                        } else if (result.getStatus() == FindCommandStatus.USAGE_ERROR) {
+                            return result;
+                        }
+                    }
+                }
+
+                // If we tried all variants and none succeeded, it means:
+                // Either missing permissions were handled already (and returned),
+                // or no suitable subcommand variant could handle these arguments.
+                // This would mean a usage/args error at this command node.
+                return FindCommandResult.usageError(pathSoFar, currentCommand, args);
+            }
+        }
+
+        if (currentCommand.isExecutable() && currentCommand.doesHandle(args.length)) {
+            // Success
+            return FindCommandResult.success(pathSoFar, args);
+        }
+
+        return FindCommandResult.usageError(pathSoFar, currentCommand, args);
+    }
+
+    public enum FindCommandStatus {
+        SUCCESS,
+        MISSING_PERMISSION,
+        USAGE_ERROR
+    }
+
+    public static class FindCommandResult {
+        private final FindCommandStatus status;
+        private final List<Command> path;
+        private final Command command;
+        private final String[] args;
+
+        private FindCommandResult(FindCommandStatus status, List<Command> path, Command command, String[] args) {
+            this.status = status;
+            this.path = path;
+            this.command = command;
+            this.args = args;
+        }
+
+        public static FindCommandResult success(List<Command> path, String[] finalArgs) {
+            return new FindCommandResult(FindCommandStatus.SUCCESS, path, path.get(path.size()-1), finalArgs);
+        }
+
+        public static FindCommandResult missingPermission(Command command) {
+            return new FindCommandResult(FindCommandStatus.MISSING_PERMISSION, null, command, null);
+        }
+
+        public static FindCommandResult usageError(List<Command> path, Command failedAt, String[] args) {
+            return new FindCommandResult(FindCommandStatus.USAGE_ERROR, path, failedAt, args);
+        }
+
+        public FindCommandStatus getStatus() {
+            return status;
+        }
+
+        /**
+         * The full path of commands leading to the final command or the command that caused a usage error.
+         */
+        public List<Command> getPath() {
+            return path;
+        }
+
+        /**
+         * In SUCCESS, this is the final command to execute.
+         * In USAGE_ERROR, this is the command where it failed.
+         * In MISSING_PERMISSION, this is the command that required a permission sender lacked.
+         */
+        public Command getCommand() {
+            return command;
+        }
+
+        /**
+         * The arguments that apply to the final command (SUCCESS) or the arguments that caused a usage error (USAGE_ERROR).
+         * Null if MISSING_PERMISSION.
+         */
+        public String[] getArgs() {
+            return args;
+        }
     }
 }
