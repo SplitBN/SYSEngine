@@ -3,20 +3,20 @@ package dev.splityosis.sysengine.configlib.configuration;
 import java.lang.reflect.Field;
 import java.util.*;
 
-public class YMLProfile {
+public class ConfigProfile {
 
     private Map<String, List<String>> comments;
     private Map<String, List<String>> inlineComments;
     private Map<String, MapperClassValue> config;
     private Configuration configuration;
 
-    public YMLProfile(Map<String, List<String>> comments, Map<String, List<String>> inlineComments, Map<String, MapperClassValue> config) {
+    public ConfigProfile(Map<String, List<String>> comments, Map<String, List<String>> inlineComments, Map<String, MapperClassValue> config) {
         this.comments = comments;
         this.inlineComments = inlineComments;
         this.config = config;
     }
 
-    public YMLProfile(Map<String, List<String>> comments, Map<String, List<String>> inlineComments, Map<String, MapperClassValue> config, Configuration configuration) {
+    public ConfigProfile(Map<String, List<String>> comments, Map<String, List<String>> inlineComments, Map<String, MapperClassValue> config, Configuration configuration) {
         this.comments = comments;
         this.inlineComments = inlineComments;
         this.config = config;
@@ -40,7 +40,7 @@ public class YMLProfile {
     }
 
     // Method to generate YMLProfile from object fields
-    public static YMLProfile readConfigObject(Object object, int sectionSpacing, int fieldSpacing) throws IllegalAccessException {
+    public static ConfigProfile readConfigObject(Object object, int sectionSpacing, int fieldSpacing) throws IllegalAccessException {
         Map<String, MapperClassValue> config = new LinkedHashMap<>();
         Map<String, List<String>> comments = new LinkedHashMap<>();
         Map<String, List<String>> inlineComments = new LinkedHashMap<>();
@@ -100,8 +100,8 @@ public class YMLProfile {
         }
 
         if (object instanceof Configuration configuration)
-            return new YMLProfile(comments, inlineComments, config, configuration);
-        return new YMLProfile(comments, inlineComments, config);
+            return new ConfigProfile(comments, inlineComments, config, configuration);
+        return new ConfigProfile(comments, inlineComments, config);
     }
 
     private static List<String> processComment(String[] comment, List<String> listToModify) {

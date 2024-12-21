@@ -1,6 +1,7 @@
 package dev.splityosis.sysengine.configlib.manager;
 
 import dev.splityosis.sysengine.configlib.configuration.Configuration;
+import dev.splityosis.sysengine.configlib.configuration.ConfigProfile;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
 
@@ -107,6 +108,17 @@ public interface ConfigManager {
      * @throws InvalidConfigurationException if the configuration is invalid
      */
     void writeToFile(File file, Configuration configuration, String path) throws IllegalAccessException, IOException, InvalidConfigurationException;
+
+
+    /**
+     * Write the given YMLProfile into an existing ConfigurationSection,
+     * reusing the same logic that handles lists, maps, enums, etc.
+     *
+     * @param configProfile the ConfigProfile to write
+     * @param section    the ConfigurationSection to write into
+     * @param path       the subpath within section (can be null)
+     */
+    void setProfileInSection(ConfigProfile configProfile, ConfigurationSection section, String path);
 
     /**
      * Writes the fields of the configuration to a ConfigurationSection.

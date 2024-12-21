@@ -1,79 +1,284 @@
 package dev.splityosis.sysengine.configlib.manager;
 
-import dev.splityosis.sysengine.configlib.exceptions.ConfigNotRegisteredException;
 import dev.splityosis.sysengine.configlib.ConfigLib;
-import dev.splityosis.sysengine.configlib.configuration.YMLProfile;
-import dev.splityosis.sysengine.configlib.configuration.Configuration;
 import dev.splityosis.sysengine.configlib.configuration.AbstractMapper;
+import dev.splityosis.sysengine.configlib.configuration.Configuration;
+import dev.splityosis.sysengine.configlib.configuration.ConfigProfile;
+import dev.splityosis.sysengine.configlib.exceptions.ConfigNotRegisteredException;
 import dev.splityosis.sysengine.utils.ReflectionUtil;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.*;
 
 public class DefaultConfigManager implements ConfigManager {
 
     private ConfigOptions configOptions;
-    private Map<Configuration, File> registeredConfigs;
+    private final Map<Configuration, File> registeredConfigs = new HashMap<>();
+
+    // Basic set of classes considered "primitive-like"
+    private static final Set<Class<?>> PRIMITIVE_CLASSES = new HashSet<>(Arrays.asList(
+            String.class, Integer.class, Long.class, Double.class, Float.class,
+            Character.class, Boolean.class, Byte.class, Short.class, Void.class
+    ));
 
     public DefaultConfigManager() {
-        configOptions = new ConfigOptions();
-        registeredConfigs = new HashMap<>();
+        this.configOptions = new ConfigOptions();
     }
+
+    /* -------------------------------------------------
+     * Registration / Unregistration
+     * ------------------------------------------------- */
 
     @Override
     public void registerConfig(Configuration configuration, File file) throws Exception {
-        if (!file.exists())
+        if (!file.exists()) {
             writeToFile(file, configuration);
-
+        }
         registeredConfigs.put(configuration, file);
-
         writeToFields(configuration, readFile(file));
     }
 
     @Override
     public void unregisterConfig(Configuration configuration) {
-        if (registeredConfigs.remove(configuration) == null)
+        if (registeredConfigs.remove(configuration) == null) {
             throw new ConfigNotRegisteredException(configuration);
+        }
     }
+
+    /* -------------------------------------------------
+     * Reload / Save
+     * ------------------------------------------------- */
 
     @Override
     public void reload(Configuration configuration) throws Exception {
         File file = registeredConfigs.get(configuration);
-        if (file == null)
+        if (file == null) {
             throw new ConfigNotRegisteredException(configuration);
-
+        }
         writeToFields(configuration, readFile(file));
     }
 
     @Override
     public void save(Configuration configuration) throws Exception {
         File file = registeredConfigs.get(configuration);
-        if (file == null)
+        if (file == null) {
             throw new ConfigNotRegisteredException(configuration);
+        }
         writeToFile(file, configuration);
     }
 
     @Override
     public void reloadAll() throws Exception {
-        for (Configuration configuration : registeredConfigs.keySet())
+        for (Configuration configuration : registeredConfigs.keySet()) {
             reload(configuration);
+        }
     }
 
     @Override
     public void saveAll() throws Exception {
-        for (Configuration configuration : registeredConfigs.keySet())
+        for (Configuration configuration : registeredConfigs.keySet()) {
             save(configuration);
+        }
+    }
+
+    /* -------------------------------------------------
+     * Reading / Writing to File
+     * ------------------------------------------------- */
+
+    @Override
+    public ConfigurationSection readFile(File file) throws IOException, InvalidConfigurationException {
+        FileConfiguration config = new YamlConfiguration();
+        config.load(file);
+        return config;
     }
 
     @Override
-    public MapperRegistry getMapperRegistry() {
-        return ConfigLib.getMapperRegistry();
+    public void writeToFile(File file, Configuration configuration)
+            throws IllegalAccessException, IOException, InvalidConfigurationException {
+        writeToFile(file, configuration, null);
     }
+
+    @Override
+    public void writeToFile(File file, Configuration configuration, String path)
+            throws IllegalAccessException, IOException, InvalidConfigurationException {
+        ConfigProfile ymlProfile = ConfigProfile.readConfigObject(
+                configuration,
+                configOptions.getSectionSpacing(),
+                configOptions.getFieldSpacing()
+        );
+        writeToFile(file, ymlProfile, path);
+    }
+
+    public void writeToFile(File file, ConfigProfile ymlProfile)
+            throws IOException, InvalidConfigurationException {
+        writeToFile(file, ymlProfile, null);
+    }
+
+    public void writeToFile(File file, ConfigProfile ymlProfile, String path)
+            throws IOException, InvalidConfigurationException {
+
+        if (!file.exists()) {
+            File parentDir = file.getParentFile();
+            if (parentDir != null && !parentDir.exists()) {
+                parentDir.mkdirs();
+            }
+            file.createNewFile();
+        }
+
+        FileConfiguration config = (FileConfiguration) readFile(file);
+        setProfileInSection(ymlProfile, config, path); // <--- Use the new method
+
+        if (ymlProfile.getConfiguration() != null) {
+            ConfigurationSection section = null;
+            if (path != null && !path.isBlank())
+                section = config.createSection(path);
+            
+            if (section == null)
+                section = config;
+            ymlProfile.getConfiguration().onSave(file, section);
+        }
+        config.save(file);
+    }
+
+
+
+    @Override
+    public void setProfileInSection(ConfigProfile configProfile, ConfigurationSection section, String path) {
+        if (path == null) {
+            path = "";
+        } else if (!path.isBlank() && !path.endsWith(".")) {
+            path += ".";
+        }
+        String finalPath = path.trim();
+
+        configProfile.getConfig().forEach((key, ymlValue) -> {
+            String mapper = ymlValue.getMapper();
+            String absolutePath = finalPath + key;
+            Class<?> fieldClass = ymlValue.getFieldClass();
+
+            // Collection of non-primitive elements
+            if ((fieldClass == List.class || fieldClass == Set.class) &&
+                    !isPrimitive(ReflectionUtil.getGenericTypes(ymlValue.getField())[0])) {
+
+                Collection<?> collection = (Collection<?>) ymlValue.getValue();
+                ConfigurationSection collSec = section.createSection(absolutePath);
+
+                if (collection != null) {
+                    Class<?> genericClass = ReflectionUtil.getGenericTypes(ymlValue.getField())[0];
+                    int i = 0;
+                    for (Object o : collection) {
+                        setObjectCorrectly(genericClass, o, collSec, String.valueOf(i++), mapper);
+                    }
+                }
+
+            }
+            // Map of non-primitive values
+            else if (fieldClass == Map.class &&
+                    !isPrimitive(ReflectionUtil.getGenericTypes(ymlValue.getField())[1])) {
+
+                Class<?>[] generics = ReflectionUtil.getGenericTypes(ymlValue.getField());
+                if (generics[0] != String.class) {
+                    new RuntimeException(
+                            "Map key must be String at '" + ymlValue.getField().getName() + "'"
+                    ).printStackTrace();
+                    return;
+                }
+
+                Map<String, ?> map = (Map<String, ?>) ymlValue.getValue();
+                ConfigurationSection mapSec = section.createSection(absolutePath);
+
+                if (map != null) {
+                    map.forEach((mapKey, mapValue) -> {
+                        setObjectCorrectly(generics[1], mapValue, mapSec, mapKey, mapper);
+                    });
+                }
+
+            }
+            else {
+                setObjectCorrectly(fieldClass, ymlValue.getValue(), section, absolutePath, mapper);
+            }
+        });
+
+        // Write block comments
+        configProfile.getComments().forEach((commentKey, commentLines) -> {
+            section.setComments(finalPath + commentKey, commentLines);
+        });
+        // Write inline comments
+        configProfile.getInlineComments().forEach((inlineKey, inlineLines) -> {
+            section.setInlineComments(finalPath + inlineKey, inlineLines);
+        });
+    }
+
+    /* -------------------------------------------------
+     * Writing to Fields
+     * ------------------------------------------------- */
+
+    @Override
+    public void writeToFields(Configuration configuration, ConfigurationSection section)
+            throws IllegalAccessException {
+        if (section == null) return;
+
+        Class<?> clazz = configuration.getClass();
+        String currentSectionPath = "";
+
+        for (Field field : clazz.getDeclaredFields()) {
+            field.setAccessible(true);
+            Configuration.Field fieldAnnotation = field.getAnnotation(Configuration.Field.class);
+            if (fieldAnnotation == null) continue;
+
+            // Handle @Configuration.Section
+            Configuration.Section sectionAnnotation = field.getAnnotation(Configuration.Section.class);
+            if (sectionAnnotation != null) {
+                String value = sectionAnnotation.value();
+                currentSectionPath = (value.isBlank()) ? "" :
+                        value + (value.endsWith(".") ? "" : ".");
+            }
+
+            // Handle @Configuration.Mapper
+            Configuration.Mapper mapperAnnotation = field.getAnnotation(Configuration.Mapper.class);
+            String mapper = (mapperAnnotation != null) ? mapperAnnotation.value() : "";
+
+            String fieldPath = ConfigProfile.getFieldPath(field, fieldAnnotation);
+            String absolutePath = currentSectionPath + fieldPath;
+
+            // If it's a List/Set of non-primitives
+            if ((field.getType() == List.class || field.getType() == Set.class) &&
+                    !isPrimitive(ReflectionUtil.getGenericTypes(field)[0])) {
+
+                Collection<?> collection = getList(field, section, absolutePath, mapper);
+                field.set(configuration, collection);
+
+            }
+            // If it's a Map<String, non-primitive>
+            else if (field.getType() == Map.class) {
+
+                Class<?>[] genericTypes = ReflectionUtil.getGenericTypes(field);
+                if (genericTypes[0] != String.class) {
+                    new RuntimeException("Map key must be String at '" + field.getName() + "'")
+                            .printStackTrace();
+                    return;
+                }
+                Map<String, ?> map = getMap(genericTypes[1], section, absolutePath, mapper);
+                field.set(configuration, map);
+
+            } else {
+                Object value = getObjectCorrectly(field.getType(), mapper, section, absolutePath);
+                field.set(configuration, value);
+            }
+        }
+
+        configuration.onLoad(section);
+    }
+
+    /* -------------------------------------------------
+     * Helper Methods
+     * ------------------------------------------------- */
 
     @Override
     public boolean isRegistered(Configuration configuration) {
@@ -86,131 +291,8 @@ public class DefaultConfigManager implements ConfigManager {
     }
 
     @Override
-    public void writeToFile(File file, Configuration configuration) throws IllegalAccessException, IOException, InvalidConfigurationException {
-        writeToFile(file, configuration, null);
-    }
-
-    @Override
-    public void writeToFile(File file, Configuration configuration, String path) throws IllegalAccessException, IOException, InvalidConfigurationException {
-        writeToFile(file, YMLProfile.readConfigObject(configuration, configOptions.getSectionSpacing(), configOptions.getFieldSpacing()), path);
-    }
-
-    public void writeToFile(File file, YMLProfile ymlProfile) throws IOException, InvalidConfigurationException {
-        writeToFile(file, ymlProfile, null);
-    }
-
-    public void writeToFile(File file, YMLProfile ymlProfile, String path) throws IOException, InvalidConfigurationException {
-        if (!file.exists()) {
-            File parentDir = file.getParentFile();
-            if (parentDir != null && !parentDir.exists())
-                parentDir.mkdirs();
-
-            file.createNewFile();
-        }
-
-        if (path == null ) path = "";
-        else if (!path.isBlank() && !path.endsWith(".")) path += '.';
-        String finalPath = path.trim();
-
-        FileConfiguration config = (FileConfiguration) readFile(file);
-
-        ymlProfile.getConfig().forEach((string, value) -> {
-            String mapper = value.getMapper();
-            String absolutePath = finalPath + string;
-
-            if ((value.getFieldClass() == List.class || value.getFieldClass() == Set.class) && !isPrimative(ReflectionUtil.getGenericTypes(value.getField())[0])) {
-                Collection<?> collection = (Collection<?>) value.getValue();
-
-                ConfigurationSection collectionSection = config.createSection(absolutePath);
-
-                if (collection != null) {
-                    Class<?> genericClass = ReflectionUtil.getGenericTypes(value.getField())[0];
-                    int i = 0;
-                    for (Object o : collection)
-                        setObjectCorrectly(genericClass, o, collectionSection, String.valueOf(i++), mapper);
-                }
-            }
-
-            else if (value.getFieldClass() == Map.class && !isPrimative(ReflectionUtil.getGenericTypes(value.getField())[1])) {
-                Class<?>[] genericClasses = ReflectionUtil.getGenericTypes(value.getField());
-                if (genericClasses[0] != String.class) {
-                    new RuntimeException("Map key class must be of type String at '"+value.getField().getName()+"'").printStackTrace();
-                    return;
-                }
-                Map<String, ?> map = (Map<String, ?>) value.getValue();
-
-                ConfigurationSection mapSection = config.createSection(absolutePath);
-
-                if (map != null)
-                    map.forEach((key, object) -> {
-                        setObjectCorrectly(genericClasses[1], object, mapSection, key, mapper);
-                    });
-            }
-
-            else
-                setObjectCorrectly(value.getFieldClass(), value.getValue(), config, absolutePath, mapper);
-        });
-
-        ymlProfile.getComments().forEach((string, strings) -> config.setComments(finalPath + string, strings));
-        ymlProfile.getInlineComments().forEach((string, strings) -> config.setInlineComments(finalPath + string, strings));
-
-        if (ymlProfile.getConfiguration() != null)
-            ymlProfile.getConfiguration().onSave(file, config.getConfigurationSection(path));
-        config.save(file);
-    }
-
-    @Override
-    public void writeToFields(Configuration configuration, ConfigurationSection section) throws IllegalAccessException {
-        Class<?> clazz = configuration.getClass();
-
-        String currentSectionPath = "";
-
-        for (Field declaredField : clazz.getDeclaredFields()) {
-            declaredField.setAccessible(true);
-
-            Configuration.Field fieldAnnotation = declaredField.getAnnotation(Configuration.Field.class);
-            if (fieldAnnotation == null) continue;
-
-            Configuration.Section sectionAnnotation = declaredField.getAnnotation(Configuration.Section.class);
-            if (sectionAnnotation != null)
-                currentSectionPath = sectionAnnotation.value().isBlank() ? "" : sectionAnnotation.value() + (sectionAnnotation.value().endsWith(".") ? "" : ".");
-
-            Configuration.Mapper mapperAnnotation = declaredField.getAnnotation(Configuration.Mapper.class);
-            String mapper = "";
-            if (mapperAnnotation != null)
-                mapper = mapperAnnotation.value();
-
-            declaredField.setAccessible(true);
-            String absolutePath = currentSectionPath + YMLProfile.getFieldPath(declaredField, fieldAnnotation);
-
-            if ((declaredField.getType() == List.class || declaredField.getDeclaringClass() == Set.class) && ! isPrimative(ReflectionUtil.getGenericTypes(declaredField)[0])) {
-                Collection<?> collection = getList(declaredField, section, absolutePath, mapper);
-                declaredField.set(configuration, collection);
-            }
-            else if (declaredField.getType() == Map.class && ! isPrimative(ReflectionUtil.getGenericTypes(declaredField)[1])) {
-                Class<?>[] genericClasses = ReflectionUtil.getGenericTypes(declaredField);
-                if (genericClasses[0] != String.class) {
-                    new RuntimeException("Map key class must be of type String at '"+declaredField.getName()+"'").printStackTrace();
-                    return;
-                }
-
-                Map<String, ?> map = getMap(genericClasses[1], section, absolutePath, mapper);
-                declaredField.set(configuration, map);
-            }
-
-            else {
-                Object o = getObjectCorrectly(declaredField.getType(), mapper, section, absolutePath);
-                declaredField.set(configuration, o);
-            }
-        }
-        configuration.onLoad(section);
-    }
-
-    @Override
-    public ConfigurationSection readFile(File file) throws IOException, InvalidConfigurationException {
-        FileConfiguration config = new YamlConfiguration();
-        config.load(file);
-        return config;
+    public MapperRegistry getMapperRegistry() {
+        return ConfigLib.getMapperRegistry();
     }
 
     @Override
@@ -224,93 +306,75 @@ public class DefaultConfigManager implements ConfigManager {
         return configOptions;
     }
 
-    private void setObjectCorrectly(Class<?> clazz, Object object, ConfigurationSection section, String path, String mapper) {
-        AbstractMapper abstractMapper = getMapperRegistry().getMapper(clazz, mapper);
+    // Example of handling a single object with a mapper or fallback
+    private <T> T getObjectCorrectly(Class<T> clazz, String mapper, ConfigurationSection section, String path) {
+        AbstractMapper<T> abstractMapper = getMapperRegistry().getMapper(clazz, mapper);
         if (abstractMapper != null) {
-            // Handle custom Mapper
-            abstractMapper.setInConfig(this, object, section, path);
-        }
-        if (clazz.isEnum()) {
-            // Handle enum
-            Enum<?> enumValue = (Enum<?>) object;
-            section.set(path, enumValue.name());
+            return abstractMapper.getFromConfig(this, section, path);
+        } else if (clazz.isEnum()) {
+            String enumValue = section.getString(path);
+            if (enumValue != null) {
+                @SuppressWarnings("unchecked")
+                T enumConstant = (T) Enum.valueOf((Class<Enum>) clazz, enumValue);
+                return enumConstant;
+            }
+            return null;
         } else {
-            // Let the fallback types be handled
+            return (T) section.get(path);
+        }
+    }
+
+    private void setObjectCorrectly(Class<?> clazz, Object object, ConfigurationSection section,
+                                    String path, String mapper) {
+        AbstractMapper abstractMapper = getMapperRegistry().getMapper(clazz, mapper);
+        System.out.println("Setting "+clazz.getName());
+        System.out.println("mapper is " + ((abstractMapper != null) ? abstractMapper.getClass().getName() : "null"));
+        if (abstractMapper != null) {
+            abstractMapper.setInConfig(this, object, section, path);
+        } else if (clazz.isEnum() && object != null) {
+            section.set(path, ((Enum<?>)object).name());
+        } else {
             section.set(path, object);
         }
     }
 
-    private <T> T getObjectCorrectly(Class<T> clazz, String mapper, ConfigurationSection section, String absolutePath) {
-        AbstractMapper<T> abstractMapper = getMapperRegistry().getMapper(clazz, mapper);
-        T o;
-        if (abstractMapper != null) {
-            // Handle custom Mapper
-            o = abstractMapper.getFromConfig(this, section, absolutePath);
-        }
-        else if (clazz.isEnum()) {
-            // Handle enum
-            String enumValue = section.getString(absolutePath);
-            if (enumValue != null) {
-                @SuppressWarnings("unchecked")
-                Enum<?> enumConstant = Enum.valueOf((Class<Enum>) clazz, enumValue);
-                o = (T) enumConstant;
-            } else
-                o = null;
-        }
-        else {
-            // Let the fallback types be handled
-            o = (T) section.get(absolutePath);
-        }
-        return o;
-    }
-
-    private <T> Collection<?> getList(Field declaredField, ConfigurationSection section, String absolutePath, String mapper) {
-        Class<T> genericClass = (Class<T>) ReflectionUtil.getGenericTypes(declaredField)[0];
+    // Build a List/Set of complex objects
+    private <T> Collection<T> getList(Field field, ConfigurationSection section,
+                                      String path, String mapper) {
+        Class<T> genericClass = (Class<T>) ReflectionUtil.getGenericTypes(field)[0];
         Collection<T> collection;
-
-        if (declaredField.getType() == List.class)
+        if (field.getType() == List.class) {
             collection = new ArrayList<>();
-        else
+        } else {
             collection = new LinkedHashSet<>();
+        }
 
-        ConfigurationSection collectionSection = section.getConfigurationSection(absolutePath);
-
-        if (collectionSection != null) {
-            for (String key : collectionSection.getKeys(false)) {
-                collection.add(getObjectCorrectly(genericClass, mapper, collectionSection, key));
+        ConfigurationSection collSec = section.getConfigurationSection(path);
+        if (collSec != null) {
+            for (String key : collSec.getKeys(false)) {
+                T elem = getObjectCorrectly(genericClass, mapper, collSec, key);
+                collection.add(elem);
             }
         }
-
         return collection;
     }
 
-    private <T> Map<String, T> getMap(Class<T> value, ConfigurationSection section, String absolutePath, String mapper) {
+    // Build a Map<String, T> of complex objects
+    private <T> Map<String, T> getMap(Class<T> clazz, ConfigurationSection section,
+                                      String path, String mapper) {
         Map<String, T> map = new LinkedHashMap<>();
-        ConfigurationSection mapSection = section.getConfigurationSection(absolutePath);
-
-        if (mapSection != null)
-            for (String key : mapSection.getKeys(false))
-                map.put(key, getObjectCorrectly(value, mapper, mapSection, key));
-
+        ConfigurationSection mapSec = section.getConfigurationSection(path);
+        if (mapSec != null) {
+            for (String key : mapSec.getKeys(false)) {
+                T value = getObjectCorrectly(clazz, mapper, mapSec, key);
+                map.put(key, value);
+            }
+        }
         return map;
     }
 
-    private static Set<Class<?>> primitiveClasses = new HashSet<>(Arrays.asList(
-            String.class,
-            Integer.class,
-            Long.class,
-            Double.class,
-            Float.class,
-            Character.class,
-            Boolean.class,
-            Byte.class,
-            Short.class,
-            Void.class
-    ));
-
-    private boolean isPrimative(Class<?> clazz) {
-        if (clazz.isPrimitive()) return true;
-        return primitiveClasses.contains(clazz);
+    // Checks if it's considered primitive
+    private boolean isPrimitive(Class<?> clazz) {
+        return clazz.isPrimitive() || PRIMITIVE_CLASSES.contains(clazz);
     }
-
 }

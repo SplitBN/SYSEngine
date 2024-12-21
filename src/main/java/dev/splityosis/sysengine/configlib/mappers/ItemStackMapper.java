@@ -6,10 +6,12 @@ import com.cryptomorin.xseries.profiles.builder.XSkull;
 import com.cryptomorin.xseries.profiles.objects.Profileable;
 import dev.splityosis.sysengine.configlib.configuration.ConfigMapper;
 import dev.splityosis.sysengine.configlib.manager.ConfigManager;
+import dev.splityosis.sysengine.utils.ColorUtil;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -19,7 +21,8 @@ public class ItemStackMapper implements ConfigMapper<ItemStack> {
     @Field public int amount;
     @Field public String displayName;
     @Field public List<String> lore;
-    @Field public Map<String, Integer> enchantments;
+    @Field public Map<String, Integer> enchantments = new HashMap<>();
+
     @FieldInlineComment("Base64, UUID or Username (Only applies for skulls)")
     @Field public String skin;
 
@@ -39,18 +42,19 @@ public class ItemStackMapper implements ConfigMapper<ItemStack> {
         ItemMeta itemMeta = itemStack.getItemMeta();
         if (itemMeta != null) {
 
-            itemMeta.setDisplayName(displayName);
-            itemMeta.setLore(lore);
+            itemMeta.setDisplayName(displayName != null ? ColorUtil.colorize(displayName) : null);
+            itemMeta.setLore(lore != null ? ColorUtil.colorize(lore) : null);
             itemStack.setItemMeta(itemMeta);
         }
 
         ItemStack finalItemStack = itemStack;
-        enchantments.forEach((string, integer) -> {
-            XEnchantment xEnchantment = XEnchantment.matchXEnchantment(string.toUpperCase()).orElse(null);
-            if (xEnchantment == null) return; // TODO let them know
-            if (!xEnchantment.isSupported()) return; // TODO let them know
-            finalItemStack.addUnsafeEnchantment(xEnchantment.getEnchant(), integer);
-        });
+        if (enchantments != null)
+            enchantments.forEach((string, integer) -> {
+                XEnchantment xEnchantment = XEnchantment.matchXEnchantment(string.toUpperCase()).orElse(null);
+                if (xEnchantment == null) return; // TODO let them know
+                if (!xEnchantment.isSupported()) return; // TODO let them know
+                finalItemStack.addUnsafeEnchantment(xEnchantment.getEnchant(), integer);
+            });
 
         return finalItemStack;
     }
@@ -60,17 +64,18 @@ public class ItemStackMapper implements ConfigMapper<ItemStack> {
         material = XMaterial.matchXMaterial(instance);
         amount = instance.getAmount();
         ItemMeta itemMeta = instance.getItemMeta();
+
         if (itemMeta != null) {
-            displayName = itemMeta.getDisplayName();
-            lore = itemMeta.getLore();
+            displayName = itemMeta.getDisplayName() != null ? ColorUtil.reverseColorize(itemMeta.getDisplayName()) : null;
+            lore = itemMeta.getLore() != null ? ColorUtil.reverseColorize(itemMeta.getLore()) : null;
         }
 
-
+        enchantments = null;
         instance.getEnchantments().forEach((enchantment, integer) -> {
             enchantments.put(XEnchantment.matchXEnchantment(enchantment).name(), integer);
         });
 
-
+        skin = null;
         if (material == XMaterial.PLAYER_HEAD || material == XMaterial.PLAYER_WALL_HEAD) {
             skin = XSkull.of(instance).getDelegateProfile().getProfileValue();
             if (skin == null)

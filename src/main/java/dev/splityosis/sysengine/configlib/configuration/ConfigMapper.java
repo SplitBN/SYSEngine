@@ -3,57 +3,59 @@ package dev.splityosis.sysengine.configlib.configuration;
 import dev.splityosis.sysengine.configlib.manager.ConfigManager;
 import org.bukkit.configuration.ConfigurationSection;
 
-public interface ConfigMapper<T> extends Configuration, AbstractMapper<T>{
+/**
+ * A specialized interface that behaves like a normal Configuration object
+ * but also implements AbstractMapper. This lets you annotate fields within
+ * the mapper itself and use them to load/save a particular object of type T.
+ */
+public interface ConfigMapper<T> extends Configuration, AbstractMapper<T> {
 
+    /**
+     * Called after the ConfigManager has written fields into 'this'.
+     * Allows you to compile the final T object from the data in 'this'.
+     */
     T compile(ConfigManager manager, ConfigurationSection section, String path);
 
+    /**
+     * Called before writing 'instance' to config. Lets you decompile
+     * the T object into fields of 'this' if needed, or do transformations.
+     */
     void decompile(ConfigManager manager, T instance, ConfigurationSection section, String path);
 
     /**
-     * Sets the configuration values in the provided ConfigurationSection based on the given instance.
-     *
-     * @param manager The ConfigManager instance managing the configuration.
-     * @param instance The instance of the object to be mapped to the configuration.
-     * @param section The ConfigurationSection where the configuration values will be set.
-     * @param path The path within the ConfigurationSection where the values will be set.
-     * @throws RuntimeException If an IllegalAccessException occurs during the process.
+     * Write 'instance' of T into the configuration, using the manager's logic
+     * for handling nested lists/maps/enums/custom mappers, etc.
      */
     @Override
-    default void setInConfig(ConfigManager manager, T instance, ConfigurationSection section, String path){
+    default void setInConfig(ConfigManager manager, T instance, ConfigurationSection section, String path) {
         decompile(manager, instance, section, path);
+
+        section.set(path, null);
+
         try {
-            section.set(path, null);
-            YMLProfile ymlProfile = YMLProfile.readConfigObject(instance, manager.getConfigOptions().getSectionSpacing(), manager.getConfigOptions().getFieldSpacing());
-            ymlProfile.getConfig().forEach((string, object) -> {
-                section.set(path + "." + string, object);
-            });
+            ConfigProfile ymlProfile = ConfigProfile.readConfigObject(
+                    this,
+                    manager.getConfigOptions().getSectionSpacing(),
+                    manager.getConfigOptions().getFieldSpacing()
+            );
 
-            ymlProfile.getComments().forEach((string, comments) -> {
-                section.setComments(path + "." + string, comments);
-            });
-
-            ymlProfile.getInlineComments().forEach((string, comments) -> {
-                section.setInlineComments(path + "." + string, comments);
-            });
-
+            manager.setProfileInSection(ymlProfile, section, path);
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         }
     }
 
     /**
-     * Retrieves an object of type T from the given configuration section.
-     *
-     * @param manager the ConfigManager instance used to manage the configuration
-     * @param section the ConfigurationSection from which to retrieve the data
-     * @param path the path within the configuration section to read the data from
-     * @return an object of type T populated with the data from the configuration
-     * @throws RuntimeException if there is an error accessing the fields
+     * Read data from the config into 'this' object, then compile
+     * a new T from that data.
      */
     @Override
     default T getFromConfig(ConfigManager manager, ConfigurationSection section, String path) {
         try {
-            manager.writeToFields(this, section.getConfigurationSection(path));
+            ConfigurationSection subSection = section.getConfigurationSection(path);
+            if (subSection != null) {
+                manager.writeToFields(this, subSection);
+            }
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         }
