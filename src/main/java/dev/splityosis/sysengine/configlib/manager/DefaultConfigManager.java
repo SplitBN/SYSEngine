@@ -327,8 +327,6 @@ public class DefaultConfigManager implements ConfigManager {
     private void setObjectCorrectly(Class<?> clazz, Object object, ConfigurationSection section,
                                     String path, String mapper) {
         AbstractMapper abstractMapper = getMapperRegistry().getMapper(clazz, mapper);
-        System.out.println("Setting "+clazz.getName());
-        System.out.println("mapper is " + ((abstractMapper != null) ? abstractMapper.getClass().getName() : "null"));
         if (abstractMapper != null) {
             abstractMapper.setInConfig(this, object, section, path);
         } else if (clazz.isEnum() && object != null) {
