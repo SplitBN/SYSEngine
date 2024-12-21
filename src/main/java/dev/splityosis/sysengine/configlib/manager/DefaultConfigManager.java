@@ -228,7 +228,7 @@ public class DefaultConfigManager implements ConfigManager {
         AbstractMapper abstractMapper = getMapperRegistry().getMapper(clazz, mapper);
         if (abstractMapper != null) {
             // Handle custom Mapper
-            abstractMapper.setInConfig(this, clazz, section, path);
+            abstractMapper.setInConfig(this, object, section, path);
         }
         if (clazz.isEnum()) {
             // Handle enum

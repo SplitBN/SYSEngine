@@ -1,5 +1,5 @@
 # Minecraft Plugin Engine
-![Version](https://img.shields.io/badge/version-1.0.15-blue.svg)
+![Version](https://img.shields.io/badge/version-1.0.16-blue.svg)
 
 ## Overview
 **Minecraft Command Engine** is a flexible and powerful library designed to help you build Minecraft plugins that are compatible with Minecraft versions 1.8 - 1.21. It offers convenient and fluent utilities for handling commands, configuration management, versioning, and much more, making plugin development easier and more efficient.
@@ -22,7 +22,7 @@ Add the following Maven dependency to your `pom.xml` file under `dependencies`:
 <dependency>
     <groupId>dev.splityosis</groupId>
     <artifactId>sysengine</artifactId>
-    <version>1.0.15</version>
+    <version>1.0.16</version>
     <scope>provided</scope>
 </dependency>
 ```
@@ -31,7 +31,7 @@ Add the following Maven dependency to your `pom.xml` file under `dependencies`:
 If you're using Gradle, add this to your `build.gradle` file under `dependencies`:
 ```gradle
 dependencies {
-    compileOnly 'dev.splityosis:sysengine:1.0.15-SNAPSHOT'
+    compileOnly 'dev.splityosis:sysengine:1.0.16-SNAPSHOT'
 }
 ```
 
