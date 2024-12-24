@@ -27,6 +27,16 @@ public class ConfigLib {
      *
      * @return A new instance of ConfigManager.
      */
+    public static ConfigManager createConfigManager(JavaPlugin plugin) {
+        return new DefaultConfigManager();
+    }
+
+    /**
+     * Creates a new instance of ConfigManager.
+     *
+     * @return A new instance of ConfigManager.
+     */
+    @Deprecated(forRemoval = true)
     public static ConfigManager createConfigManager() {
         return new DefaultConfigManager();
     }
@@ -64,25 +74,28 @@ public class ConfigLib {
     }
 
     /**
-     * Initializes whatever needs to be initialized for this library.
+     * Initializes whatever needs to be initialized for ConfigLib.
      * You should never call this, look at {@link SYSEngine#initialize(JavaPlugin)}.
      */
     public static void initialize(){
         if (isInitialized) return;
         isInitialized = true;
 
-        getMapperRegistry().registerMapper(new AWTColorMapper());
-        getMapperRegistry().registerMapper(new ColorMapper());
-        getMapperRegistry().registerMapper(new InstantMapper());
-        getMapperRegistry().registerMapper(new LocalDateMapper());
-        getMapperRegistry().registerMapper(new LocalDateTimeMapper());
-        getMapperRegistry().registerMapper(new LocalTimeMapper());
-        getMapperRegistry().registerMapper(new LocationMapper());
-        getMapperRegistry().registerMapper(new PotionEffectMapper());
-        getMapperRegistry().registerMapper(new UUIDMapper());
-        getMapperRegistry().registerMapper(new VectorMapper());
-        getMapperRegistry().registerMapper(new XMaterialMapper());
-        getMapperRegistry().registerMapper(new XEnchantmentMapper());
-        getMapperRegistry().registerMapper(new ItemStackMapper());
+        getMapperRegistry().registerMappers(
+                new AWTColorMapper(),
+                new ColorMapper(),
+                new InstantMapper(),
+                new LocalDateMapper(),
+                new LocalDateTimeMapper(),
+                new LocalTimeMapper(),
+                new LocationMapper(),
+                new PotionEffectMapper(),
+                new UUIDMapper(),
+                new VectorMapper(),
+                new XMaterialMapper(),
+                new XEnchantmentMapper(),
+                new ItemStackMapper(),
+                new ActionsMapper()
+        );
     }
 }
