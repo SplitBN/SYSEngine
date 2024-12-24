@@ -48,6 +48,16 @@ public class MapperRegistry {
     }
 
     /**
+     * Registers mappers with an identifier, calls{@link MapperRegistry#registerMapper(AbstractMapper, String)}
+     * @param mappers the mappers to register.
+     */
+    public void registerMappers(String mapperIdentifier, AbstractMapper<?>... mappers) {
+        for (AbstractMapper<?> mapper : mappers) {
+            registerMapper(mapper, mapperIdentifier);
+        }
+    }
+
+    /**
      * Registers an AbstractMapper instance with a default identifier (empty string).
      * This will treat the mapper as the main or default mapper for this class type.
      *
@@ -55,6 +65,16 @@ public class MapperRegistry {
      */
     public void registerMapper(AbstractMapper<?> mapper) {
         registerMapper(mapper, null);
+    }
+
+    /**
+     * Registers mappers without a mapper identifier, calls{@link MapperRegistry#registerMapper(AbstractMapper)}
+     * @param mappers the mappers to register.
+     */
+    public void registerMappers(AbstractMapper<?>... mappers) {
+        for (AbstractMapper<?> mapper : mappers) {
+            registerMapper(mapper, null);
+        }
     }
 
     /**

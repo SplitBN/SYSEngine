@@ -1,5 +1,7 @@
 name: SYSEngine
+description: An engine for connecting and making cross-version plugins.
 version: '${project.version}'
 author: SplitYoSis
 main: dev.splityosis.sysengine.SYSEngine
 api-version: '1.13'
+load: STARTUP

@@ -22,7 +22,7 @@ Add the following Maven dependency to your `pom.xml` file under `dependencies`:
 <dependency>
     <groupId>dev.splityosis</groupId>
     <artifactId>sysengine</artifactId>
-    <version>1.0.17</version>
+    <version>{VERSION}</version>
     <scope>provided</scope>
 </dependency>
 ```
@@ -31,7 +31,7 @@ Add the following Maven dependency to your `pom.xml` file under `dependencies`:
 If you're using Gradle, add this to your `build.gradle` file under `dependencies`:
 ```gradle
 dependencies {
-    implementation 'dev.splityosis:sysengine:1.0.17'
+    implementation 'dev.splityosis:sysengine:{VERSION}'
 }
 ```
 
