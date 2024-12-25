@@ -2,7 +2,7 @@
 ![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)
 
 ## Overview
-**Minecraft Command Engine** is a flexible and powerful library designed to help you build Minecraft plugins that are compatible with Minecraft versions 1.8 - 1.21. It offers convenient and fluent utilities for handling commands, configuration management, versioning, and much more, making plugin development easier and more efficient.
+**SYSEngine** is a flexible and powerful engine designed to help you build Minecraft plugins that are compatible with Minecraft versions 1.8 - 1.21. It offers convenient and fluent utilities for handling commands, configuration management, versioning, and much more, making plugin development easier and more efficient.
 
 This engine includes the following main components:
 
