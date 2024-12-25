@@ -1,17 +1,33 @@
 package dev.splityosis.sysengine;
 
+import dev.splityosis.sysengine.actions.ActionTypeRegistry;
+import dev.splityosis.sysengine.commandlib.CommandLib;
+import dev.splityosis.sysengine.commandlib.manager.CommandManager;
 import dev.splityosis.sysengine.configlib.ConfigLib;
+import dev.splityosis.sysengine.configlib.manager.ConfigManager;
+import dev.splityosis.sysengine.plugin.commands.SYSEngineCommand;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.io.File;
 
 public final class SYSEngine extends JavaPlugin {
 
+    public static SYSEngine plugin;
     private static boolean isInitialized = false;
+
+    private CommandManager commandManager;
+    private ConfigManager configManager;
 
     @Override
     public void onEnable() {
+        plugin = this;
         initialize(this);
-    }
 
+        commandManager = CommandLib.createCommandManager(this);
+        configManager = ConfigLib.createConfigManager(this);
+
+        commandManager.registerCommands(new SYSEngineCommand());
+    }
 
 
     @Override
@@ -38,6 +54,7 @@ public final class SYSEngine extends JavaPlugin {
 //        }
 
         ConfigLib.initialize();
+        ActionTypeRegistry.initialize();
     }
 
 }

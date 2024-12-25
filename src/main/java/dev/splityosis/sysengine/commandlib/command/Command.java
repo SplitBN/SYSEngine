@@ -165,6 +165,43 @@ public class Command implements Cloneable{
     }
 
     /**
+     * Adds subcommand to this command.
+     * <p>
+     * For example, for a base command `/base`, subcommands could be added like:
+     *   `/base <args>`
+     *   `/base create <args>`
+     *   `/base delete <args>`
+     * <p>
+     * Example usage:
+     * <pre>{@code
+     * Command baseCommand = new Command("base")
+     *         .setDescription("Base command for managing bases")
+     *         .executes((sender, context) -> sender.sendMessage("Use /base <subcommand> for specific actions."));
+     *
+     * Command createCommand = new Command("create")
+     *         .setDescription("Creates a new base")
+     *         .setArguments(new CommandArgument<>("baseName"))
+     *         .executes((sender, context) -> sender.sendMessage("Base created!"));
+     *
+     * baseCommand.addSubCommand(createCommand);
+     * }</pre>
+     *
+     * @param command Command instance to add as subcommand.
+     * @return The current Command instance, for chaining.
+     */
+    public Command addSubCommand(Command command) {
+            int minArgs = command.getArguments().length;
+            int maxArgs = minArgs + command.getOptionalArguments().length;
+
+            addSubCommandForAlias(command.getName(), command, minArgs, maxArgs);
+
+            for (String alias : command.getAliases())
+                addSubCommandForAlias(alias, command, minArgs, maxArgs);
+
+        return this;
+    }
+
+    /**
      * Creates and returns a copy of this Command instance.
      * <p>
      * The clone includes all properties of the command, such as the name, aliases,

@@ -99,7 +99,8 @@ public class ActionTypeRegistry {
      * Initializes whatever needs to be initialized for actions.
      * You should never call this, look at {@link SYSEngine#initialize(JavaPlugin)}.
      */
-    private static void initialize() {
+    public static void initialize() {
+        if (instance != null) return;
         instance = new ActionTypeRegistry();
         instance.registerActionTypes(
                 new MessageActionType(),

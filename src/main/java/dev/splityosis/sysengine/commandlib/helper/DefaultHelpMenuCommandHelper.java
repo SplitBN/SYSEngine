@@ -62,7 +62,7 @@ public class DefaultHelpMenuCommandHelper extends HelpMenuCommandHelper{
         }
 
         String commandPath = getCommandPath(parentCommands, command);
-        StringBuilder parentLineBuilder = new StringBuilder("&c* ").append(commandPath).append(" ");
+        StringBuilder parentLineBuilder = new StringBuilder("&c* &7").append(commandPath).append(" ");
 
         for (CommandArgument<?> argument : command.getArguments()) {
             parentLineBuilder.append("<").append(argument.getName()).append("> ");
@@ -73,13 +73,13 @@ public class DefaultHelpMenuCommandHelper extends HelpMenuCommandHelper{
         }
 
         String parentDescription = command.getDescription().endsWith(".") ? command.getDescription() : command.getDescription() + ".";
-        parentLineBuilder.append("- ").append(parentDescription);
+        parentLineBuilder.append("&f- ").append(parentDescription);
 
         commandSender.sendMessage(ColorUtil.colorize(parentLineBuilder.toString()));
 
         for (List<Command> group : groupedSubCommands.values()) {
             for (Command subCommand : group) {
-                StringBuilder subCommandLine = new StringBuilder("&c* ").append(commandPath).append(" ").append(subCommand.getName()).append(" ");
+                StringBuilder subCommandLine = new StringBuilder("&c* &7").append(commandPath).append(" ").append(subCommand.getName()).append(" ");
 
                 for (CommandArgument<?> argument : subCommand.getArguments()) {
                     subCommandLine.append("<").append(argument.getName()).append("> ");
@@ -91,7 +91,7 @@ public class DefaultHelpMenuCommandHelper extends HelpMenuCommandHelper{
 
                 String subDescription = subCommand.getDescription().endsWith(".") ? subCommand.getDescription() : subCommand.getDescription() + ".";
                 if (!subDescription.equals(".")) {
-                    subCommandLine.append("- ").append(subDescription);
+                    subCommandLine.append("&f- ").append(subDescription);
                 }
 
                 commandSender.sendMessage(ColorUtil.colorize(subCommandLine.toString()));
