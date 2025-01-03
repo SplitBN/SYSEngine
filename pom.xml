@@ -6,7 +6,7 @@
 
     <groupId>dev.splityosis</groupId>
     <artifactId>sysengine</artifactId>
-    <version>1.1.1</version>
+    <version>1.1.2</version>
     <packaging>jar</packaging>
 
     <name>SYSEngine</name>
@@ -62,6 +62,7 @@
                                     <shadedPattern>dev.splityosis.sysengine.nbtapi</shadedPattern>
                                 </relocation>
                             </relocations>
+                            <minimizeJar>true</minimizeJar>
                             <artifactSet>
                                 <includes>
                                     <include>org.spigotmc:spigot-api</include>
@@ -137,6 +138,7 @@
             <version>1.20.4-R0.1-SNAPSHOT</version>
             <!--            <version>1.8.8-R0.1-SNAPSHOT</version>-->
             <scope>compile</scope>
+            <optional>true</optional>
         </dependency>
 
         <dependency>
@@ -149,7 +151,7 @@
         <dependency>
             <groupId>de.tr7zw</groupId>
             <artifactId>item-nbt-api</artifactId>
-            <version>2.13.0</version>
+            <version>2.14.1</version>
             <scope>compile</scope>
         </dependency>
 
