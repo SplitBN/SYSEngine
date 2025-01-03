@@ -95,7 +95,8 @@ public class ConfigLib {
                 new XMaterialMapper(),
                 new XEnchantmentMapper(),
                 new ItemStackMapper(),
-                new ActionsMapper()
+                new ActionsMapper(),
+                new NBTCompoundMapper()
         );
     }
 }

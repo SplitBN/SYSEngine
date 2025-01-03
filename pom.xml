@@ -62,7 +62,7 @@
                                     <shadedPattern>dev.splityosis.sysengine.nbtapi</shadedPattern>
                                 </relocation>
                             </relocations>
-                            <minimizeJar>true</minimizeJar>
+                            <minimizeJar>false</minimizeJar>
                             <artifactSet>
                                 <includes>
                                     <include>org.spigotmc:spigot-api</include>
