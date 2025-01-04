@@ -57,8 +57,11 @@ public class ItemStackMapper implements ConfigMapper<ItemStack> {
                 finalItemStack.addUnsafeEnchantment(xEnchantment.getEnchant(), integer);
             });
 
+
         if (customNbt != null) {
-            new NBTItem(finalItemStack, true).mergeCompound(customNbt);
+            NBTItem nbtItem = new NBTItem(finalItemStack);
+            nbtItem.mergeCompound(customNbt);
+            return nbtItem.getItem();
         }
 
         return finalItemStack;

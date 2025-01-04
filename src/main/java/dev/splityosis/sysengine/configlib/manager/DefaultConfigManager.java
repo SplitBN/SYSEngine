@@ -227,10 +227,8 @@ public class DefaultConfigManager implements ConfigManager {
         Class<?> clazz = configuration.getClass();
         String currentSectionPath = "";
 
-        for (Field field : clazz.getDeclaredFields()) {
+        for (Field field : ReflectionUtil.getAnnotatedFields(clazz, Configuration.Field.class, Configuration.Section.class)) {
             field.setAccessible(true);
-            Configuration.Field fieldAnnotation = field.getAnnotation(Configuration.Field.class);
-            if (fieldAnnotation == null) continue;
 
             // Handle @Configuration.Section
             Configuration.Section sectionAnnotation = field.getAnnotation(Configuration.Section.class);
@@ -239,6 +237,9 @@ public class DefaultConfigManager implements ConfigManager {
                 currentSectionPath = (value.isBlank()) ? "" :
                         value + (value.endsWith(".") ? "" : ".");
             }
+
+            Configuration.Field fieldAnnotation = field.getAnnotation(Configuration.Field.class);
+            if (fieldAnnotation == null) continue;
 
             // Handle @Configuration.Mapper
             Configuration.Mapper mapperAnnotation = field.getAnnotation(Configuration.Mapper.class);
