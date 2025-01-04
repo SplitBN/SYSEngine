@@ -1,5 +1,7 @@
 package dev.splityosis.sysengine.configlib.configuration;
 
+import dev.splityosis.sysengine.utils.ReflectionUtil;
+
 import java.lang.reflect.Field;
 import java.util.*;
 
@@ -44,11 +46,10 @@ public class ConfigProfile {
         Map<String, MapperClassValue> config = new LinkedHashMap<>();
         Map<String, List<String>> comments = new LinkedHashMap<>();
         Map<String, List<String>> inlineComments = new LinkedHashMap<>();
-        Map<String, String> mappers = new LinkedHashMap<>();
 
         String currentSectionPath = "";
 
-        for (Field declaredField : object.getClass().getDeclaredFields()) {
+        for (Field declaredField : ReflectionUtil.getAnnotatedFields(object.getClass(), Configuration.Field.class, Configuration.Section.class)) {
             declaredField.setAccessible(true);
 
             Configuration.Field fieldAnnotation = declaredField.getAnnotation(Configuration.Field.class);
@@ -96,6 +97,27 @@ public class ConfigProfile {
                     mapper = mapperAnnotation.value();
 
                 config.put(absolutePath, new MapperClassValue(mapper, declaredField, declaredField.get(object)));
+            }
+            else {
+                Configuration.Section sectionAnnotation = declaredField.getAnnotation(Configuration.Section.class);
+                if (sectionAnnotation != null) {
+                    // Handle section stuff
+                    currentSectionPath = sectionAnnotation.value().trim();
+
+                    Configuration.SectionComment sectionCommentAnnotation = declaredField.getAnnotation(Configuration.SectionComment.class);
+                    List<String> sectionComments = getSpaceList(sectionSpacing);
+                    if (sectionCommentAnnotation != null) {
+                        // Handle section comment
+                        processComment(sectionCommentAnnotation.value(), sectionComments);
+                    }
+                    comments.put(currentSectionPath, sectionComments);
+
+                    Configuration.SectionInlineComment sectionInlineCommentAnnotation = declaredField.getAnnotation(Configuration.SectionInlineComment.class);
+                    if (sectionInlineCommentAnnotation != null) {
+                        // Handle section inline comment
+                        inlineComments.put(currentSectionPath, processComment(sectionInlineCommentAnnotation.value(), new ArrayList<>()));
+                    }
+                }
             }
         }
 

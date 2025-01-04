@@ -1,8 +1,13 @@
 package dev.splityosis.sysengine.utils;
 
+import dev.splityosis.sysengine.configlib.configuration.Configuration;
+
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ReflectionUtil {
 
@@ -22,5 +27,25 @@ public class ReflectionUtil {
             return genericClasses;
         }
         return new Class<?>[0];
+    }
+
+    public static List<Field> getAnnotatedFields(Class<?> clazz, Class<? extends Annotation>... annotation) {
+        List<Field> fields = new ArrayList<>();
+        collectFieldsRecursively(clazz, fields, annotation);
+        return fields;
+    }
+
+    private static void collectFieldsRecursively(Class<?> clazz, List<Field> fields, Class<? extends Annotation>... annotation) {
+        if (clazz == null || clazz == Object.class)
+            return;
+
+        collectFieldsRecursively(clazz.getSuperclass(), fields, annotation);
+
+        for (Field field : clazz.getDeclaredFields())
+            for (Class<? extends Annotation> aClass : annotation)
+                if (field.isAnnotationPresent(aClass)) {
+                    fields.add(field);
+                    break;
+                }
     }
 }
