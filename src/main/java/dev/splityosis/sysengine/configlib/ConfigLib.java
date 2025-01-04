@@ -96,7 +96,10 @@ public class ConfigLib {
                 new XEnchantmentMapper(),
                 new ItemStackMapper(),
                 new ActionsMapper(),
-                new NBTCompoundMapper()
+                new NBTCompoundMapper(),
+                new XPotionMapper(),
+                new PotionDataMapper(),
+                new PotionPropertiesMapper()
         );
     }
 }

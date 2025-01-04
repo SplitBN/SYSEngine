@@ -138,7 +138,7 @@ public class DefaultConfigManager implements ConfigManager {
             ConfigurationSection section = null;
             if (path != null && !path.isBlank())
                 section = config.createSection(path);
-            
+
             if (section == null)
                 section = config;
             ymlProfile.getConfiguration().onSave(file, section);
@@ -270,6 +270,26 @@ public class DefaultConfigManager implements ConfigManager {
 
             } else {
                 Object value = getObjectCorrectly(field.getType(), mapper, section, absolutePath);
+                if (value == null && field.getType().isPrimitive()) {
+                    if (field.getType().equals(boolean.class)) {
+                        value = false;
+                    } else if (field.getType().equals(int.class)) {
+                        value = 0;
+                    } else if (field.getType().equals(double.class)) {
+                        value = 0.0;
+                    } else if (field.getType().equals(float.class)) {
+                        value = 0.0f;
+                    } else if (field.getType().equals(long.class)) {
+                        value = 0L;
+                    } else if (field.getType().equals(short.class)) {
+                        value = (short) 0;
+                    } else if (field.getType().equals(byte.class)) {
+                        value = (byte) 0;
+                    } else if (field.getType().equals(char.class)) {
+                        value = '\u0000';
+                    }
+                }
+
                 field.set(configuration, value);
             }
         }

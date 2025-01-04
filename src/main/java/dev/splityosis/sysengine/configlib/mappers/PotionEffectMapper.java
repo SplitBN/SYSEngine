@@ -1,50 +1,51 @@
 package dev.splityosis.sysengine.configlib.mappers;
 
-import dev.splityosis.sysengine.configlib.configuration.AbstractMapper;
+import com.cryptomorin.xseries.XPotion;
+import dev.splityosis.sysengine.configlib.configuration.ConfigMapper;
 import dev.splityosis.sysengine.configlib.manager.ConfigManager;
+import dev.splityosis.sysengine.utils.VersionUtil;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
-public class PotionEffectMapper implements AbstractMapper<PotionEffect> {
+public class PotionEffectMapper implements ConfigMapper<PotionEffect> {
+
+    @Field public XPotion type;
+    @Field public int duration;
+    @Field public int amplifier;
+    @Field public boolean ambient = false;
+    @Field public boolean particles = true;
+    @Field public boolean icon = true;
+
+    public PotionEffectMapper() {}
 
     @Override
-    public PotionEffect getFromConfig(ConfigManager manager, ConfigurationSection section, String path) {
-        String effectString = section.getString(path);
-        if (effectString == null || effectString.isEmpty()) {
-            return null;
+    public PotionEffect compile(ConfigManager manager, ConfigurationSection section, String path) {
+        PotionEffectType pet = type.getPotionEffectType();
+        if (pet == null) return null;
+
+        if (VersionUtil.isServerAtLeast("1.9")) {
+            return new PotionEffect(pet, duration, amplifier, ambient, particles, icon);
+        } else if (VersionUtil.isServerAtLeast("1.8")) {
+            return new PotionEffect(pet, duration, amplifier, ambient, particles);
+        } else {
+            return new PotionEffect(pet, duration, amplifier);
         }
-
-        String[] parts = effectString.split(" ");
-        if (parts.length < 1) {
-            return null;
-        }
-
-        PotionEffectType type = PotionEffectType.getByName(parts[0]);
-        if (type == null) {
-            return null;
-        }
-
-        int duration = (parts.length >= 2) ? Integer.parseInt(parts[1]) : 600;
-
-        int amplifier = (parts.length >= 3) ? Integer.parseInt(parts[2]) : 0;
-
-        return new PotionEffect(type, duration, amplifier);
     }
 
     @Override
-    public void setInConfig(ConfigManager manager, PotionEffect instance, ConfigurationSection section, String path) {
-        if (instance == null) {
-            section.set(path, "");
-            return;
+    public void decompile(ConfigManager manager, PotionEffect instance, ConfigurationSection section, String path) {
+        this.type = XPotion.matchXPotion(instance.getType());
+        this.duration = instance.getDuration();
+        this.amplifier = instance.getAmplifier();
+        this.ambient = instance.isAmbient();
+
+        if (VersionUtil.isServerAtLeast("1.8")) {
+            this.particles = instance.hasParticles();
         }
 
-        String effectString = String.format(
-                "%s %d %d",
-                instance.getType().getName(),
-                instance.getDuration(),
-                instance.getAmplifier()
-        );
-        section.set(path, effectString);
+        if (VersionUtil.isServerAtLeast("1.9")) {
+            this.icon = instance.hasIcon();
+        }
     }
 }
