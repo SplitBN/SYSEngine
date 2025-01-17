@@ -5,6 +5,7 @@ import dev.splityosis.sysengine.configlib.configuration.AbstractMapper;
 import dev.splityosis.sysengine.configlib.configuration.Configuration;
 import dev.splityosis.sysengine.configlib.configuration.ConfigProfile;
 import dev.splityosis.sysengine.configlib.exceptions.ConfigNotRegisteredException;
+import dev.splityosis.sysengine.configlib.manager.strategy.FieldPathConverter;
 import dev.splityosis.sysengine.utils.ReflectionUtil;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -19,6 +20,7 @@ import java.util.*;
 public class DefaultConfigManager implements ConfigManager {
 
     private ConfigOptions configOptions;
+    private FieldPathConverter fieldPathConverter;
     private final Map<Configuration, File> registeredConfigs = new HashMap<>();
 
     // Basic set of classes considered "primitive-like"
@@ -110,7 +112,8 @@ public class DefaultConfigManager implements ConfigManager {
         ConfigProfile ymlProfile = ConfigProfile.readConfigObject(
                 configuration,
                 configOptions.getSectionSpacing(),
-                configOptions.getFieldSpacing()
+                configOptions.getFieldSpacing(),
+                fieldPathConverter
         );
         writeToFile(file, ymlProfile, path);
     }
@@ -245,7 +248,7 @@ public class DefaultConfigManager implements ConfigManager {
             Configuration.Mapper mapperAnnotation = field.getAnnotation(Configuration.Mapper.class);
             String mapper = (mapperAnnotation != null) ? mapperAnnotation.value() : "";
 
-            String fieldPath = ConfigProfile.getFieldPath(field, fieldAnnotation);
+            String fieldPath = ConfigProfile.getFieldPath(fieldPathConverter, field, fieldAnnotation);
             String absolutePath = currentSectionPath + fieldPath;
 
             // If it's a List/Set of non-primitives
@@ -395,5 +398,15 @@ public class DefaultConfigManager implements ConfigManager {
     // Checks if it's considered primitive
     private boolean isPrimitive(Class<?> clazz) {
         return clazz.isPrimitive() || PRIMITIVE_CLASSES.contains(clazz);
+    }
+
+    @Override
+    public void setFieldPathConverter(FieldPathConverter fieldPathConverter) {
+        this.fieldPathConverter = fieldPathConverter;
+    }
+
+    @Override
+    public FieldPathConverter getFieldPathConverter() {
+        return fieldPathConverter;
     }
 }

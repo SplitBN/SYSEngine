@@ -1,5 +1,6 @@
 package dev.splityosis.sysengine.configlib.configuration;
 
+import dev.splityosis.sysengine.configlib.manager.strategy.FieldPathConverter;
 import dev.splityosis.sysengine.utils.ReflectionUtil;
 
 import java.lang.reflect.Field;
@@ -42,7 +43,7 @@ public class ConfigProfile {
     }
 
     // Method to generate YMLProfile from object fields
-    public static ConfigProfile readConfigObject(Object object, int sectionSpacing, int fieldSpacing) throws IllegalAccessException {
+    public static ConfigProfile readConfigObject(Object object, int sectionSpacing, int fieldSpacing, FieldPathConverter fieldPathConverter) throws IllegalAccessException {
         Map<String, MapperClassValue> config = new LinkedHashMap<>();
         Map<String, List<String>> comments = new LinkedHashMap<>();
         Map<String, List<String>> inlineComments = new LinkedHashMap<>();
@@ -76,7 +77,7 @@ public class ConfigProfile {
                     }
                 }
 
-                String absolutePath = currentSectionPath + (!currentSectionPath.isBlank() ? '.' : "") + getFieldPath(declaredField, fieldAnnotation);
+                String absolutePath = currentSectionPath + (!currentSectionPath.isBlank() ? '.' : "") + getFieldPath(fieldPathConverter, declaredField, fieldAnnotation);
 
                 Configuration.FieldComment fieldCommentAnnotation = declaredField.getAnnotation(Configuration.FieldComment.class);
                 List<String> fieldComments = getSpaceList(fieldSpacing);
@@ -141,78 +142,10 @@ public class ConfigProfile {
         return lst;
     }
 
-    public static String getFieldPath(Field declaredField, Configuration.Field fieldAnnotation) {
+    public static String getFieldPath(FieldPathConverter fieldPathConverter, Field declaredField, Configuration.Field fieldAnnotation) {
         if (fieldAnnotation.value().equals(Configuration.PATH_FROM_NAME_SECRET))
-            return convertToPathFormat(declaredField.getName());
+            return fieldPathConverter.convertToPathFormat(declaredField.getName());
         return fieldAnnotation.value();
-    }
-
-    // Turns field name into a standard yaml path
-    public static String convertToPathFormat(String fieldName) {
-        if (fieldName.length() == 1) return fieldName;
-
-        StringBuilder pathFormat = new StringBuilder();
-
-        boolean dashed = true;
-
-        for (int i = 0; i < fieldName.length(); i++) {
-            char currentChar = fieldName.charAt(i);
-            char nextChar = (i + 1 < fieldName.length()) ? fieldName.charAt(i + 1) : '\0';
-
-            boolean appendDash = false;
-
-            if (nextChar == '\0') {
-                pathFormat.append(currentChar);
-                return pathFormat.toString();
-            }
-
-            // ...aa... -> ...a...
-            else if (Character.isLowerCase(currentChar) && Character.isLowerCase(nextChar)) {
-                pathFormat.append(currentChar);
-            }
-
-            // ...11... -> ...1...
-            else if (Character.isDigit(currentChar) && Character.isDigit(nextChar)) {
-                pathFormat.append(currentChar);
-            }
-
-            // ...AA... -> ...A...
-            else if (Character.isUpperCase(currentChar) && Character.isUpperCase(nextChar)) {
-                pathFormat.append(currentChar);
-            }
-
-            // ...Ab... -> ...a...
-            else if (Character.isUpperCase(currentChar) && Character.isLowerCase(nextChar)) {
-                if (!dashed)
-                    pathFormat.append("-");
-                pathFormat.append(Character.toLowerCase(currentChar));
-            }
-
-            // ...aB... -> ...a-...
-            else if (Character.isLowerCase(currentChar) && Character.isUpperCase(nextChar)) {
-                pathFormat.append(currentChar);
-                appendDash = true;
-            }
-
-            // ...1b... -> ...1-... || ...b1... -> ...b-...
-            else if (Character.isDigit(currentChar) != Character.isDigit(nextChar) && nextChar != '_') {
-                pathFormat.append(currentChar);
-                appendDash = true;
-            }
-
-            else pathFormat.append(currentChar);
-
-            if (currentChar == '_') dashed = true;
-
-            if (appendDash && !dashed) {
-                pathFormat.append("-");
-                dashed = true;
-            }
-            else
-                dashed = false;
-        }
-
-        return pathFormat.toString();
     }
 
     public static class MapperClassValue {

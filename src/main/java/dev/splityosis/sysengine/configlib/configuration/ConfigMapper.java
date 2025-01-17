@@ -36,7 +36,8 @@ public interface ConfigMapper<T> extends Configuration, AbstractMapper<T> {
             ConfigProfile ymlProfile = ConfigProfile.readConfigObject(
                     this,
                     manager.getConfigOptions().getSectionSpacing(),
-                    manager.getConfigOptions().getFieldSpacing()
+                    manager.getConfigOptions().getFieldSpacing(),
+                    manager.getFieldPathConverter()
             );
 
             manager.setProfileInSection(ymlProfile, section, path);

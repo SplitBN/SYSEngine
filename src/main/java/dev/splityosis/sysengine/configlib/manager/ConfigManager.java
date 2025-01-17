@@ -2,6 +2,7 @@ package dev.splityosis.sysengine.configlib.manager;
 
 import dev.splityosis.sysengine.configlib.configuration.Configuration;
 import dev.splityosis.sysengine.configlib.configuration.ConfigProfile;
+import dev.splityosis.sysengine.configlib.manager.strategy.FieldPathConverter;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
 
@@ -155,4 +156,14 @@ public interface ConfigManager {
      * @return the current configuration options
      */
     ConfigOptions getConfigOptions();
+
+    /**
+     * Sets strategy for field name to yml path conversion strategy.
+     */
+    void setFieldPathConverter(FieldPathConverter fieldPathConverter);
+
+    /**
+     * Gets the current FieldPathConverter strategy.
+     */
+    FieldPathConverter getFieldPathConverter();
 }
