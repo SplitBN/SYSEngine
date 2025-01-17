@@ -15,7 +15,7 @@ This engine includes the following main components:
 
 ## Installation
 
-To use the Minecraft Command Engine in your project, you can include the following dependencies based on your build system.
+To use the engine, include the following dependencies based on your build system.
 
 ### Maven Dependency
 Add the following Maven dependency to your `pom.xml` file under `dependencies`:
@@ -38,7 +38,8 @@ dependencies {
 ```
 
 ## Shading
-While shading the library into your plugin’s JAR file is possible, it is not recommended in most cases. This is because some cross-plugin features that rely on dynamically loaded classes or plugin-to-plugin interactions might not work as expected when shaded (e.g., ConfigMappers, CommandArguments etc...).
+While shading the library into your plugin’s JAR file is possible, it is not recommended in most cases. This is because some cross-plugin features that rely on dynamically loaded classes or plugin-to-plugin interactions might not work as expected when shaded (e.g., `ConfigMappers`, `CommandArguments`, etc.). If you do decide to shade it in, you must call `SYSEngine#initialize(plugin)` to initialize the libraries. Additionally, ensure you relocate the package `dev.splityosis.sysengine` to avoid class conflicts.
+
 
 # Documentation
 ## ConfigLib
