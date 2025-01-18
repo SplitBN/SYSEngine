@@ -6,6 +6,7 @@ import dev.splityosis.sysengine.configlib.configuration.Configuration;
 import dev.splityosis.sysengine.configlib.configuration.ConfigProfile;
 import dev.splityosis.sysengine.configlib.exceptions.ConfigNotRegisteredException;
 import dev.splityosis.sysengine.configlib.manager.strategy.FieldPathConverter;
+import dev.splityosis.sysengine.configlib.manager.strategy.impl.DefaultFieldPathConverter;
 import dev.splityosis.sysengine.utils.ReflectionUtil;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -31,6 +32,7 @@ public class DefaultConfigManager implements ConfigManager {
 
     public DefaultConfigManager() {
         this.configOptions = new ConfigOptions();
+        this.fieldPathConverter = new DefaultFieldPathConverter();
     }
 
     /* -------------------------------------------------

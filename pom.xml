@@ -6,7 +6,7 @@
 
     <groupId>dev.splityosis</groupId>
     <artifactId>sysengine</artifactId>
-    <version>1.1.6</version>
+    <version>1.1.7</version>
     <packaging>jar</packaging>
 
     <name>SYSEngine</name>
