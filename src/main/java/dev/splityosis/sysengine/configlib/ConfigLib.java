@@ -6,6 +6,7 @@ import dev.splityosis.sysengine.configlib.manager.ConfigManager;
 import dev.splityosis.sysengine.configlib.configuration.AbstractMapper;
 import dev.splityosis.sysengine.configlib.manager.MapperRegistry;
 import dev.splityosis.sysengine.configlib.mappers.*;
+import dev.splityosis.sysengine.utils.VersionUtil;
 import org.bukkit.plugin.java.JavaPlugin;
 
 /**
@@ -98,8 +99,12 @@ public class ConfigLib {
                 new ActionsMapper(),
                 new NBTCompoundMapper(),
                 new XPotionMapper(),
-                new PotionDataMapper(),
                 new PotionPropertiesMapper()
         );
+
+        if (VersionUtil.isServerAtLeast("1.11"))
+            getMapperRegistry().registerMappers(
+                    new PotionDataMapper()
+            );
     }
 }

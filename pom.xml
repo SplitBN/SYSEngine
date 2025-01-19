@@ -6,7 +6,7 @@
 
     <groupId>dev.splityosis</groupId>
     <artifactId>sysengine</artifactId>
-    <version>1.1.7</version>
+    <version>1.1.8</version>
     <packaging>jar</packaging>
 
     <name>SYSEngine</name>
@@ -56,6 +56,9 @@
                                 <relocation>
                                     <pattern>org.bukkit.configuration</pattern>
                                     <shadedPattern>dev.splityosis.sysengine.configlib.bukkit</shadedPattern>
+                                    <includes>
+                                        <include>dev.splityosis.sysengine</include>
+                                    </includes>
                                 </relocation>
                                 <relocation>
                                     <pattern>de.tr7zw.changeme.nbtapi</pattern>
