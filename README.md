@@ -26,10 +26,10 @@ Add the following repository and dependency to your `pom.xml` file:
 
 #### Repository
 ```xml
-    <repository>
-        <id>octane</id>
-        <url>https://repo.octanepvp.com/repository/maven-releases/</url>
-    </repository>
+<repository>
+    <id>octane</id>
+    <url>https://repo.octanepvp.com/repository/maven-releases/</url>
+</repository>
 ```
 
 #### Dependency
