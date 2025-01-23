@@ -6,7 +6,7 @@
 
     <groupId>dev.splityosis</groupId>
     <artifactId>sysengine</artifactId>
-    <version>1.1.10</version>
+    <version>1.1.11</version>
     <packaging>jar</packaging>
 
     <name>SYSEngine</name>
@@ -19,9 +19,8 @@
 
     <distributionManagement>
         <repository>
-            <id>github</id>
-            <name>GitHub OctanePvP Apache Maven Packages</name>
-            <url>https://maven.pkg.github.com/SplitYoSis/SYSEngine</url>
+            <id>octane</id>
+            <url>https://repo.octanepvp.com/repository/maven-releases/</url>
         </repository>
     </distributionManagement>
 
@@ -155,6 +154,5 @@
             <version>1.0.1</version>
             <scope>compile</scope>
         </dependency>
-
     </dependencies>
 </project>
