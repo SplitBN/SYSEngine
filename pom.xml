@@ -6,7 +6,7 @@
 
     <groupId>dev.splityosis</groupId>
     <artifactId>sysengine</artifactId>
-    <version>1.1.8</version>
+    <version>1.1.9</version>
     <packaging>jar</packaging>
 
     <name>SYSEngine</name>
@@ -57,27 +57,8 @@
                                     <pattern>de.tr7zw.changeme.nbtapi</pattern>
                                     <shadedPattern>dev.splityosis.sysengine.nbtapi</shadedPattern>
                                 </relocation>
-                                <relocation>
-                                    <pattern>org.bukkit.configuration</pattern>
-                                    <shadedPattern>dev.splityosis.sysengine.configlib.bukkit</shadedPattern>
-                                </relocation>
                             </relocations>
                             <minimizeJar>false</minimizeJar>
-                            <artifactSet>
-                                <includes>
-                                    <include>org.spigotmc:spigot-api</include>
-                                    <include>com.github.cryptomorin:XSeries</include>
-                                    <include>de.tr7zw:item-nbt-api</include>
-                                </includes>
-                            </artifactSet>
-                            <filters>
-                                <filter>
-                                    <artifact>org.spigotmc:spigot-api</artifact>
-                                    <includes>
-                                        <include>org/bukkit/configuration/**</include>
-                                    </includes>
-                                </filter>
-                            </filters>
                         </configuration>
                     </execution>
                 </executions>
@@ -137,8 +118,7 @@
             <artifactId>spigot</artifactId>
             <version>1.18.2-R0.1-SNAPSHOT</version>
             <!--            <version>1.8.8-R0.1-SNAPSHOT</version>-->
-            <scope>compile</scope>
-            <optional>true</optional>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
@@ -167,6 +147,13 @@
             <artifactId>placeholderapi</artifactId>
             <version>2.11.6</version>
             <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>dev.splityosis</groupId>
+            <artifactId>BukkitConfigurationRelocated</artifactId>
+            <version>1.0.0</version>
+            <scope>compile</scope>
         </dependency>
 
     </dependencies>

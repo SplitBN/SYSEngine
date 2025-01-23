@@ -1,8 +1,8 @@
 package dev.splityosis.sysengine.configlib.configuration;
 
 import dev.splityosis.sysengine.configlib.manager.MapperRegistry;
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.file.FileConfiguration;
+import dev.splityosis.sysengine.configlib.bukkit.ConfigurationSection;
+import dev.splityosis.sysengine.configlib.bukkit.file.FileConfiguration;
 
 import java.io.File;
 import java.lang.annotation.*;

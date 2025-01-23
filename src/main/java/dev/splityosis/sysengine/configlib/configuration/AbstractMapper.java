@@ -1,7 +1,7 @@
 package dev.splityosis.sysengine.configlib.configuration;
 
 import dev.splityosis.sysengine.configlib.manager.ConfigManager;
-import org.bukkit.configuration.ConfigurationSection;
+import dev.splityosis.sysengine.configlib.bukkit.ConfigurationSection;
 
 /**
  * Base interface for a mapper that can read/write objects of type T

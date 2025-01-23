@@ -2,7 +2,7 @@ package dev.splityosis.sysengine.configlib.mappers;
 
 import dev.splityosis.sysengine.configlib.configuration.AbstractMapper;
 import dev.splityosis.sysengine.configlib.manager.ConfigManager;
-import org.bukkit.configuration.ConfigurationSection;
+import dev.splityosis.sysengine.configlib.bukkit.ConfigurationSection;
 
 import java.util.UUID;
 

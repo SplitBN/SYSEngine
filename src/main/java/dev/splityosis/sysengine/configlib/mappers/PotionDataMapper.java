@@ -3,7 +3,7 @@ package dev.splityosis.sysengine.configlib.mappers;
 import com.cryptomorin.xseries.XPotion;
 import dev.splityosis.sysengine.configlib.configuration.ConfigMapper;
 import dev.splityosis.sysengine.configlib.manager.ConfigManager;
-import org.bukkit.configuration.ConfigurationSection;
+import dev.splityosis.sysengine.configlib.bukkit.ConfigurationSection;
 import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionType;
 

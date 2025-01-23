@@ -6,7 +6,7 @@ import dev.splityosis.sysengine.actions.Actions;
 import dev.splityosis.sysengine.actions.ActionsParser;
 import dev.splityosis.sysengine.configlib.configuration.AbstractMapper;
 import dev.splityosis.sysengine.configlib.manager.ConfigManager;
-import org.bukkit.configuration.ConfigurationSection;
+import dev.splityosis.sysengine.configlib.bukkit.ConfigurationSection;
 
 import java.util.ArrayList;
 import java.util.Collections;

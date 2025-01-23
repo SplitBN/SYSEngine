@@ -1,7 +1,7 @@
 package dev.splityosis.sysengine.configlib.configuration;
 
 import dev.splityosis.sysengine.configlib.manager.ConfigManager;
-import org.bukkit.configuration.ConfigurationSection;
+import dev.splityosis.sysengine.configlib.bukkit.ConfigurationSection;
 
 /**
  * A specialized interface that behaves like a normal Configuration object

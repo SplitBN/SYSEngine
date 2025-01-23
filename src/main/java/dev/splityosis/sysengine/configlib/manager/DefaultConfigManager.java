@@ -8,10 +8,10 @@ import dev.splityosis.sysengine.configlib.exceptions.ConfigNotRegisteredExceptio
 import dev.splityosis.sysengine.configlib.manager.strategy.FieldPathConverter;
 import dev.splityosis.sysengine.configlib.manager.strategy.impl.DefaultFieldPathConverter;
 import dev.splityosis.sysengine.utils.ReflectionUtil;
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.InvalidConfigurationException;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
+import dev.splityosis.sysengine.configlib.bukkit.ConfigurationSection;
+import dev.splityosis.sysengine.configlib.bukkit.InvalidConfigurationException;
+import dev.splityosis.sysengine.configlib.bukkit.file.FileConfiguration;
+import dev.splityosis.sysengine.configlib.bukkit.file.YamlConfiguration;
 
 import java.io.File;
 import java.io.IOException;

@@ -4,7 +4,7 @@ import dev.splityosis.sysengine.configlib.configuration.AbstractMapper;
 import dev.splityosis.sysengine.configlib.manager.ConfigManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.configuration.ConfigurationSection;
+import dev.splityosis.sysengine.configlib.bukkit.ConfigurationSection;
 
 public class LocationMapper implements AbstractMapper<Location> {
 

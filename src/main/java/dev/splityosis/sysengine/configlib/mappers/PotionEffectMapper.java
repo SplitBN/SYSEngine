@@ -4,7 +4,7 @@ import com.cryptomorin.xseries.XPotion;
 import dev.splityosis.sysengine.configlib.configuration.ConfigMapper;
 import dev.splityosis.sysengine.configlib.manager.ConfigManager;
 import dev.splityosis.sysengine.utils.VersionUtil;
-import org.bukkit.configuration.ConfigurationSection;
+import dev.splityosis.sysengine.configlib.bukkit.ConfigurationSection;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 

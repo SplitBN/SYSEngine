@@ -3,7 +3,7 @@ package dev.splityosis.sysengine.configlib.mappers;
 import com.cryptomorin.xseries.XEnchantment;
 import dev.splityosis.sysengine.configlib.configuration.AbstractMapper;
 import dev.splityosis.sysengine.configlib.manager.ConfigManager;
-import org.bukkit.configuration.ConfigurationSection;
+import dev.splityosis.sysengine.configlib.bukkit.ConfigurationSection;
 
 public class XEnchantmentMapper implements AbstractMapper<XEnchantment> {
 

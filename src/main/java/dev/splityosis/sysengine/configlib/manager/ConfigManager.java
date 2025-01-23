@@ -3,8 +3,8 @@ package dev.splityosis.sysengine.configlib.manager;
 import dev.splityosis.sysengine.configlib.configuration.Configuration;
 import dev.splityosis.sysengine.configlib.configuration.ConfigProfile;
 import dev.splityosis.sysengine.configlib.manager.strategy.FieldPathConverter;
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.InvalidConfigurationException;
+import dev.splityosis.sysengine.configlib.bukkit.ConfigurationSection;
+import dev.splityosis.sysengine.configlib.bukkit.InvalidConfigurationException;
 
 import java.io.*;
 

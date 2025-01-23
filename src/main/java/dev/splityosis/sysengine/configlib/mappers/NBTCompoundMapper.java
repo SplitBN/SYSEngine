@@ -4,8 +4,8 @@ import de.tr7zw.changeme.nbtapi.*;
 
 import dev.splityosis.sysengine.configlib.configuration.AbstractMapper;
 import dev.splityosis.sysengine.configlib.manager.ConfigManager;
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.MemoryConfiguration;
+import dev.splityosis.sysengine.configlib.bukkit.ConfigurationSection;
+import dev.splityosis.sysengine.configlib.bukkit.MemoryConfiguration;
 
 import java.util.*;
 import java.util.Base64;
