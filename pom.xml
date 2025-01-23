@@ -60,7 +60,6 @@
                                 <relocation>
                                     <pattern>org.bukkit.configuration</pattern>
                                     <shadedPattern>dev.splityosis.sysengine.configlib.bukkit</shadedPattern>
-                                    <!-- TODO exclude this relocation from NBTAPI -->
                                 </relocation>
                             </relocations>
                             <minimizeJar>false</minimizeJar>
