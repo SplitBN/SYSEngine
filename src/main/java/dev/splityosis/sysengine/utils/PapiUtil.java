@@ -6,6 +6,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Utility class for interacting with PlaceholderAPI.
@@ -67,7 +68,7 @@ public class PapiUtil {
      */
     public static List<String> parsePlaceholders(Player player, List<String> lines) {
         if (isPapiAvailable() && lines != null) {
-            return lines.stream().map(line -> parsePlaceholders(player, line)).toList();
+            return lines.stream().map(line -> parsePlaceholders(player, line)).collect(Collectors.toList());
         }
         return lines;
     }
@@ -82,7 +83,7 @@ public class PapiUtil {
      */
     public static List<String> parsePlaceholders(OfflinePlayer player, List<String> lines) {
         if (isPapiAvailable() && lines != null) {
-            return lines.stream().map(line -> parsePlaceholders(player, line)).toList();
+            return lines.stream().map(line -> parsePlaceholders(player, line)).collect(Collectors.toList());
         }
         return lines;
     }
@@ -114,7 +115,7 @@ public class PapiUtil {
      */
     public static List<String> parseRelationalPlaceholders(Player one, Player two, List<String> lines) {
         if (isPapiAvailable() && lines != null) {
-            return lines.stream().map(line -> parseRelationalPlaceholders(one, two, line)).toList();
+            return lines.stream().map(line -> parseRelationalPlaceholders(one, two, line)).collect(Collectors.toList());
         }
         return lines;
     }
@@ -159,7 +160,7 @@ public class PapiUtil {
      */
     public static List<String> parseBracketPlaceholders(Player player, List<String> lines) {
         if (isPapiAvailable() && lines != null) {
-            return lines.stream().map(line -> parseBracketPlaceholders(player, line)).toList();
+            return lines.stream().map(line -> parseBracketPlaceholders(player, line)).collect(Collectors.toList());
         }
         return lines;
     }
@@ -174,7 +175,7 @@ public class PapiUtil {
      */
     public static List<String> parseBracketPlaceholders(OfflinePlayer player, List<String> lines) {
         if (isPapiAvailable() && lines != null) {
-            return lines.stream().map(line -> parseBracketPlaceholders(player, line)).toList();
+            return lines.stream().map(line -> parseBracketPlaceholders(player, line)).collect(Collectors.toList());
         }
         return lines;
     }

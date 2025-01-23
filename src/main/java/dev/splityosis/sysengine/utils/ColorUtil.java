@@ -4,6 +4,7 @@ import org.bukkit.ChatColor;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Utility class for handling color codes in strings and lists of strings.
@@ -91,7 +92,7 @@ public class ColorUtil {
      * @return A list of colorized strings.
      */
     public static List<String> colorizeStandard(List<String> lst) {
-        return lst.stream().map(string -> string == null ? null : colorizeStandard(string)).toList();
+        return lst.stream().map(string -> string == null ? null : colorizeStandard(string)).collect(Collectors.toList());
     }
 
     /**
@@ -111,7 +112,7 @@ public class ColorUtil {
      * @return A list of reverse-colorized strings.
      */
     public static List<String> reverseColorizeStandard(List<String> lst) {
-        return lst.stream().map(string -> string == null ? null : reverseColorizeStandard(string)).toList();
+        return lst.stream().map(string -> string == null ? null : reverseColorizeStandard(string)).collect(Collectors.toList());
     }
 
     /**
@@ -126,9 +127,9 @@ public class ColorUtil {
         StringBuilder buffer = new StringBuilder();
 
         while (matcher.find())
-            matcher.appendReplacement(buffer, net.md_5.bungee.api.ChatColor.of(matcher.group(1)).toString());
+            matcher.appendReplacement(new StringBuffer(buffer), net.md_5.bungee.api.ChatColor.of(matcher.group(1)).toString());
 
-        return matcher.appendTail(buffer).toString();
+        return matcher.appendTail(new StringBuffer(buffer)).toString();
     }
 
     /**
@@ -139,7 +140,7 @@ public class ColorUtil {
      * @return A list of hex-colorized strings.
      */
     public static List<String> colorizeHex(List<String> lst) {
-        return lst.stream().map(string -> string == null ? null : colorizeHex(string)).toList();
+        return lst.stream().map(string -> string == null ? null : colorizeHex(string)).collect(Collectors.toList());
     }
 
     /**
@@ -155,9 +156,9 @@ public class ColorUtil {
         StringBuilder sb = new StringBuilder();
         while (matcher.find()) {
             String colorCode = matcher.group().replaceAll("§", "");
-            matcher.appendReplacement(sb, "&#" + colorCode.substring(1));
+            matcher.appendReplacement(new StringBuffer(sb), "&#" + colorCode.substring(1));
         }
-        matcher.appendTail(sb);
+        matcher.appendTail(new StringBuffer(sb));
         return sb.toString();
     }
 
@@ -169,6 +170,6 @@ public class ColorUtil {
      * @return A list of reverse-colorized hex strings.
      */
     public static List<String> reverseColorizeHex(List<String> lst) {
-        return lst.stream().map(string -> string == null ? null : reverseColorizeHex(string)).toList();
+        return lst.stream().map(string -> string == null ? null : reverseColorizeHex(string)).collect(Collectors.toList());
     }
 }

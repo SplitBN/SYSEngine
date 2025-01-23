@@ -11,6 +11,7 @@ import dev.splityosis.sysengine.utils.ColorUtil;
 import org.bukkit.command.CommandSender;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ActionTypeArgument implements CommandArgument<ActionType> {
 
@@ -46,6 +47,6 @@ public class ActionTypeArgument implements CommandArgument<ActionType> {
                 .map(ActionType::getName)
                 .filter(string -> string.toLowerCase().startsWith(finalInput))
                 .sorted()
-                .toList();
+                .collect(Collectors.toList());
     }
 }

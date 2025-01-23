@@ -141,7 +141,7 @@ public class DefaultConfigManager implements ConfigManager {
 
         if (ymlProfile.getConfiguration() != null) {
             ConfigurationSection section = null;
-            if (path != null && !path.isBlank())
+            if (path != null && !path.isEmpty())
                 section = config.createSection(path);
 
             if (section == null)
@@ -157,7 +157,7 @@ public class DefaultConfigManager implements ConfigManager {
     public void setProfileInSection(ConfigProfile configProfile, ConfigurationSection section, String path) {
         if (path == null) {
             path = "";
-        } else if (!path.isBlank() && !path.endsWith(".")) {
+        } else if (!path.isEmpty() && !path.endsWith(".")) {
             path += ".";
         }
         String finalPath = path.trim();
@@ -239,7 +239,7 @@ public class DefaultConfigManager implements ConfigManager {
             Configuration.Section sectionAnnotation = field.getAnnotation(Configuration.Section.class);
             if (sectionAnnotation != null) {
                 String value = sectionAnnotation.value();
-                currentSectionPath = (value.isBlank()) ? "" :
+                currentSectionPath = (value.isEmpty()) ? "" :
                         value + (value.endsWith(".") ? "" : ".");
             }
 

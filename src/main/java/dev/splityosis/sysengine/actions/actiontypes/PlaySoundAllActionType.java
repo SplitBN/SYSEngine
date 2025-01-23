@@ -3,10 +3,10 @@ package dev.splityosis.sysengine.actions.actiontypes;
 import com.cryptomorin.xseries.XSound;
 import dev.splityosis.sysengine.actions.ActionType;
 import org.bukkit.Bukkit;
-import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -19,7 +19,7 @@ public class PlaySoundAllActionType implements ActionType {
 
     @Override
     public List<String> getAliases() {
-        return List.of("soundAll");
+        return Arrays.asList("soundAll");
     }
 
     @Override
@@ -29,12 +29,12 @@ public class PlaySoundAllActionType implements ActionType {
 
     @Override
     public List<String> getParameters() {
-        return List.of("sound");
+        return Arrays.asList("sound");
     }
 
     @Override
     public List<String> getOptionalParameters() {
-        return List.of("volume", "pitch");
+        return Arrays.asList("volume", "pitch");
     }
 
     @Override

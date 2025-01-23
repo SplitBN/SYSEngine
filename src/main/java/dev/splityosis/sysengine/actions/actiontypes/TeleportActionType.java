@@ -6,6 +6,7 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -18,7 +19,7 @@ public class TeleportActionType implements ActionType {
 
     @Override
     public List<String> getAliases() {
-        return List.of("tp");
+        return Arrays.asList("tp");
     }
 
     @Override
@@ -28,17 +29,18 @@ public class TeleportActionType implements ActionType {
 
     @Override
     public List<String> getParameters() {
-        return List.of("x", "y", "z");
+        return Arrays.asList("x", "y", "z");
     }
 
     @Override
     public List<String> getOptionalParameters() {
-        return List.of("world");
+        return Arrays.asList("world");
     }
 
     @Override
     public void execute(Object target, @NotNull List<String> params, @NotNull Map<String, String> replacements) {
-        if (!(target instanceof Player player)) return;
+        if (!(target instanceof Player)) return;
+        Player player = (Player) target;
 
         params = applyPlaceholders(player, params, replacements);
         double x = Double.parseDouble(params.get(0));

@@ -7,6 +7,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Represents a type of action that can be performed.
@@ -96,7 +97,7 @@ public interface ActionType {
      */
     default List<String> applyPlaceholders(@Nullable Player player, @NotNull List<String> lst, @NotNull Map<String, String> replacements) {
         for (Map.Entry<String, String> entry : replacements.entrySet())
-            lst = lst.stream().map(string -> string.replace(entry.getKey(), entry.getValue())).toList();
+            lst = lst.stream().map(string -> string.replace(entry.getKey(), entry.getValue())).collect(Collectors.toList());
 
         return PapiUtil.parsePlaceholders(player, lst);
     }

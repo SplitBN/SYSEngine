@@ -6,6 +6,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -18,7 +19,7 @@ public class SudoActionType implements ActionType {
 
     @Override
     public List<String> getAliases() {
-        return List.of("runCommand", "forceCommand");
+        return Arrays.asList("runCommand", "forceCommand");
     }
 
     @Override
@@ -28,19 +29,20 @@ public class SudoActionType implements ActionType {
 
     @Override
     public List<String> getParameters() {
-        return List.of("command");
+        return Arrays.asList("command");
     }
 
     @Override
     public List<String> getOptionalParameters() {
-        return List.of();
+        return Arrays.asList();
     }
 
     @Override
     public void execute(Object target, @NotNull List<String> params, @NotNull Map<String, String> replacements) {
-        if (!(target instanceof CommandSender commandSender)) return;
+        if (!(target instanceof CommandSender)) return;
+        CommandSender commandSender = (CommandSender) target;
 
-        params = applyPlaceholders(commandSender instanceof Player player ? player : null, params, replacements);
+        params = applyPlaceholders(commandSender instanceof Player ? (Player) commandSender: null, params, replacements);
         String command = params.get(0);
         Bukkit.dispatchCommand(commandSender, command);
     }

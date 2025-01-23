@@ -77,7 +77,7 @@ public class ConfigProfile {
                     }
                 }
 
-                String absolutePath = currentSectionPath + (!currentSectionPath.isBlank() ? '.' : "") + getFieldPath(fieldPathConverter, declaredField, fieldAnnotation);
+                String absolutePath = currentSectionPath + (!currentSectionPath.isEmpty() ? '.' : "") + getFieldPath(fieldPathConverter, declaredField, fieldAnnotation);
 
                 Configuration.FieldComment fieldCommentAnnotation = declaredField.getAnnotation(Configuration.FieldComment.class);
                 List<String> fieldComments = getSpaceList(fieldSpacing);
@@ -122,8 +122,8 @@ public class ConfigProfile {
             }
         }
 
-        if (object instanceof Configuration configuration)
-            return new ConfigProfile(comments, inlineComments, config, configuration);
+        if (object instanceof Configuration)
+            return new ConfigProfile(comments, inlineComments, config, (Configuration) object);
         return new ConfigProfile(comments, inlineComments, config);
     }
 

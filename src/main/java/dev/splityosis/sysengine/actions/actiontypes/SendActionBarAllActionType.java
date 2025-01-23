@@ -7,6 +7,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -19,7 +20,7 @@ public class SendActionBarAllActionType implements ActionType {
 
     @Override
     public List<String> getAliases() {
-        return List.of("actionBarAll");
+        return Arrays.asList("actionBarAll");
     }
 
     @Override
@@ -29,12 +30,12 @@ public class SendActionBarAllActionType implements ActionType {
 
     @Override
     public List<String> getParameters() {
-        return List.of("message");
+        return Arrays.asList("message");
     }
 
     @Override
     public List<String> getOptionalParameters() {
-        return List.of();
+        return Arrays.asList();
     }
 
     @Override

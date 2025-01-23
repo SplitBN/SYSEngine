@@ -5,6 +5,7 @@ import dev.splityosis.sysengine.utils.ColorUtil;
 import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -17,7 +18,7 @@ public class MessageAllActionType implements ActionType {
 
     @Override
     public List<String> getAliases() {
-        return List.of("messageAll", "broadcast");
+        return Arrays.asList("messageAll", "broadcast");
     }
 
     @Override
@@ -27,12 +28,12 @@ public class MessageAllActionType implements ActionType {
 
     @Override
     public List<String> getParameters() {
-        return List.of("message");
+        return Arrays.asList("message");
     }
 
     @Override
     public List<String> getOptionalParameters() {
-        return List.of();
+        return Arrays.asList();
     }
 
     @Override

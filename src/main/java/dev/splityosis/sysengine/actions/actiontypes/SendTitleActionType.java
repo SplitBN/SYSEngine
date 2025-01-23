@@ -6,6 +6,7 @@ import dev.splityosis.sysengine.utils.ColorUtil;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -18,7 +19,7 @@ public class SendTitleActionType implements ActionType {
 
     @Override
     public List<String> getAliases() {
-        return List.of("title");
+        return Arrays.asList("title");
     }
 
     @Override
@@ -28,17 +29,18 @@ public class SendTitleActionType implements ActionType {
 
     @Override
     public List<String> getParameters() {
-        return List.of("title");
+        return Arrays.asList("title");
     }
 
     @Override
     public List<String> getOptionalParameters() {
-        return List.of("subtitle", "fadeIn", "stay", "fadeOut");
+        return Arrays.asList("subtitle", "fadeIn", "stay", "fadeOut");
     }
 
     @Override
     public void execute(Object target, @NotNull List<String> params, @NotNull Map<String, String> replacements) {
-        if (!(target instanceof Player player)) return;
+        if (!(target instanceof Player)) return;
+        Player player = (Player) target;
 
         params = applyPlaceholders(player, params, replacements);
         String title = ColorUtil.colorize(params.get(0));

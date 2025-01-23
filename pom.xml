@@ -13,7 +13,7 @@
 
 
     <properties>
-        <java.version>16</java.version>
+        <java.version>1.8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -54,15 +54,13 @@
                                     <shadedPattern>dev.splityosis.sysengine.xseries</shadedPattern>
                                 </relocation>
                                 <relocation>
-                                    <pattern>org.bukkit.configuration</pattern>
-                                    <shadedPattern>dev.splityosis.sysengine.configlib.bukkit</shadedPattern>
-                                    <includes>
-                                        <include>dev.splityosis.sysengine</include>
-                                    </includes>
-                                </relocation>
-                                <relocation>
                                     <pattern>de.tr7zw.changeme.nbtapi</pattern>
                                     <shadedPattern>dev.splityosis.sysengine.nbtapi</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.bukkit.configuration</pattern>
+                                    <shadedPattern>dev.splityosis.sysengine.configlib.bukkit</shadedPattern>
+                                    <!-- TODO exclude this relocation from NBTAPI -->
                                 </relocation>
                             </relocations>
                             <minimizeJar>false</minimizeJar>
@@ -138,7 +136,7 @@
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot</artifactId>
-            <version>1.20.4-R0.1-SNAPSHOT</version>
+            <version>1.18.2-R0.1-SNAPSHOT</version>
             <!--            <version>1.8.8-R0.1-SNAPSHOT</version>-->
             <scope>compile</scope>
             <optional>true</optional>

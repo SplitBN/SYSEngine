@@ -1,5 +1,6 @@
 package dev.splityosis.sysengine.configlib.mappers;
 
+import com.google.common.collect.Maps;
 import dev.splityosis.sysengine.actions.ActionDefinition;
 import dev.splityosis.sysengine.actions.Actions;
 import dev.splityosis.sysengine.actions.ActionsParser;
@@ -8,6 +9,7 @@ import dev.splityosis.sysengine.configlib.manager.ConfigManager;
 import org.bukkit.configuration.ConfigurationSection;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -47,7 +49,7 @@ public class ActionsMapper implements AbstractMapper<Actions> {
         List<Map<String, Object>> list = new ArrayList<>();
 
         for (ActionDefinition actionDefinition : instance.getActionDefinitions())
-            list.add(Map.of(actionDefinition.getActionType(), paramsToString(actionDefinition.getParameters())));
+            list.add(Collections.singletonMap(actionDefinition.getActionType(), paramsToString(actionDefinition.getParameters())));
 
         section.set(path, list);
     }

@@ -7,6 +7,7 @@ import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -19,7 +20,7 @@ public class TeleportAllActionType implements ActionType {
 
     @Override
     public List<String> getAliases() {
-        return List.of("tpAll");
+        return Arrays.asList("tpAll");
     }
 
     @Override
@@ -29,12 +30,12 @@ public class TeleportAllActionType implements ActionType {
 
     @Override
     public List<String> getParameters() {
-        return List.of("x", "y", "z");
+        return Arrays.asList("x", "y", "z");
     }
 
     @Override
     public List<String> getOptionalParameters() {
-        return List.of("world");
+        return Arrays.asList("world");
     }
 
     @Override

@@ -7,6 +7,7 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -19,7 +20,7 @@ public class PlaySoundActionType implements ActionType {
 
     @Override
     public List<String> getAliases() {
-        return List.of("sound");
+        return Arrays.asList("sound");
     }
 
     @Override
@@ -29,17 +30,18 @@ public class PlaySoundActionType implements ActionType {
 
     @Override
     public List<String> getParameters() {
-        return List.of("sound");
+        return Arrays.asList("sound");
     }
 
     @Override
     public List<String> getOptionalParameters() {
-        return List.of("volume", "pitch");
+        return Arrays.asList("volume", "pitch");
     }
 
     @Override
     public void execute(Object target, @NotNull List<String> params, @NotNull Map<String, String> replacements) {
-        if (!(target instanceof Player player)) return;
+        if (!(target instanceof Player)) return;
+        Player player = (Player) target;
 
         params = applyPlaceholders(player, params, replacements);
         XSound sound = XSound.matchXSound(params.get(0).toUpperCase()).orElse(null);

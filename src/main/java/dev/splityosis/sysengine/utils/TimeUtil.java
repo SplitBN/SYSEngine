@@ -368,11 +368,11 @@ public class TimeUtil {
         if (day >= 11 && day <= 13) {
             return "th";
         }
-        return switch (day % 10) {
-            case 1 -> "st";
-            case 2 -> "nd";
-            case 3 -> "rd";
-            default -> "th";
-        };
+        switch (day % 10) {
+            case 1: return "st";
+            case 2: return "nd";
+            case 3: return "rd";
+            default: return "th";
+        }
     }
 }

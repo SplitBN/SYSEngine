@@ -215,7 +215,7 @@ public class MessageActionType implements ActionType {
 
     @Override
     public List<String> getAliases() {
-        return List.of("message", "msg");
+        return Arrays.asList("message", "msg");
     }
 
     @Override
@@ -225,12 +225,12 @@ public class MessageActionType implements ActionType {
 
     @Override
     public List<String> getParameters() {
-        return List.of("message");
+        return Arrays.asList("message");
     }
 
     @Override
     public List<String> getOptionalParameters() {
-        return List.of();
+        return Arrays.asList();
     }
 
     @Override

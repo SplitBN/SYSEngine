@@ -14,7 +14,7 @@ public class DefaultFieldPathConverter implements FieldPathConverter {
             StringBuilder finalBuilder = new StringBuilder();
 
             for (String s : split) {
-                if (s.isBlank()) continue;
+                if (s.isEmpty()) continue;
                 finalBuilder.append(convertToPathFormat(s));
                 finalBuilder.append(".");
             }

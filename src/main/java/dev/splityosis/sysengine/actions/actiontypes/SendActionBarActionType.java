@@ -6,6 +6,7 @@ import dev.splityosis.sysengine.utils.ColorUtil;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -18,7 +19,7 @@ public class SendActionBarActionType implements ActionType {
 
     @Override
     public List<String> getAliases() {
-        return List.of("actionBar");
+        return Arrays.asList("actionBar");
     }
 
     @Override
@@ -28,17 +29,18 @@ public class SendActionBarActionType implements ActionType {
 
     @Override
     public List<String> getParameters() {
-        return List.of("message");
+        return Arrays.asList("message");
     }
 
     @Override
     public List<String> getOptionalParameters() {
-        return List.of();
+        return Arrays.asList();
     }
 
     @Override
     public void execute(Object target, @NotNull List<String> params, @NotNull Map<String, String> replacements) {
-        if (!(target instanceof Player player)) return;
+        if (!(target instanceof Player)) return;
+        Player player = (Player) target;
 
         params = applyPlaceholders(player, params, replacements);
         String message = ColorUtil.colorize(params.get(0));

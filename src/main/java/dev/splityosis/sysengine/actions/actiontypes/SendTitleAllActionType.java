@@ -7,6 +7,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -19,7 +20,7 @@ public class SendTitleAllActionType implements ActionType {
 
     @Override
     public List<String> getAliases() {
-        return List.of("titleAll");
+        return Arrays.asList("titleAll");
     }
 
     @Override
@@ -29,12 +30,12 @@ public class SendTitleAllActionType implements ActionType {
 
     @Override
     public List<String> getParameters() {
-        return List.of("title", "subtitle");
+        return Arrays.asList("title", "subtitle");
     }
 
     @Override
     public List<String> getOptionalParameters() {
-        return List.of("fadeIn", "stay", "fadeOut");
+        return Arrays.asList("fadeIn", "stay", "fadeOut");
     }
 
     @Override

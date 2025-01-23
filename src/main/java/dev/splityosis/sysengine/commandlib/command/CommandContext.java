@@ -13,7 +13,7 @@ public class CommandContext extends RawCommandContext {
     public CommandContext(Command command, String label, List<Command> parentCommands, LinkedHashMap<String, String> rawArgs, LinkedHashMap<String, Object> parsedArgs, List<Object> requirementValues) {
         super(command, label, parentCommands, rawArgs);
         this.parsedArgs = parsedArgs;
-        this.parsedArgsArray = parsedArgs.values().toArray(Object[]::new);
+        this.parsedArgsArray = parsedArgs.values().toArray(new Object[0]);
         this.requirementValues = requirementValues;
     }
 
@@ -152,6 +152,6 @@ public class CommandContext extends RawCommandContext {
     @Override
     public void update() {
         super.update();
-        this.parsedArgsArray = parsedArgs.values().toArray(Object[]::new);
+        this.parsedArgsArray = parsedArgs.values().toArray(new Object[0]);
     }
 }

@@ -19,7 +19,7 @@ public class RawCommandContext {
         this.label = label;
         this.parentCommands = parentCommands;
         this.rawArgs = rawArgs;
-        this.rawArgsArray = rawArgs.values().toArray(String[]::new);
+        this.rawArgsArray = rawArgs.values().toArray(new String[0]);
     }
 
     /**
@@ -108,7 +108,7 @@ public class RawCommandContext {
      * This is mainly used internally.
      */
     public void update() {
-        this.rawArgsArray = rawArgs.values().toArray(String[]::new);
+        this.rawArgsArray = rawArgs.values().toArray(new String[0]);
     }
 
     protected String fixArgName(String name) {

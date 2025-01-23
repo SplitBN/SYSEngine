@@ -17,6 +17,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class DefaultCommandManager implements CommandManager {
 
@@ -209,7 +210,7 @@ public class DefaultCommandManager implements CommandManager {
             List<String> filteredKeys = command.getSubCommands().keySet().stream()
                     .filter(key -> key.toLowerCase().startsWith(prefix))
                     .sorted()
-                    .toList();
+                    .collect(Collectors.toList());
 
             finalList.addAll(filteredKeys);
         }

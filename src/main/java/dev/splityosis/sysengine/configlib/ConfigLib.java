@@ -37,7 +37,7 @@ public class ConfigLib {
      *
      * @return A new instance of ConfigManager.
      */
-    @Deprecated(forRemoval = true)
+    @Deprecated
     public static ConfigManager createConfigManager() {
         return new DefaultConfigManager();
     }
