@@ -153,12 +153,12 @@ public class ColorUtil {
     public static String reverseColorizeHex(String str) {
         Matcher matcher = REVERSE_HEX_PATTERN.matcher(str);
 
-        StringBuilder sb = new StringBuilder();
+        StringBuffer sb = new StringBuffer();
         while (matcher.find()) {
             String colorCode = matcher.group().replaceAll("§", "");
             matcher.appendReplacement(new StringBuffer(sb), "&#" + colorCode.substring(1));
         }
-        matcher.appendTail(new StringBuffer(sb));
+        matcher.appendTail(sb);
         return sb.toString();
     }
 

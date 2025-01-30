@@ -37,11 +37,8 @@ public class ItemStackMapper implements ConfigMapper<ItemStack> {
 
     @FieldInlineComment("Base64, UUID or Username (only applies to skulls).")
     @Field public String skin;
-
     @Field public NBTCompound customNbt;
-
     @Field public Color color;
-
     @Field public PotionProperties potionData;
 
     @Override
