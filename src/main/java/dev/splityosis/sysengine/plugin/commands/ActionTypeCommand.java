@@ -7,10 +7,12 @@ import dev.splityosis.sysengine.commandlib.arguments.StringArgument;
 import dev.splityosis.sysengine.commandlib.command.Command;
 import dev.splityosis.sysengine.plugin.commands.arguments.ActionTypeArgument;
 import dev.splityosis.sysengine.utils.ColorUtil;
+import dev.splityosis.sysengine.utils.VersionUtil;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.chat.HoverEvent;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,7 +61,7 @@ public class ActionTypeCommand extends Command {
         int endIndex = Math.min(startIndex + ITEMS_PER_PAGE, totalItems);
 
         for (ActionType actionType : actionTypes.subList(startIndex, endIndex)) {
-            sender.spigot().sendMessage(buildActionTypeComponent(actionType));
+            sendComponent(sender, buildActionTypeComponent(actionType));
         }
     }
 
@@ -118,5 +120,20 @@ public class ActionTypeCommand extends Command {
         }
 
         return new BaseComponent[]{combined};
+    }
+
+    private static void sendComponent(CommandSender sender, BaseComponent[] components) {
+        if (VersionUtil.isServerAtLeast("1.9"))
+            sender.spigot().sendMessage(components);
+        else {
+            if (sender instanceof Player)
+                ((Player) sender).spigot().sendMessage(components);
+            else {
+                StringBuilder text = new StringBuilder();
+                for (BaseComponent component : components)
+                    text.append(component.toPlainText());
+                sender.sendMessage(text.toString());
+            }
+        }
     }
 }
