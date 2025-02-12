@@ -24,17 +24,28 @@ public interface Configuration {
     String PATH_FROM_NAME_SECRET = "GENERATE_PATH_FROM_NAME_5410"; // If you actually need this path then you have problems
 
     /**
-     * Gets called after this config is loaded.
-     * Used to define logic right after this config is loaded/reloaded.
-     * @param config the config that is loaded.
+     * Gets called after this config is loaded and mapped.
+     * Used to define logic immediately after the configuration data has been read and mapped into object fields.
+     *
+     * @param config the loaded configuration section.
      */
     default void onLoad(ConfigurationSection config) {}
 
+
     /**
-     * Gets called before this config is saved.
-     * Used to define logic right before this config is saved.
+     * Gets called right before this config's objects are mapped for saving.
+     * Used to define logic for final modifications to object fields before they are serialized.
+     * This is the last opportunity to adjust values before they are converted and stored.
+     */
+    default void onPreMapping() {}
+
+
+    /**
+     * Gets called after the objects have been mapped and before the config is saved.
+     * Used to define logic right before the final configuration structure is written to a file.
+     *
      * @param file the file that this config will be saved to.
-     * @param config the pre-processed config (already processed the annotated fields).
+     * @param config the processed configuration section containing the mapped values.
      */
     default void onSave(File file, ConfigurationSection config) {}
 
@@ -134,7 +145,7 @@ public interface Configuration {
      * <p>Example:</p>
      * <pre>
      * public class MyConfig {
-     *     @Mapper(mapper = "custom-itemstack-mapper")
+     *     @Mapper("custom-itemstack-mapper")
      *     private ItemStack item;
      * }
      * </pre>
@@ -150,19 +161,4 @@ public interface Configuration {
          */
         String value() default "";
     }
-
-
-    /**
-     * Skips adding this field to the configuration if its value is `null`.
-     *
-     * <p>Example:
-     * <pre>
-     * {@code
-     * @IgnoreIfNull
-     * private String optionalSetting = null;
-     * }
-     * </pre>
-     */
-    @Retention(RetentionPolicy.RUNTIME)
-    @interface IgnoreIfNull {}
 }

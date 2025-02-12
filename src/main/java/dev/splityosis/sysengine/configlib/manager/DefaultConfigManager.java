@@ -137,6 +137,8 @@ public class DefaultConfigManager implements ConfigManager {
         }
 
         FileConfiguration config = (FileConfiguration) readFile(file);
+        if (ymlProfile.getConfiguration() != null)
+            ymlProfile.getConfiguration().onPreMapping();
         setProfileInSection(ymlProfile, config, path);
 
         if (ymlProfile.getConfiguration() != null) {
