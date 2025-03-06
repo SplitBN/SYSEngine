@@ -33,9 +33,9 @@ public class DefaultHelpMenuCommandHelper extends HelpMenuCommandHelper{
             Set<Command> filteredSubCommands = new HashSet<>();
 
             for (Command subCommand : allSubCommands) {
-                if (firstArg.equalsIgnoreCase(subCommand.getName())) {
+                if (firstArg.equalsIgnoreCase(subCommand.getName()))
                     filteredSubCommands.add(subCommand);
-                }
+
                 else {
                     for (String alias : subCommand.getAliases()) {
                         if (firstArg.equalsIgnoreCase(alias)) {
@@ -57,23 +57,21 @@ public class DefaultHelpMenuCommandHelper extends HelpMenuCommandHelper{
             groupedSubCommands.computeIfAbsent(baseName, k -> new ArrayList<>()).add(subCommand);
         }
 
-        for (List<Command> group : groupedSubCommands.values()) {
+        for (List<Command> group : groupedSubCommands.values())
             group.sort(Comparator.comparingInt(cmd -> cmd.getArguments().length + cmd.getOptionalArguments().length));
-        }
 
         String commandPath = getCommandPath(parentCommands, command);
         StringBuilder parentLineBuilder = new StringBuilder("&c* &7").append(commandPath).append(" ");
 
-        for (CommandArgument<?> argument : command.getArguments()) {
+        for (CommandArgument<?> argument : command.getArguments())
             parentLineBuilder.append("<").append(argument.getName()).append("> ");
-        }
 
-        for (CommandArgument<?> argument : command.getOptionalArguments()) {
+        for (CommandArgument<?> argument : command.getOptionalArguments())
             parentLineBuilder.append("[<").append(argument.getName()).append(">] ");
-        }
 
         String parentDescription = command.getDescription().endsWith(".") ? command.getDescription() : command.getDescription() + ".";
-        parentLineBuilder.append("&f- ").append(parentDescription);
+        if (!parentDescription.equals("."))
+            parentLineBuilder.append("&f- ").append(parentDescription);
 
         commandSender.sendMessage(ColorUtil.colorize(parentLineBuilder.toString()));
 
@@ -81,18 +79,15 @@ public class DefaultHelpMenuCommandHelper extends HelpMenuCommandHelper{
             for (Command subCommand : group) {
                 StringBuilder subCommandLine = new StringBuilder("&c* &7").append(commandPath).append(" ").append(subCommand.getName()).append(" ");
 
-                for (CommandArgument<?> argument : subCommand.getArguments()) {
+                for (CommandArgument<?> argument : subCommand.getArguments())
                     subCommandLine.append("<").append(argument.getName()).append("> ");
-                }
 
-                for (CommandArgument<?> argument : subCommand.getOptionalArguments()) {
+                for (CommandArgument<?> argument : subCommand.getOptionalArguments())
                     subCommandLine.append("[<").append(argument.getName()).append(">] ");
-                }
 
                 String subDescription = subCommand.getDescription().endsWith(".") ? subCommand.getDescription() : subCommand.getDescription() + ".";
-                if (!subDescription.equals(".")) {
+                if (!subDescription.equals("."))
                     subCommandLine.append("&f- ").append(subDescription);
-                }
 
                 commandSender.sendMessage(ColorUtil.colorize(subCommandLine.toString()));
             }
