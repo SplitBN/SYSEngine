@@ -1,5 +1,5 @@
 # Minecraft Plugin Engine
-![Version](https://img.shields.io/badge/version-1.1.15-blue.svg)
+![Version](https://img.shields.io/badge/version-1.2.0-blue.svg)
 
 ## Overview
 **SYSEngine** is a flexible and powerful engine designed to help you build Minecraft plugins that are compatible with Minecraft versions 1.8 - 1.21. It offers convenient and fluent utilities for handling commands, configuration management, versioning, and much more, making plugin development easier and more efficient.
@@ -320,6 +320,7 @@ exp-function:
 
 ### Key Points
 * **Multi-domain logic:** You can define as many condition–expression pairs (domains) as needed.
+* **Multiple conditions:** You can chain multiple conditions within a single domain line using && (for example, `level < 10 && hp >= 50`).
 * **Flexible usage:** Use either a Map<String, Double> or the QOL varargs method to pass in variable values.
 * **Exp4J powered:** The engine uses [Exp4j](https://github.com/fasseg/exp4j) under the hood, so all standard math operations, parentheses, and functions are supported.
 * **Maintainability:** By allowing configurability of conditions and expressions externally, you can have full control over your plugin’s balancing without recompiling code.
