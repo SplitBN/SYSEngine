@@ -1,5 +1,5 @@
 # Minecraft Plugin Engine
-![Version](https://img.shields.io/badge/version-1.1.14-blue.svg)
+![Version](https://img.shields.io/badge/version-1.1.15-blue.svg)
 
 ## Overview
 **SYSEngine** is a flexible and powerful engine designed to help you build Minecraft plugins that are compatible with Minecraft versions 1.8 - 1.21. It offers convenient and fluent utilities for handling commands, configuration management, versioning, and much more, making plugin development easier and more efficient.
@@ -8,6 +8,7 @@ This engine includes the following main components:
 
 - [**ConfigLib**](#configlib): Simplified, annotation-based configuration management.
 - [**Actions**](#actions): A flexible system for defining and executing dynamic behaviors using configuration files.
+- [**Functions**](#functions) Enables you to add configurable conditional mathematical expressions that are evaluated based on variables.
 - [**CommandLib**](#commandlib): A command handling system supporting dynamic command registration, subcommands, and tab completion.
 - **Util Classes**: A collection of useful utilities, including [ColorUtil](https://github.com/SplitYoSis/SYSEngine/blob/master/src/main/java/dev/splityosis/sysengine/utils/ColorUtil.java), [TimeUtil](https://github.com/SplitYoSis/SYSEngine/blob/master/src/main/java/dev/splityosis/sysengine/utils/TimeUtil.java), [VersionUtil](https://github.com/SplitYoSis/SYSEngine/blob/master/src/main/java/dev/splityosis/sysengine/utils/VersionUtil.java), [Symbol](https://github.com/SplitYoSis/SYSEngine/blob/master/src/main/java/dev/splityosis/sysengine/utils/Symbol.java), [PapiUtil](https://github.com/SplitYoSis/SYSEngine/blob/master/src/main/java/dev/splityosis/sysengine/utils/PapiUtil.java) and more...
 - **XSeries**: Shaded and relocated library which provides cross-version supported util classes such as `XMaterial`, `XSound`, `XBlock`, `XItemStack`, see more: https://github.com/CryptoMorin/XSeries
@@ -284,6 +285,46 @@ In-game documentation for registered `ActionTypes` can be accessed using:
 ```
 /sysengine actions actiontypes
 ```
+
+## Functions
+Functions allow you to define mathematical expressions that are conditionally evaluated based on variable ranges (“domains”).
+This is very useful for scaling values, leveling curves, or any feature where the output changes depending on variables.
+
+### Simple Usage Example
+**An XP function based on level**
+```java
+// Define a function using FunctionBuilder
+Function xpFunc = Function.builder(
+    "level < 10: 50*level", // Exp function for level < 10 
+    "level < 50: 5*level^2", // Exp function for level < 50
+    "0.04*sqrt(level^3)" // Function for any other level (level >= 50)
+    ).variables("level") // Define the variables
+    .build(); // Build the function
+        
+    double result = xpFunc.evaluate("level", 5); // Get the result for level = 5
+```
+
+**How it looks in a config**
+```yaml
+exp-function:
+  variables-DONT-TOUCH: "level" # Lists the variables this function uses
+  domains: # List of domains
+    - "level < 10: 50*level"
+    - "level < 50: 5*level^2"
+    - "0.04*sqrt(level^3)"
+```
+
+* The function checks each domain (condition line) in order.
+* Once it finds a domain whose conditions are all satisfied, it calculates and returns that expression’s result.
+* If no conditions match, it throws an exception or uses your fallback expression line.
+
+### Key Points
+* **Multi-domain logic:** You can define as many condition–expression pairs (domains) as needed.
+* **Flexible usage:** Use either a Map<String, Double> or the QOL varargs method to pass in variable values.
+* **Exp4J powered:** The engine uses [Exp4j](https://github.com/fasseg/exp4j) under the hood, so all standard math operations, parentheses, and functions are supported.
+* **Maintainability:** By allowing configurability of conditions and expressions externally, you can have full control over your plugin’s balancing without recompiling code.
+
+***Performance Note:*** Each domain expression and condition is pre-parsed and compiled, so runtime evaluations are relatively quick, making these functions suitable for typical use in real-time plugin calculations.
 
 ## CommandLib
 The library's intention is to be intuitive and easy to use while not restricting any functionality you might want to achieve.
