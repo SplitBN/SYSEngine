@@ -13,11 +13,11 @@ import org.bukkit.command.CommandSender;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class ActionTypeArgument implements CommandArgument<ActionType> {
+public class ActionTypesArgument implements CommandArgument<List<ActionType>> {
 
     private String name;
 
-    public ActionTypeArgument(String name) {
+    public ActionTypesArgument(String name) {
         this.name = name;
     }
 
@@ -27,8 +27,8 @@ public class ActionTypeArgument implements CommandArgument<ActionType> {
     }
 
     @Override
-    public ActionType parse(CommandSender sender, String input, Command command, int index, CommandContext context) throws InvalidInputException {
-        ActionType actionType = ActionTypeRegistry.get().getActionType(input);
+    public List<ActionType> parse(CommandSender sender, String input, Command command, int index, CommandContext context) throws InvalidInputException {
+        List<ActionType> actionType = ActionTypeRegistry.get().getActionTypes(input);
         if (actionType == null)
             throw new InvalidInputException("Invalid action type");
         return actionType;

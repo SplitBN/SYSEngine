@@ -44,7 +44,7 @@ public class ActionsExecution {
                     if (wait <= 0)
                         throw new RuntimeException();
 
-                    Bukkit.getScheduler().runTaskLater(SYSEngine.plugin, this::processLine, wait);
+                    Bukkit.getScheduler().runTaskLater(SYSEngine.getPlugin(), this::processLine, wait);
                     return;
                 } catch (Exception e) {
                     Bukkit.getLogger().warning("wait keyword expects {<gameticks>}, a positive integer.");

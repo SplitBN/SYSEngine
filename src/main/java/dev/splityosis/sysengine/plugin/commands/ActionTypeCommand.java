@@ -3,9 +3,8 @@ package dev.splityosis.sysengine.plugin.commands;
 import dev.splityosis.sysengine.actions.ActionType;
 import dev.splityosis.sysengine.actions.ActionTypeRegistry;
 import dev.splityosis.sysengine.commandlib.arguments.IntegerArgument;
-import dev.splityosis.sysengine.commandlib.arguments.StringArgument;
 import dev.splityosis.sysengine.commandlib.command.Command;
-import dev.splityosis.sysengine.plugin.commands.arguments.ActionTypeArgument;
+import dev.splityosis.sysengine.plugin.commands.arguments.ActionTypesArgument;
 import dev.splityosis.sysengine.utils.ColorUtil;
 import dev.splityosis.sysengine.utils.VersionUtil;
 import net.md_5.bungee.api.chat.BaseComponent;
@@ -36,10 +35,10 @@ public class ActionTypeCommand extends Command {
 
                 new Command("search")
                         .description("Search for a specific ActionType by name")
-                        .arguments(new ActionTypeArgument("actiontype"))
+                        .arguments(new ActionTypesArgument("actiontype"))
                         .executes((sender, context) -> {
-                            ActionType actionType = (ActionType) context.getArg("actiontype");
-                            showActionTypeDetails(sender, actionType);
+                            List<ActionType> actionTypes = (List<ActionType>) context.getArg("actiontype");
+                            actionTypes.forEach(actionType -> showActionTypeDetails(sender, actionType));
                         })
         );
     }
