@@ -1,8 +1,8 @@
 package dev.splityosis.sysengine.scheduling;
 
+import dev.splityosis.sysengine.configlib.bukkit.file.FileConfiguration;
+import dev.splityosis.sysengine.configlib.bukkit.file.YamlConfiguration;
 import org.bukkit.Bukkit;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
@@ -23,9 +23,20 @@ public class SimpleScheduler implements Scheduler {
     private File dataFile;
     private Consumer<ScheduledContext> executionHandler;
     private boolean isEnabled = false;
+    private final Plugin plugin;
+    private final long checksPeriod;
+    private BukkitRunnable runnable;
 
     private FileConfiguration config = new YamlConfiguration();
-    private BukkitRunnable runnable;
+
+    public SimpleScheduler(Plugin plugin) {
+        this(plugin, 20*45);
+    }
+
+    public SimpleScheduler(Plugin plugin, long checksPeriod) {
+        this.plugin = plugin;
+        this.checksPeriod = checksPeriod;
+    }
 
     @Override
     public Scheduler setSchedule(@Nullable Schedule schedule) {
@@ -45,8 +56,7 @@ public class SimpleScheduler implements Scheduler {
     }
 
     @Override
-    public Scheduler enable(Plugin plugin) {
-        Objects.requireNonNull(plugin, "plugin cannot be null");
+    public Scheduler enable() {
         isEnabled = true;
 
         if (runnable != null)
@@ -55,13 +65,17 @@ public class SimpleScheduler implements Scheduler {
         runnable = new BukkitRunnable() {
             @Override
             public void run() {
-                check();
+                try {
+                    check();
 
-                if (missedScheduleStrategy != MissedScheduleStrategy.NONE)
-                    Bukkit.getScheduler().runTaskAsynchronously(plugin, SimpleScheduler.this::save);
+                    if (missedScheduleStrategy != MissedScheduleStrategy.NONE)
+                        save();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         };
-        runnable.runTaskTimer(plugin, 0, 20*45);
+        runnable.runTaskTimerAsynchronously(plugin, 0, checksPeriod);
 
         return this;
     }
@@ -69,7 +83,8 @@ public class SimpleScheduler implements Scheduler {
     @Override
     public Scheduler disable() {
         isEnabled = false;
-        runnable.cancel();
+        if (runnable != null)
+            runnable.cancel();
         runnable = null;
         return this;
     }
@@ -95,6 +110,7 @@ public class SimpleScheduler implements Scheduler {
         Objects.requireNonNull(dataFile, "dataFile cannot be null");
         Objects.requireNonNull(strategy, "strategy cannot be null");
         this.dataFile = dataFile;
+        this.config = YamlConfiguration.loadConfiguration(dataFile);
         this.missedScheduleStrategy = strategy;
     }
 
@@ -115,32 +131,37 @@ public class SimpleScheduler implements Scheduler {
     }
 
     public void check() {
-        LocalDateTime checking = normalize(getLastChecked()).plusMinutes(1);
+        if (schedule == null)
+            return;
+        LocalDateTime checking = normalize(getLastChecked());
         LocalDateTime now = normalize(LocalDateTime.now(schedule.getZoneId()));
 
         if (now.equals(checking)) return;
 
+        checking = checking.plusMinutes(1);
+
         // First handle missed schedules if relevant
         if (missedScheduleStrategy != MissedScheduleStrategy.NONE) {
             List<ScheduledContext> matches = new ArrayList<>();
-
             // Loop through all missed times
             while (checking.isBefore(now)) {
                 matches.addAll(checkTasksForTime(checking));
                 checking = checking.plusMinutes(1);
             }
 
-            if (missedScheduleStrategy == MissedScheduleStrategy.CALL_ALL_MISSED)
-                matches.forEach(this::trigger);
+            if (missedScheduleStrategy == MissedScheduleStrategy.CALL_ALL)
+                Bukkit.getScheduler().runTask(plugin, () -> matches.forEach(this::trigger));
+
             else if (!matches.isEmpty()) {
-                        matches.stream()
+                matches.stream()
                         .max(Comparator.comparing(ctx -> LocalDateTime.of(ctx.getDate(), ctx.getTime())))
-                                .ifPresent(this::trigger);
+                        .ifPresent(scheduledContext -> Bukkit.getScheduler().callSyncMethod(plugin, () -> trigger(scheduledContext)));
             }
         }
 
         // Handle now
-        checkTasksForTime(now).forEach(this::trigger);
+        List<ScheduledContext> nowTasks = checkTasksForTime(now);
+        Bukkit.getScheduler().runTask(plugin, () -> nowTasks.forEach(this::trigger));
 
         setLastChecked(now);
     }

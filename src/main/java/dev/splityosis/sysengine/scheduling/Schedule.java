@@ -3,9 +3,9 @@ package dev.splityosis.sysengine.scheduling;
 import org.bukkit.Bukkit;
 
 import java.time.*;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 /**
@@ -17,23 +17,26 @@ public class Schedule {
 
     private ZoneId zoneId;
 
-    private final List<DailyTask> dailyTasks = new ArrayList<>();
-    private final List<WeeklyTask> weeklyTasks = new ArrayList<>();
-    private final List<MonthlyTask> monthlyTasks = new ArrayList<>();
-    private final List<DateTask> dateTasks = new ArrayList<>();
+    private final List<DailyTask> dailyTasks = new CopyOnWriteArrayList<>();
+    private final List<WeeklyTask> weeklyTasks = new CopyOnWriteArrayList<>();
+    private final List<MonthlyTask> monthlyTasks = new CopyOnWriteArrayList<>();
+    private final List<DateTask> dateTasks = new CopyOnWriteArrayList<>();
 
     public Schedule(ZoneId zoneId) {
         this.zoneId = zoneId;
     }
 
-    public Schedule() {
-        this(ZoneId.of("UTC"));
-    }
-
+    /**
+     * @return The time zone used for this schedule.
+     */
     public ZoneId getZoneId() {
         return zoneId;
     }
 
+    /**
+     * Sets the time zone for this schedule.
+     * @param zoneId The time zone to set.
+     */
     public void setZoneId(ZoneId zoneId) {
         this.zoneId = zoneId;
     }
@@ -54,24 +57,63 @@ public class Schedule {
         return dateTasks;
     }
 
-    public void addDaily(String data, LocalTime... times) {
+    /**
+     * Adds a daily task at specified times.
+     * @param data Task data.
+     * @param times Times to trigger each day.
+     * @return This schedule.
+     */
+    public Schedule addDaily(String data, LocalTime... times) {
         dailyTasks.add(new DailyTask(data, Arrays.stream(times).map(Schedule::normalize).collect(Collectors.toList())));
+        return this;
     }
 
-    public void addWeekly(String data, DayOfWeek dayOfWeek, LocalTime... times) {
+    /**
+     * Adds a weekly task on a specific day and times.
+     * @param data Task data.
+     * @param dayOfWeek Day of the week to trigger.
+     * @param times Times to trigger on that day.
+     * @return This schedule.
+     */
+    public Schedule addWeekly(String data, DayOfWeek dayOfWeek, LocalTime... times) {
         weeklyTasks.add(new WeeklyTask(data, dayOfWeek, Arrays.stream(times).map(Schedule::normalize).collect(Collectors.toList())));
+        return this;
     }
 
-    public void addMonthly(String data, int dayOfMonth, LocalTime... times) {
+    /**
+     * Adds a monthly task on a specific day and times.
+     * @param data Task data.
+     * @param dayOfMonth Day of the month to trigger.
+     * @param times Times to trigger on that day.
+     * @return This schedule.
+     */
+    public Schedule addMonthly(String data, int dayOfMonth, LocalTime... times) {
         monthlyTasks.add(new MonthlyTask(data, dayOfMonth, Arrays.stream(times).map(Schedule::normalize).collect(Collectors.toList())));
+        return this;
     }
 
-    public void addDate(String data, LocalDate date, LocalTime... times) {
+    /**
+     * Adds a date-specific task at specified times.
+     * @param data Task data.
+     * @param date The date to trigger.
+     * @param times Times to trigger on that date.
+     * @return This schedule.
+     */
+    public Schedule addDate(String data, LocalDate date, LocalTime... times) {
         dateTasks.add(new DateTask(data, date, Arrays.stream(times).map(Schedule::normalize).collect(Collectors.toList())));
+        return this;
     }
 
-    public void merge(Schedule other) {
-        if (other == null) return;
+    public Schedule clear() {
+        dailyTasks.clear();
+        weeklyTasks.clear();
+        monthlyTasks.clear();
+        dateTasks.clear();
+        return this;
+    }
+
+    public Schedule merge(Schedule other) {
+        if (other == null) return this;
 
         if (!this.zoneId.equals(other.zoneId))
             Bukkit.getLogger().warning("Warning: Merging schedules with different time zones (" + this.zoneId + " vs " + other.zoneId + ")");
@@ -80,6 +122,7 @@ public class Schedule {
         this.weeklyTasks.addAll(other.getWeeklyTasks());
         this.monthlyTasks.addAll(other.getMonthlyTasks());
         this.dateTasks.addAll(other.getDateTasks());
+        return this;
     }
 
     private static LocalTime normalize(LocalTime time) {
