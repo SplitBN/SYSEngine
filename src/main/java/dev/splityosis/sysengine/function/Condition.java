@@ -13,7 +13,7 @@ import java.util.regex.Pattern;
  */
 public class Condition {
 
-    private static final Pattern OPERATOR_PATTERN = Pattern.compile("([<>]=?|==)");
+    private static final Pattern OPERATOR_PATTERN = Pattern.compile("([<>]=?|==|!=)");
 
     private final String variableName;
     private final ConditionOperator conditionOperator;

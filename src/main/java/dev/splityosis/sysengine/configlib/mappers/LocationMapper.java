@@ -6,6 +6,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import dev.splityosis.sysengine.configlib.bukkit.ConfigurationSection;
 
+import java.text.DecimalFormat;
+
 public class LocationMapper implements AbstractMapper<Location> {
 
     @Override
@@ -39,17 +41,24 @@ public class LocationMapper implements AbstractMapper<Location> {
             return;
         }
 
-        String locString = String.format(
-                "%s %f %f %f %f %f",
-                instance.getWorld().getName(),
-                instance.getX(),
-                instance.getY(),
-                instance.getZ(),
-                instance.getYaw(),
-                instance.getPitch()
-        );
+        String worldName = instance.getWorld().getName();
+        String x         = formatNumber(instance.getX());
+        String y         = formatNumber(instance.getY());
+        String z         = formatNumber(instance.getZ());
+        String yaw       = formatNumber(instance.getYaw());
+        String pitch     = formatNumber(instance.getPitch());
 
+        String locString = String.join(" ", worldName, x, y, z, yaw, pitch);
         section.set(path, locString);
+    }
+
+
+    public static String formatNumber(double d) {
+        DecimalFormat decimalFormat = new DecimalFormat("0.##");
+        if (d == Math.floor(d))
+            return String.valueOf((int) d);
+        else
+            return decimalFormat.format(d);
     }
 
 }

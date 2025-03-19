@@ -11,7 +11,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public final class SYSEngine extends JavaPlugin {
 
-    public static SYSEngine plugin;
+    private static SYSEngine plugin;
     private static boolean isInitialized = false;
 
     private CommandManager commandManager;
@@ -55,4 +55,7 @@ public final class SYSEngine extends JavaPlugin {
         ActionTypeRegistry.initialize();
     }
 
+    public static SYSEngine getPlugin() {
+        return plugin;
+    }
 }

@@ -33,6 +33,13 @@ public enum ConditionOperator {
         public boolean compare(double left, double right) {
             return Double.compare(left, right) == 0;
         }
+    },
+
+    NOT_EQUAL("!=") {
+        @Override
+        public boolean compare(double left, double right) {
+            return Double.compare(left, right) != 0;
+        }
     };
 
     private final String symbol;

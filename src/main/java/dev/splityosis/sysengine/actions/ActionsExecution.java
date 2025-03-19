@@ -55,18 +55,14 @@ public class ActionsExecution {
         }
 
         // Handle rest
-        ActionType actionType = actionTypeRegistry.getActionType(actionDefinition.getActionType().toLowerCase());
-        if (actionType == null)
-            Bukkit.getLogger().warning("Invalid action type for " + actionDefinition.getActionType());
+        List<ActionType> actionTypes = actionTypeRegistry.getActionTypes(actionDefinition.getActionType().toLowerCase());
+        if (actionTypes == null || actionTypes.isEmpty())
+            Bukkit.getLogger().warning("Action type with identifier '" + actionDefinition.getActionType() + "' does exist");
         else {
-            List<String> parameters = actionType.getParameters();
-            List<String> optionalParameters = actionType.getOptionalParameters();
-            int min = parameters == null ? 0 : parameters.size();
-            int max = min + (optionalParameters == null ? 0 : optionalParameters.size());
-
-            if (params.size() < min || params.size() > max)
-                Bukkit.getLogger().warning("Invalid number of parameters for ActionType '" + actionDefinition.getActionType() + "', Expected: "+generateUsage(actionType, parameters, optionalParameters));
-
+            ActionType actionType = actionTypeRegistry.getActionType(actionDefinition.getActionType().toLowerCase(), params.size());
+            if (actionType == null) {
+                Bukkit.getLogger().warning("Invalid number of parameters for ActionType '" + actionDefinition.getActionType() + "', Expected: " + generateUsages(actionTypes));
+            }
             else {
                 try {
                     actionType.execute(target, params, replacements);
@@ -80,7 +76,17 @@ public class ActionsExecution {
         processLine();
     }
 
-    private String generateUsage(ActionType actionType, List<String> parameters, List<String> optionalParameters) {
+    private String generateUsages(List<ActionType> actionTypes) {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (ActionType actionType : actionTypes)
+            stringBuilder.append(generateUsage(actionType)).append("OR ");
+
+        return stringBuilder.substring(0, stringBuilder.length() - 3);
+    }
+
+    private String generateUsage(ActionType actionType) {
+        List<String> parameters = actionType.getParameters();
+        List<String> optionalParameters = actionType.getOptionalParameters();
         StringBuilder stringBuilder = new StringBuilder(actionType.getName() + ": \"");
         if (parameters != null)
             parameters.forEach(string -> stringBuilder.append("{<").append(string).append(">} "));

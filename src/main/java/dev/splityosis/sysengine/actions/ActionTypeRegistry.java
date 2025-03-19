@@ -12,7 +12,9 @@ import java.util.*;
 public class ActionTypeRegistry {
 
     private static ActionTypeRegistry instance;
-    private final Map<String, ActionType> actionTypes = new HashMap<>();
+
+    private final Map<String, Map<Integer, ActionType>> actionTypesByNameAndParamCount = new HashMap<>();
+
     private final Set<ActionType> actionTypeSet = new HashSet<>();
 
     // Private constructor to prevent instantiation
@@ -38,14 +40,18 @@ public class ActionTypeRegistry {
     public void registerActionType(ActionType actionType) {
         Objects.requireNonNull(actionType, "ActionType cannot be null.");
 
+        int requiredCount = actionType.getParameters().size();
+        int maxCount = requiredCount + actionType.getOptionalParameters().size();
+
         String primaryName = actionType.getName().toLowerCase();
-        actionTypes.put(primaryName, actionType);
-        actionTypeSet.add(actionType);
+        registerByParamCounts(primaryName, actionType, requiredCount, maxCount);
 
         for (String alias : actionType.getAliases()) {
             String lowerAlias = alias.toLowerCase();
-            actionTypes.put(lowerAlias, actionType);
+            registerByParamCounts(lowerAlias, actionType, requiredCount, maxCount);
         }
+
+        actionTypeSet.add(actionType);
     }
 
     /**
@@ -61,20 +67,45 @@ public class ActionTypeRegistry {
     }
 
     /**
-     * Retrieves an ActionType by its name or alias.
+     * Retrieves an ActionType by its name or alias and the specified parameter count.
      *
-     * @param name The name or alias of the ActionType.
+     * @param name       The name or alias of the ActionType.
+     * @param paramCount The number of parameters to match.
      * @return The corresponding ActionType instance, or {@code null} if not found.
      */
-    public ActionType getActionType(String name) {
-        if (name == null) {
+    public ActionType getActionType(String name, int paramCount) {
+        if (name == null)
+            return null;
+
+        Map<Integer, ActionType> byParamCount = actionTypesByNameAndParamCount.get(name.toLowerCase());
+        if (byParamCount == null) {
             return null;
         }
-        return actionTypes.get(name.toLowerCase());
+        return byParamCount.get(paramCount);
     }
 
     /**
-     * Checks if an ActionType with the given name or alias is registered.
+     * Retrieves a list of all ActionType instances that are registered under a given name or alias,
+     * ignoring parameter count.
+     *
+     * @param name The name or alias of the ActionType.
+     * @return A list of matching ActionTypes, or an empty list if none are found.
+     */
+    public List<ActionType> getActionTypes(String name) {
+        if (name == null)
+            return Collections.emptyList();
+
+        Map<Integer, ActionType> byParamCount = actionTypesByNameAndParamCount.get(name.toLowerCase());
+        if (byParamCount == null) {
+            return Collections.emptyList();
+        }
+
+        return new ArrayList<>(byParamCount.values());
+    }
+
+    /**
+     * Checks if an ActionType with the given name or alias is registered
+     * for any parameter count.
      *
      * @param name The name or alias to check.
      * @return {@code true} if registered, {@code false} otherwise.
@@ -83,7 +114,7 @@ public class ActionTypeRegistry {
         if (name == null) {
             return false;
         }
-        return actionTypes.containsKey(name.toLowerCase());
+        return actionTypesByNameAndParamCount.containsKey(name.toLowerCase());
     }
 
     /**
@@ -104,6 +135,7 @@ public class ActionTypeRegistry {
         instance = new ActionTypeRegistry();
         instance.registerActionTypes(
                 new MessageActionType(),
+                new MessagePlayerActionType(),
                 new ConsoleCommandActionType(),
                 new SudoActionType(),
                 new SendActionBarActionType(),
@@ -114,7 +146,19 @@ public class ActionTypeRegistry {
                 new SendTitleActionType(),
                 new SendTitleAllActionType(),
                 new SendActionBarAllActionType()
-
         );
+    }
+
+    /**
+     * Registers an ActionType under the given identifier for all applicable parameter counts.
+     */
+    private void registerByParamCounts(String identifier, ActionType actionType, int minCount, int maxCount) {
+        Map<Integer, ActionType> map = actionTypesByNameAndParamCount
+                .computeIfAbsent(identifier, k -> new HashMap<>());
+
+        // For all possible param counts the action can handle (min -> max)
+        for (int count = minCount; count <= maxCount; count++) {
+            map.put(count, actionType);
+        }
     }
 }

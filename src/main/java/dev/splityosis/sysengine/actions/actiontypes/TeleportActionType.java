@@ -7,6 +7,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -29,12 +30,12 @@ public class TeleportActionType implements ActionType {
 
     @Override
     public List<String> getParameters() {
-        return Arrays.asList("x", "y", "z");
+        return Arrays.asList("world", "x", "y", "z");
     }
 
     @Override
     public List<String> getOptionalParameters() {
-        return Arrays.asList("world");
+        return Arrays.asList("yaw", "pitch");
     }
 
     @Override
@@ -43,12 +44,15 @@ public class TeleportActionType implements ActionType {
         Player player = (Player) target;
 
         params = applyPlaceholders(player, params, replacements);
-        double x = Double.parseDouble(params.get(0));
-        double y = Double.parseDouble(params.get(1));
-        double z = Double.parseDouble(params.get(2));
-        String worldName = params.size() > 3 ? params.get(3) : player.getWorld().getName();
+        double x = Double.parseDouble(params.get(1));
+        double y = Double.parseDouble(params.get(2));
+        double z = Double.parseDouble(params.get(3));
+        String worldName = params.get(0);
 
-        Location location = new Location(Bukkit.getWorld(worldName), x, y, z);
+        float yaw = params.size() > 4 ? Float.parseFloat(params.get(4)) : 0;
+        float pitch = params.size() > 5 ? Float.parseFloat(params.get(5)) : 0;
+
+        Location location = new Location(Bukkit.getWorld(worldName), x, y, z, yaw, pitch);
         player.teleport(location);
     }
 }
