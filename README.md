@@ -18,10 +18,6 @@ This engine includes the following main components:
 
 To use the engine, include the following dependencies based on your build system.
 
-## Installation
-
-To use the engine, include the following dependencies based on your build system.
-
 ### Maven Dependency
 Add the following repository and dependency to your `pom.xml` file:
 
