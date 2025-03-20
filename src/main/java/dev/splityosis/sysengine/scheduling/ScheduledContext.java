@@ -41,4 +41,15 @@ public class ScheduledContext {
     public DayOfWeek getDayOfWeek() {
         return dayOfWeek;
     }
+
+    @Override
+    public String toString() {
+        return "ScheduledContext{" +
+                "taskType=" + taskType +
+                ", data='" + data + '\'' +
+                ", date=" + date +
+                ", time=" + time +
+                ", dayOfWeek=" + dayOfWeek +
+                '}';
+    }
 }

@@ -22,6 +22,10 @@ public class Schedule {
     private final List<MonthlyTask> monthlyTasks = new CopyOnWriteArrayList<>();
     private final List<DateTask> dateTasks = new CopyOnWriteArrayList<>();
 
+    public Schedule() {
+        this.zoneId = ZoneId.systemDefault();
+    }
+
     public Schedule(ZoneId zoneId) {
         this.zoneId = zoneId;
     }

@@ -118,7 +118,7 @@
 
         <dependency>
             <groupId>org.spigotmc</groupId>
-            <artifactId>spigot-api</artifactId>
+            <artifactId>spigot</artifactId>
             <version>1.18.2-R0.1-SNAPSHOT</version>
             <!--                        <version>1.8.8-R0.1-SNAPSHOT</version>-->
             <scope>provided</scope>
@@ -156,6 +156,7 @@
             <groupId>dev.splityosis</groupId>
             <artifactId>bukkit-configuration-relocated</artifactId>
             <version>1.0.1</version>
+            <scope>compile</scope>
         </dependency>
 
         <dependency>

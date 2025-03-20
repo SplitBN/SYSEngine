@@ -9,11 +9,20 @@ import java.io.IOException;
 
 public class ConfigFile {
 
-    private final File file;
+    private File file;
     private final FileConfiguration config;
+
+    public ConfigFile() {
+        this(null);
+    }
 
     public ConfigFile(File file) {
         this.file = file;
+        if (file == null) {
+            config = new YamlConfiguration();
+            return;
+        }
+
         try {
             if (!file.exists()) {
                 File parentDir = file.getParentFile();
@@ -30,6 +39,7 @@ public class ConfigFile {
     }
 
     public void save(){
+        if (file == null) return;
         try {
             config.save(file);
         } catch (IOException e) {
@@ -47,6 +57,10 @@ public class ConfigFile {
 
     public File getFile() {
         return file;
+    }
+
+    public void setFile(File file) {
+        this.file = file;
     }
 
     public void reload(){

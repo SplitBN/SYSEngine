@@ -1,14 +1,15 @@
 package dev.splityosis.sysengine.scheduling;
 
-import dev.splityosis.sysengine.configlib.bukkit.file.FileConfiguration;
-import dev.splityosis.sysengine.configlib.bukkit.file.YamlConfiguration;
 import org.bukkit.Bukkit;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
+import java.io.IOException;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -76,7 +77,6 @@ public class SimpleScheduler implements Scheduler {
             }
         };
         runnable.runTaskTimerAsynchronously(plugin, 0, checksPeriod);
-
         return this;
     }
 
@@ -110,6 +110,17 @@ public class SimpleScheduler implements Scheduler {
         Objects.requireNonNull(dataFile, "dataFile cannot be null");
         Objects.requireNonNull(strategy, "strategy cannot be null");
         this.dataFile = dataFile;
+        if (!dataFile.exists()) {
+            File parentDir = dataFile.getParentFile();
+            if (parentDir != null && !parentDir.exists())
+                parentDir.mkdirs();
+
+            try {
+                dataFile.createNewFile();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
         this.config = YamlConfiguration.loadConfiguration(dataFile);
         this.missedScheduleStrategy = strategy;
     }
@@ -131,10 +142,13 @@ public class SimpleScheduler implements Scheduler {
     }
 
     public void check() {
-        if (schedule == null)
+        if (schedule == null) {
             return;
+        }
         LocalDateTime checking = normalize(getLastChecked());
         LocalDateTime now = normalize(LocalDateTime.now(schedule.getZoneId()));
+
+
 
         if (now.equals(checking)) return;
 
@@ -150,7 +164,11 @@ public class SimpleScheduler implements Scheduler {
             }
 
             if (missedScheduleStrategy == MissedScheduleStrategy.CALL_ALL)
-                Bukkit.getScheduler().runTask(plugin, () -> matches.forEach(this::trigger));
+                Bukkit.getScheduler().runTask(plugin, () -> {
+                    matches.stream()
+                            .sorted(Comparator.comparing(ctx -> LocalDateTime.of(ctx.getDate(), ctx.getTime())))
+                            .forEach(this::trigger);
+                });
 
             else if (!matches.isEmpty()) {
                 matches.stream()
