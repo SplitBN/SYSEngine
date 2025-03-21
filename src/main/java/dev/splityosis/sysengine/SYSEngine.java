@@ -33,48 +33,6 @@ public final class SYSEngine extends JavaPlugin {
         configManager = ConfigLib.createConfigManager(this);
 
         commandManager.registerCommands(new SYSEngineCommand());
-
-        Test test = new Test();
-        try {
-            configManager.registerConfig(test, new File(getDataFolder(), "test.yml"));
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-
-        Scheduler scheduler =
-                Scheduler.create(this)
-                .executes(scheduledContext -> {
-                    // This block runs when the scheduler is triggered
-
-                    String identifier = scheduledContext.getTaskIdentifier(); // This is null if the schedule doesn't use identifiers
-                });
-
-        File dataFile = new File(getDataFolder(), "scheduler-data.yml");
-        scheduler.enableMissedSchedules(dataFile, MissedScheduleStrategy.CALL_ALL);
-
-        // On load and on reload to set the new schedule
-        scheduler.setSchedule(test.dataSchedule);
-
-        scheduler.enable();
-
-        commandManager.registerCommands(
-                new Command("reloadschedule")
-                        .executes((sender, context) -> {
-                            try {
-                                configManager.reload(test);
-                            } catch (Exception e) {
-                                throw new RuntimeException(e);
-                            }
-                            scheduler.setSchedule(test.dataSchedule);
-                            noDataScheduler.setSchedule(test.noDataSchedule);
-                        }),
-
-                new Command("logschedules")
-                        .executes((sender, context) -> {
-                            Bukkit.broadcastMessage("with data: " + test.dataSchedule);
-                            Bukkit.broadcastMessage("without data: " + test.noDataSchedule);
-                        })
-        );
     }
 
 
