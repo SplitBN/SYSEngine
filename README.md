@@ -338,12 +338,15 @@ You can assign a task **identifier** or use the schedule without identifiers. Th
 ```java
 public class TestConfig implements Configuration {
 
-    @Field public Schedule dataSchedule = new Schedule(ZoneId.systemDefault())
+    // Schedule with task identifiers
+    @Field public Schedule schedule = new Schedule(ZoneId.systemDefault())
             .addDaily("task1", LocalTime.of(12, 0))
             .addWeekly("task2", DayOfWeek.MONDAY, LocalTime.of(15, 0));
 
-    @Field public Schedule noDataSchedule = new Schedule(ZoneId.systemDefault())
-            .addDaily(null, LocalTime.of(10, 0));
+    // Schedule without task identifiers (taskIdentifier = null)
+    @Field public Schedule schedule = new Schedule(ZoneId.systemDefault())
+            .addDaily(null, LocalTime.of(8, 0))
+            .addWeekly(null, DayOfWeek.FRIDAY, LocalTime.of(14, 30));
 }
 ```
 
