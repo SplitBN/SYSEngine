@@ -183,26 +183,26 @@ public class ScheduleMapper implements AbstractMapper<Schedule> {
         Map<String, List<String>> linesByData = new LinkedHashMap<>();
 
         for (Schedule.DailyTaskSignature task : schedule.getDailyTaskSignatures()) {
-            String dataKey = (task.getData() == null ? nullKeyIdentifier : task.getData());
+            String dataKey = (task.getIdentifier() == null ? nullKeyIdentifier : task.getIdentifier());
             String line = "DAILY at " + formatTimes(task.getTimes());
             linesByData.computeIfAbsent(dataKey, k -> new ArrayList<>()).add(line);
         }
 
         for (Schedule.WeeklyTaskSignature task : schedule.getWeeklyTaskSignatures()) {
-            String dataKey = (task.getData() == null ? nullKeyIdentifier : task.getData());
+            String dataKey = (task.getIdentifier() == null ? nullKeyIdentifier : task.getIdentifier());
             String day = task.getDayOfWeek().toString();
             String line = "WEEKLY on " + day + " at " + formatTimes(task.getTimes());
             linesByData.computeIfAbsent(dataKey, k -> new ArrayList<>()).add(line);
         }
 
         for (Schedule.MonthlyTaskSignature task : schedule.getMonthlyTaskSignatures()) {
-            String dataKey = (task.getData() == null ? nullKeyIdentifier : task.getData());
+            String dataKey = (task.getIdentifier() == null ? nullKeyIdentifier : task.getIdentifier());
             String line = "MONTHLY on " + task.getDayOfMonth() + " at " + formatTimes(task.getTimes());
             linesByData.computeIfAbsent(dataKey, k -> new ArrayList<>()).add(line);
         }
 
         for (Schedule.DateTaskSignature task : schedule.getDateTaskSignatures()) {
-            String dataKey = (task.getData() == null ? nullKeyIdentifier : task.getData());
+            String dataKey = (task.getIdentifier() == null ? nullKeyIdentifier : task.getIdentifier());
             LocalDate date = task.getDate();
             String dateStr = date.format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
             String line = "DATE on " + dateStr + " at " + formatTimes(task.getTimes());

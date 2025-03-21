@@ -327,7 +327,7 @@ exp-function:
 
 ## Scheduling
 
-**Schedule** lets developers define tasks that trigger whenever the configurator wants — daily, weekly, monthly, or on specific dates, with flexible timing.  
+**Scheduling** lets developers define tasks that trigger whenever the configurator wants — daily, weekly, monthly, or on specific dates, with flexible timing.  
 You can assign a task **identifier** or use the schedule without identifiers. The system supports **handling missed tasks** (when the server is offline) and flexible time formats (AM/PM, no minutes, etc.).
 
 ---
