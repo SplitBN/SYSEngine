@@ -91,12 +91,12 @@ public interface Scheduler {
      * @param dataFile File to store last-checked time.
      * @param strategy How missed tasks are handled.
      */
-    void enableMissedSchedules(@NotNull File dataFile, @NotNull MissedScheduleStrategy strategy);
+    Scheduler enableMissedSchedules(@NotNull File dataFile, @NotNull MissedScheduleStrategy strategy);
 
     /**
      * Disables missed schedule handling.
      */
-    void disableMissedSchedules();
+    Scheduler disableMissedSchedules();
 
     /**
      * Gets the data file used for tracking.

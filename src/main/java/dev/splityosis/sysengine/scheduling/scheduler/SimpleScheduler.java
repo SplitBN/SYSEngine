@@ -110,7 +110,7 @@ public class SimpleScheduler implements Scheduler {
     }
 
     @Override
-    public void enableMissedSchedules(@NotNull File dataFile, @NotNull MissedScheduleStrategy strategy) {
+    public Scheduler enableMissedSchedules(@NotNull File dataFile, @NotNull MissedScheduleStrategy strategy) {
         Objects.requireNonNull(dataFile, "dataFile cannot be null");
         Objects.requireNonNull(strategy, "strategy cannot be null");
         this.dataFile = dataFile;
@@ -127,12 +127,15 @@ public class SimpleScheduler implements Scheduler {
         }
         this.config = YamlConfiguration.loadConfiguration(dataFile);
         this.missedScheduleStrategy = strategy;
+
+        return this;
     }
 
     @Override
-    public void disableMissedSchedules() {
+    public Scheduler disableMissedSchedules() {
         this.missedScheduleStrategy = MissedScheduleStrategy.NONE;
         this.dataFile = null;
+        return this;
     }
 
     @Override
@@ -217,19 +220,19 @@ public class SimpleScheduler implements Scheduler {
 
         for (Schedule.DailyTaskSignature task : schedule.getDailyTaskSignatures())
             if (task.getTimes().contains(time))
-                matches.add(new ScheduledContext(TaskType.DAILY, task.getData(), date, time, dayOfWeek));
+                matches.add(new ScheduledContext(TaskType.DAILY, task.getIdentifier(), date, time, dayOfWeek));
 
         for (Schedule.WeeklyTaskSignature task : schedule.getWeeklyTaskSignatures())
             if (task.getDayOfWeek() == dayOfWeek && task.getTimes().contains(time))
-                matches.add(new ScheduledContext(TaskType.WEEKLY, task.getData(), date, time, dayOfWeek));
+                matches.add(new ScheduledContext(TaskType.WEEKLY, task.getIdentifier(), date, time, dayOfWeek));
 
         for (Schedule.MonthlyTaskSignature task : schedule.getMonthlyTaskSignatures())
             if (task.getDayOfMonth() == date.getDayOfMonth() && task.getTimes().contains(time))
-                matches.add(new ScheduledContext(TaskType.MONTHLY, task.getData(), date, time, dayOfWeek));
+                matches.add(new ScheduledContext(TaskType.MONTHLY, task.getIdentifier(), date, time, dayOfWeek));
 
         for (Schedule.DateTaskSignature task : schedule.getDateTaskSignatures())
             if (task.getDate().equals(date) && task.getTimes().contains(time))
-                matches.add(new ScheduledContext(TaskType.DATE, task.getData(), date, time, dayOfWeek));
+                matches.add(new ScheduledContext(TaskType.DATE, task.getIdentifier(), date, time, dayOfWeek));
 
         return matches;
     }

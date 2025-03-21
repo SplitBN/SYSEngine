@@ -1,6 +1,7 @@
 package dev.splityosis.sysengine.scheduling.schedule;
 
 import org.bukkit.Bukkit;
+import org.jetbrains.annotations.Nullable;
 
 import java.time.*;
 import java.util.Arrays;
@@ -63,48 +64,48 @@ public class Schedule {
 
     /**
      * Adds a daily task at specified times.
-     * @param data Task data.
+     * @param taskIdentifier Task taskIdentifier.
      * @param times Times to trigger each day.
      * @return This schedule.
      */
-    public Schedule addDaily(String data, LocalTime... times) {
-        dailyTaskSignatures.add(new DailyTaskSignature(data, Arrays.stream(times).map(Schedule::normalize).collect(Collectors.toList())));
+    public Schedule addDaily(@Nullable String taskIdentifier, LocalTime... times) {
+        dailyTaskSignatures.add(new DailyTaskSignature(taskIdentifier, Arrays.stream(times).map(Schedule::normalize).collect(Collectors.toList())));
         return this;
     }
 
     /**
      * Adds a weekly task on a specific day and times.
-     * @param data Task data.
+     * @param taskIdentifier Task taskIdentifier.
      * @param dayOfWeek Day of the week to trigger.
      * @param times Times to trigger on that day.
      * @return This schedule.
      */
-    public Schedule addWeekly(String data, DayOfWeek dayOfWeek, LocalTime... times) {
-        weeklyTaskSignatures.add(new WeeklyTaskSignature(data, dayOfWeek, Arrays.stream(times).map(Schedule::normalize).collect(Collectors.toList())));
+    public Schedule addWeekly(@Nullable String taskIdentifier, DayOfWeek dayOfWeek, LocalTime... times) {
+        weeklyTaskSignatures.add(new WeeklyTaskSignature(taskIdentifier, dayOfWeek, Arrays.stream(times).map(Schedule::normalize).collect(Collectors.toList())));
         return this;
     }
 
     /**
      * Adds a monthly task on a specific day and times.
-     * @param data Task data.
+     * @param taskIdentifier Task taskIdentifier.
      * @param dayOfMonth Day of the month to trigger.
      * @param times Times to trigger on that day.
      * @return This schedule.
      */
-    public Schedule addMonthly(String data, int dayOfMonth, LocalTime... times) {
-        monthlyTaskSignatures.add(new MonthlyTaskSignature(data, dayOfMonth, Arrays.stream(times).map(Schedule::normalize).collect(Collectors.toList())));
+    public Schedule addMonthly(@Nullable String taskIdentifier, int dayOfMonth, LocalTime... times) {
+        monthlyTaskSignatures.add(new MonthlyTaskSignature(taskIdentifier, dayOfMonth, Arrays.stream(times).map(Schedule::normalize).collect(Collectors.toList())));
         return this;
     }
 
     /**
      * Adds a date-specific task at specified times.
-     * @param data Task data.
+     * @param taskIdentifier Task taskIdentifier.
      * @param date The date to trigger.
      * @param times Times to trigger on that date.
      * @return This schedule.
      */
-    public Schedule addDate(String data, LocalDate date, LocalTime... times) {
-        dateTaskSignatures.add(new DateTaskSignature(data, date, Arrays.stream(times).map(Schedule::normalize).collect(Collectors.toList())));
+    public Schedule addDate(@Nullable String taskIdentifier, LocalDate date, LocalTime... times) {
+        dateTaskSignatures.add(new DateTaskSignature(taskIdentifier, date, Arrays.stream(times).map(Schedule::normalize).collect(Collectors.toList())));
         return this;
     }
 
@@ -135,16 +136,16 @@ public class Schedule {
 
     public static class DailyTaskSignature {
 
-        private final String data;
+        private final String identifier;
         private final List<LocalTime> times;
 
-        public DailyTaskSignature(String data, List<LocalTime> times) {
-            this.data = data;
+        public DailyTaskSignature(String identifier, List<LocalTime> times) {
+            this.identifier = identifier;
             this.times = times;
         }
 
-        public String getData() {
-            return data;
+        public String getIdentifier() {
+            return identifier;
         }
 
         public List<LocalTime> getTimes() {
@@ -154,7 +155,7 @@ public class Schedule {
         @Override
         public String toString() {
             return "DailyTaskSignature{" +
-                    "data='" + data + '\'' +
+                    "identifier='" + identifier + '\'' +
                     ", times=" + times +
                     '}';
         }
@@ -163,12 +164,12 @@ public class Schedule {
     public static class WeeklyTaskSignature {
 
         private final DayOfWeek dayOfWeek;
-        private final String data;
+        private final String identifier;
         private final List<LocalTime> times;
 
-        public WeeklyTaskSignature(String data, DayOfWeek dayOfWeek, List<LocalTime> times) {
+        public WeeklyTaskSignature(String identifier, DayOfWeek dayOfWeek, List<LocalTime> times) {
             this.dayOfWeek = dayOfWeek;
-            this.data = data;
+            this.identifier = identifier;
             this.times = times;
         }
 
@@ -176,8 +177,8 @@ public class Schedule {
             return dayOfWeek;
         }
 
-        public String getData() {
-            return data;
+        public String getIdentifier() {
+            return identifier;
         }
 
         public List<LocalTime> getTimes() {
@@ -188,7 +189,7 @@ public class Schedule {
         public String toString() {
             return "WeeklyTaskSignature{" +
                     "dayOfWeek=" + dayOfWeek +
-                    ", data='" + data + '\'' +
+                    ", identifier='" + identifier + '\'' +
                     ", times=" + times +
                     '}';
         }
@@ -197,12 +198,12 @@ public class Schedule {
     public static class MonthlyTaskSignature {
 
         private final int dayOfMonth;
-        private final String data;
+        private final String identifier;
         private final List<LocalTime> times;
 
-        public MonthlyTaskSignature(String data, int dayOfMonth, List<LocalTime> times) {
+        public MonthlyTaskSignature(String identifier, int dayOfMonth, List<LocalTime> times) {
             this.dayOfMonth = dayOfMonth;
-            this.data = data;
+            this.identifier = identifier;
             this.times = times;
         }
 
@@ -210,8 +211,8 @@ public class Schedule {
             return dayOfMonth;
         }
 
-        public String getData() {
-            return data;
+        public String getIdentifier() {
+            return identifier;
         }
 
         public List<LocalTime> getTimes() {
@@ -222,7 +223,7 @@ public class Schedule {
         public String toString() {
             return "MonthlyTaskSignature{" +
                     "times=" + times +
-                    ", data='" + data + '\'' +
+                    ", identifier='" + identifier + '\'' +
                     ", dayOfMonth=" + dayOfMonth +
                     '}';
         }
@@ -231,12 +232,12 @@ public class Schedule {
     public static class DateTaskSignature {
 
         private final LocalDate date;
-        private final String data;
+        private final String identifier;
         private final List<LocalTime> times;
 
-        public DateTaskSignature(String data, LocalDate date, List<LocalTime> times) {
+        public DateTaskSignature(String identifier, LocalDate date, List<LocalTime> times) {
             this.date = date;
-            this.data = data;
+            this.identifier = identifier;
             this.times = times;
         }
 
@@ -244,8 +245,8 @@ public class Schedule {
             return date;
         }
 
-        public String getData() {
-            return data;
+        public String getIdentifier() {
+            return identifier;
         }
 
         public List<LocalTime> getTimes() {
@@ -256,7 +257,7 @@ public class Schedule {
         public String toString() {
             return "DateTaskSignature{" +
                     "date=" + date +
-                    ", data='" + data + '\'' +
+                    ", identifier='" + identifier + '\'' +
                     ", times=" + times +
                     '}';
         }

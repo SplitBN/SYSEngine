@@ -9,14 +9,14 @@ import java.time.LocalTime;
  */
 public class ScheduledContext {
     private final TaskType taskType;
-    private final String data;
+    private final String taskIdentifier;
     private final LocalDate date;
     private final LocalTime time;
     private final DayOfWeek dayOfWeek;
 
-    public ScheduledContext(TaskType taskType, String data, LocalDate date, LocalTime time, DayOfWeek dayOfWeek) {
+    public ScheduledContext(TaskType taskType, String taskIdentifier, LocalDate date, LocalTime time, DayOfWeek dayOfWeek) {
         this.taskType = taskType;
-        this.data = data;
+        this.taskIdentifier = taskIdentifier;
         this.date = date;
         this.time = time;
         this.dayOfWeek = dayOfWeek;
@@ -26,8 +26,8 @@ public class ScheduledContext {
         return taskType;
     }
 
-    public String getData() {
-        return data;
+    public String getTaskIdentifier() {
+        return taskIdentifier;
     }
 
     public LocalDate getDate() {
@@ -46,7 +46,7 @@ public class ScheduledContext {
     public String toString() {
         return "ScheduledContext{" +
                 "taskType=" + taskType +
-                ", data='" + data + '\'' +
+                ", taskIdentifier='" + taskIdentifier + '\'' +
                 ", date=" + date +
                 ", time=" + time +
                 ", dayOfWeek=" + dayOfWeek +

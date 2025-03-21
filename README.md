@@ -7,8 +7,9 @@
 This engine includes the following main components:
 
 - [**ConfigLib**](#configlib): Simplified, annotation-based configuration management.
-- [**Actions**](#actions): A flexible system for defining and executing dynamic behaviors using configuration files.
-- [**Functions**](#functions) Enables you to add configurable conditional mathematical expressions that are evaluated based on variables.
+    - [**Actions**](#actions): A flexible system for defining and executing dynamic behaviors using configuration files.
+    - [**Functions**](#functions) Enables you to add configurable conditional mathematical expressions that are evaluated based on variables.
+    - [**Scheduling**](#scheduling) Scheduling lets developers define tasks that trigger whenever the configurator wants — daily, weekly, monthly, or on specific dates.
 - [**CommandLib**](#commandlib): A command handling system supporting dynamic command registration, subcommands, and tab completion.
 - **Util Classes**: A collection of useful utilities, including [ColorUtil](https://github.com/SplitYoSis/SYSEngine/blob/master/src/main/java/dev/splityosis/sysengine/utils/ColorUtil.java), [TimeUtil](https://github.com/SplitYoSis/SYSEngine/blob/master/src/main/java/dev/splityosis/sysengine/utils/TimeUtil.java), [VersionUtil](https://github.com/SplitYoSis/SYSEngine/blob/master/src/main/java/dev/splityosis/sysengine/utils/VersionUtil.java), [Symbol](https://github.com/SplitYoSis/SYSEngine/blob/master/src/main/java/dev/splityosis/sysengine/utils/Symbol.java), [PapiUtil](https://github.com/SplitYoSis/SYSEngine/blob/master/src/main/java/dev/splityosis/sysengine/utils/PapiUtil.java) and more...
 - **XSeries**: Shaded and relocated library which provides cross-version supported util classes such as `XMaterial`, `XSound`, `XBlock`, `XItemStack`, see more: https://github.com/CryptoMorin/XSeries
@@ -322,6 +323,108 @@ exp-function:
 * **Maintainability:** By allowing configurability of conditions and expressions externally, you can have full control over your plugin’s balancing without recompiling code.
 
 ***Performance Note:*** Each domain expression and condition is pre-parsed and compiled, so runtime evaluations are relatively quick, making these functions suitable for typical use in real-time plugin calculations.
+
+
+## Scheduling
+
+**Schedule** lets developers define tasks that trigger whenever the configurator wants — daily, weekly, monthly, or on specific dates, with flexible timing.  
+You can assign a task **identifier** or use the schedule without identifiers. The system supports **handling missed tasks** (when the server is offline) and flexible time formats (AM/PM, no minutes, etc.).
+
+---
+
+### Usage Example (for Developers)
+
+#### 1. Define the Schedule in your config
+```java
+public class TestConfig implements Configuration {
+
+    @Field public Schedule dataSchedule = new Schedule(ZoneId.systemDefault())
+            .addDaily("task1", LocalTime.of(12, 0))
+            .addWeekly("task2", DayOfWeek.MONDAY, LocalTime.of(15, 0));
+
+    @Field public Schedule noDataSchedule = new Schedule(ZoneId.systemDefault())
+            .addDaily(null, LocalTime.of(10, 0));
+}
+```
+
+---
+
+#### 2. Create a Scheduler and define what happens when triggered
+```java
+Scheduler scheduler = Scheduler.create(plugin)
+        .executes(context -> {
+            // This runs when the schedule triggers
+
+            String identifier = context.getTaskIdentifier(); // Null if the schedule doesn’t use identifiers
+
+            // Your logic here (start event, run task, etc.)
+        });
+```
+
+---
+
+#### 3. Set the Schedule in the Scheduler and Enable
+```java
+// Call this on load AND on reload to update the schedule
+scheduler.setSchedule(config.dataSchedule);
+
+scheduler.enable();
+```
+
+---
+
+#### Handling Missed Schedules (optional)
+
+You can enable the scheduler to call tasks that were missed while the server was offline.
+
+```java
+File dataFile = new File(getDataFolder(), "scheduler-data.yml");
+scheduler.enableMissedSchedules(dataFile, MissedScheduleStrategy.CALL_ALL);
+```
+
+**Strategies:**
+
+| Strategy             | Behavior                                               |
+|----------------------|--------------------------------------------------------|
+| CALL_ALL             | Call all missed tasks since the last check.           |
+| CALL_ONLY_LAST       | Call only the latest missed task.                     |
+| NONE                 | Do not call any missed tasks.                         |
+
+---
+
+### Config Format
+
+#### With Task Identifier:
+```yaml
+timezone: "UTC"
+schedule:
+  task1:
+    - "DAILY at 12:00"
+  task2:
+    - "WEEKLY on MONDAY at 15:00"
+```
+
+#### Without Task Identifier:
+```yaml
+timezone: "UTC"
+schedule:
+  - "DAILY at 10:00"
+```
+
+---
+
+#### Valid Formats
+
+| Type    | Example                                      |
+|---------|----------------------------------------------|
+| DAILY   | `DAILY at 06:00, 18:00`                      |
+| WEEKLY  | `WEEKLY on MONDAY at 9AM, 9PM`               |
+| MONTHLY | `MONTHLY on 15 at 12`                        |
+| DATE    | `DATE on 20-03-2025 at 12AM, 3PM`            |
+
+- You can use **“on”**, **“at”**, **AM/PM**, and omit minutes (`9` → `09:00`).
+- Timezone is optional and defaults to **system time** if not specified or if set to "SYSTEM".
+
 
 ## CommandLib
 The library's intention is to be intuitive and easy to use while not restricting any functionality you might want to achieve.
