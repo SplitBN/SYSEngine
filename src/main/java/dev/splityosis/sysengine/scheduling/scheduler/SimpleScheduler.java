@@ -1,5 +1,9 @@
-package dev.splityosis.sysengine.scheduling;
+package dev.splityosis.sysengine.scheduling.scheduler;
 
+import dev.splityosis.sysengine.scheduling.MissedScheduleStrategy;
+import dev.splityosis.sysengine.scheduling.ScheduledContext;
+import dev.splityosis.sysengine.scheduling.TaskType;
+import dev.splityosis.sysengine.scheduling.schedule.Schedule;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -211,19 +215,19 @@ public class SimpleScheduler implements Scheduler {
         LocalTime time = checking.toLocalTime();
         DayOfWeek dayOfWeek = checking.getDayOfWeek();
 
-        for (Schedule.DailyTask task : schedule.getDailyTasks())
+        for (Schedule.DailyTaskSignature task : schedule.getDailyTaskSignatures())
             if (task.getTimes().contains(time))
                 matches.add(new ScheduledContext(TaskType.DAILY, task.getData(), date, time, dayOfWeek));
 
-        for (Schedule.WeeklyTask task : schedule.getWeeklyTasks())
+        for (Schedule.WeeklyTaskSignature task : schedule.getWeeklyTaskSignatures())
             if (task.getDayOfWeek() == dayOfWeek && task.getTimes().contains(time))
                 matches.add(new ScheduledContext(TaskType.WEEKLY, task.getData(), date, time, dayOfWeek));
 
-        for (Schedule.MonthlyTask task : schedule.getMonthlyTasks())
+        for (Schedule.MonthlyTaskSignature task : schedule.getMonthlyTaskSignatures())
             if (task.getDayOfMonth() == date.getDayOfMonth() && task.getTimes().contains(time))
                 matches.add(new ScheduledContext(TaskType.MONTHLY, task.getData(), date, time, dayOfWeek));
 
-        for (Schedule.DateTask task : schedule.getDateTasks())
+        for (Schedule.DateTaskSignature task : schedule.getDateTaskSignatures())
             if (task.getDate().equals(date) && task.getTimes().contains(time))
                 matches.add(new ScheduledContext(TaskType.DATE, task.getData(), date, time, dayOfWeek));
 

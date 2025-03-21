@@ -100,7 +100,9 @@ public class ConfigLib {
                 new NBTCompoundMapper(),
                 new XPotionMapper(),
                 new PotionPropertiesMapper(),
-                new FunctionMapper()
+                new FunctionMapper(),
+                new ZoneIdMapper(),
+                new ScheduleMapper()
         );
 
         if (VersionUtil.isServerAtLeast("1.11"))

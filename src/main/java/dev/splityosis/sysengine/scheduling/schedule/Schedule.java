@@ -1,4 +1,4 @@
-package dev.splityosis.sysengine.scheduling;
+package dev.splityosis.sysengine.scheduling.schedule;
 
 import org.bukkit.Bukkit;
 
@@ -17,10 +17,10 @@ public class Schedule {
 
     private ZoneId zoneId;
 
-    private final List<DailyTask> dailyTasks = new CopyOnWriteArrayList<>();
-    private final List<WeeklyTask> weeklyTasks = new CopyOnWriteArrayList<>();
-    private final List<MonthlyTask> monthlyTasks = new CopyOnWriteArrayList<>();
-    private final List<DateTask> dateTasks = new CopyOnWriteArrayList<>();
+    private final List<DailyTaskSignature> dailyTaskSignatures = new CopyOnWriteArrayList<>();
+    private final List<WeeklyTaskSignature> weeklyTaskSignatures = new CopyOnWriteArrayList<>();
+    private final List<MonthlyTaskSignature> monthlyTaskSignatures = new CopyOnWriteArrayList<>();
+    private final List<DateTaskSignature> dateTaskSignatures = new CopyOnWriteArrayList<>();
 
     public Schedule() {
         this.zoneId = ZoneId.systemDefault();
@@ -45,20 +45,20 @@ public class Schedule {
         this.zoneId = zoneId;
     }
 
-    public List<DailyTask> getDailyTasks() {
-        return dailyTasks;
+    public List<DailyTaskSignature> getDailyTaskSignatures() {
+        return dailyTaskSignatures;
     }
 
-    public List<WeeklyTask> getWeeklyTasks() {
-        return weeklyTasks;
+    public List<WeeklyTaskSignature> getWeeklyTaskSignatures() {
+        return weeklyTaskSignatures;
     }
 
-    public List<MonthlyTask> getMonthlyTasks() {
-        return monthlyTasks;
+    public List<MonthlyTaskSignature> getMonthlyTaskSignatures() {
+        return monthlyTaskSignatures;
     }
 
-    public List<DateTask> getDateTasks() {
-        return dateTasks;
+    public List<DateTaskSignature> getDateTaskSignatures() {
+        return dateTaskSignatures;
     }
 
     /**
@@ -68,7 +68,7 @@ public class Schedule {
      * @return This schedule.
      */
     public Schedule addDaily(String data, LocalTime... times) {
-        dailyTasks.add(new DailyTask(data, Arrays.stream(times).map(Schedule::normalize).collect(Collectors.toList())));
+        dailyTaskSignatures.add(new DailyTaskSignature(data, Arrays.stream(times).map(Schedule::normalize).collect(Collectors.toList())));
         return this;
     }
 
@@ -80,7 +80,7 @@ public class Schedule {
      * @return This schedule.
      */
     public Schedule addWeekly(String data, DayOfWeek dayOfWeek, LocalTime... times) {
-        weeklyTasks.add(new WeeklyTask(data, dayOfWeek, Arrays.stream(times).map(Schedule::normalize).collect(Collectors.toList())));
+        weeklyTaskSignatures.add(new WeeklyTaskSignature(data, dayOfWeek, Arrays.stream(times).map(Schedule::normalize).collect(Collectors.toList())));
         return this;
     }
 
@@ -92,7 +92,7 @@ public class Schedule {
      * @return This schedule.
      */
     public Schedule addMonthly(String data, int dayOfMonth, LocalTime... times) {
-        monthlyTasks.add(new MonthlyTask(data, dayOfMonth, Arrays.stream(times).map(Schedule::normalize).collect(Collectors.toList())));
+        monthlyTaskSignatures.add(new MonthlyTaskSignature(data, dayOfMonth, Arrays.stream(times).map(Schedule::normalize).collect(Collectors.toList())));
         return this;
     }
 
@@ -104,15 +104,15 @@ public class Schedule {
      * @return This schedule.
      */
     public Schedule addDate(String data, LocalDate date, LocalTime... times) {
-        dateTasks.add(new DateTask(data, date, Arrays.stream(times).map(Schedule::normalize).collect(Collectors.toList())));
+        dateTaskSignatures.add(new DateTaskSignature(data, date, Arrays.stream(times).map(Schedule::normalize).collect(Collectors.toList())));
         return this;
     }
 
     public Schedule clear() {
-        dailyTasks.clear();
-        weeklyTasks.clear();
-        monthlyTasks.clear();
-        dateTasks.clear();
+        dailyTaskSignatures.clear();
+        weeklyTaskSignatures.clear();
+        monthlyTaskSignatures.clear();
+        dateTaskSignatures.clear();
         return this;
     }
 
@@ -122,10 +122,10 @@ public class Schedule {
         if (!this.zoneId.equals(other.zoneId))
             Bukkit.getLogger().warning("Warning: Merging schedules with different time zones (" + this.zoneId + " vs " + other.zoneId + ")");
 
-        this.dailyTasks.addAll(other.getDailyTasks());
-        this.weeklyTasks.addAll(other.getWeeklyTasks());
-        this.monthlyTasks.addAll(other.getMonthlyTasks());
-        this.dateTasks.addAll(other.getDateTasks());
+        this.dailyTaskSignatures.addAll(other.getDailyTaskSignatures());
+        this.weeklyTaskSignatures.addAll(other.getWeeklyTaskSignatures());
+        this.monthlyTaskSignatures.addAll(other.getMonthlyTaskSignatures());
+        this.dateTaskSignatures.addAll(other.getDateTaskSignatures());
         return this;
     }
 
@@ -133,12 +133,12 @@ public class Schedule {
         return time.withSecond(0).withNano(0);
     }
 
-    public static class DailyTask {
+    public static class DailyTaskSignature {
 
         private final String data;
         private final List<LocalTime> times;
 
-        public DailyTask(String data, List<LocalTime> times) {
+        public DailyTaskSignature(String data, List<LocalTime> times) {
             this.data = data;
             this.times = times;
         }
@@ -150,15 +150,23 @@ public class Schedule {
         public List<LocalTime> getTimes() {
             return times;
         }
+
+        @Override
+        public String toString() {
+            return "DailyTaskSignature{" +
+                    "data='" + data + '\'' +
+                    ", times=" + times +
+                    '}';
+        }
     }
 
-    public static class WeeklyTask {
+    public static class WeeklyTaskSignature {
 
         private final DayOfWeek dayOfWeek;
         private final String data;
         private final List<LocalTime> times;
 
-        public WeeklyTask(String data, DayOfWeek dayOfWeek, List<LocalTime> times) {
+        public WeeklyTaskSignature(String data, DayOfWeek dayOfWeek, List<LocalTime> times) {
             this.dayOfWeek = dayOfWeek;
             this.data = data;
             this.times = times;
@@ -175,15 +183,24 @@ public class Schedule {
         public List<LocalTime> getTimes() {
             return times;
         }
+
+        @Override
+        public String toString() {
+            return "WeeklyTaskSignature{" +
+                    "dayOfWeek=" + dayOfWeek +
+                    ", data='" + data + '\'' +
+                    ", times=" + times +
+                    '}';
+        }
     }
 
-    public static class MonthlyTask {
+    public static class MonthlyTaskSignature {
 
         private final int dayOfMonth;
         private final String data;
         private final List<LocalTime> times;
 
-        public MonthlyTask(String data, int dayOfMonth, List<LocalTime> times) {
+        public MonthlyTaskSignature(String data, int dayOfMonth, List<LocalTime> times) {
             this.dayOfMonth = dayOfMonth;
             this.data = data;
             this.times = times;
@@ -200,15 +217,24 @@ public class Schedule {
         public List<LocalTime> getTimes() {
             return times;
         }
+
+        @Override
+        public String toString() {
+            return "MonthlyTaskSignature{" +
+                    "times=" + times +
+                    ", data='" + data + '\'' +
+                    ", dayOfMonth=" + dayOfMonth +
+                    '}';
+        }
     }
 
-    public static class DateTask {
+    public static class DateTaskSignature {
 
         private final LocalDate date;
         private final String data;
         private final List<LocalTime> times;
 
-        public DateTask(String data, LocalDate date, List<LocalTime> times) {
+        public DateTaskSignature(String data, LocalDate date, List<LocalTime> times) {
             this.date = date;
             this.data = data;
             this.times = times;
@@ -225,5 +251,25 @@ public class Schedule {
         public List<LocalTime> getTimes() {
             return times;
         }
+
+        @Override
+        public String toString() {
+            return "DateTaskSignature{" +
+                    "date=" + date +
+                    ", data='" + data + '\'' +
+                    ", times=" + times +
+                    '}';
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "Schedule{" +
+                "zoneId=" + zoneId +
+                ", dailyTaskSignatures=" + dailyTaskSignatures +
+                ", weeklyTaskSignatures=" + weeklyTaskSignatures +
+                ", monthlyTaskSignatures=" + monthlyTaskSignatures +
+                ", dateTaskSignatures=" + dateTaskSignatures +
+                '}';
     }
 }
