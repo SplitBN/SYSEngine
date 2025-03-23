@@ -20,6 +20,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.logging.Level;
 
 public class SimpleScheduler implements Scheduler {
 
@@ -56,7 +57,11 @@ public class SimpleScheduler implements Scheduler {
 
     @Override
     public Scheduler trigger(ScheduledContext context) {
-        executionHandler.accept(context);
+        try {
+            executionHandler.accept(context);
+        } catch (Exception e) {
+            plugin.getLogger().log(Level.SEVERE, "Scheduler caught an exception while triggering task (" + context.getTaskIdentifier() +  "): ", e);
+        }
         return this;
     }
 
