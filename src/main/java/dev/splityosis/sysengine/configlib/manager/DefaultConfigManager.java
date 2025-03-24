@@ -214,11 +214,25 @@ public class DefaultConfigManager implements ConfigManager {
 
         // Write block comments
         configProfile.getComments().forEach((commentKey, commentLines) -> {
-            section.setComments(finalPath + commentKey, commentLines);
+            String s = finalPath + commentKey;
+            List<String> comments = section.getComments(s);
+            if (comments == null)
+                comments = new ArrayList<>();
+            else
+                comments = new ArrayList<>(comments);
+            comments.addAll(0, commentLines != null ? commentLines : new ArrayList<>());
+            section.setComments(s, comments);
         });
         // Write inline comments
         configProfile.getInlineComments().forEach((inlineKey, inlineLines) -> {
-            section.setInlineComments(finalPath + inlineKey, inlineLines);
+            String s = finalPath + inlineKey;
+            List<String> inlineComments = section.getInlineComments(s);
+            if (inlineComments == null)
+                inlineComments = new ArrayList<>();
+            else
+                inlineComments = new ArrayList<>(inlineComments);
+            inlineComments.addAll(0, inlineLines != null ? inlineLines  : new ArrayList<>());
+            section.setInlineComments(s, inlineComments);
         });
     }
 

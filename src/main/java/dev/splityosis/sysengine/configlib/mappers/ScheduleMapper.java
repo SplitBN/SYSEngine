@@ -52,15 +52,6 @@ public class ScheduleMapper implements AbstractMapper<Schedule> {
 
     @Override
     public void setInConfig(ConfigManager manager, Schedule schedule, ConfigurationSection section, String path) {
-        section.setComments(path, Arrays.asList(
-                "Schedule format reference:",
-                "https://github.com/SplitBN/SYSEngine?tab=readme-ov-file#config-format",
-                " ",
-                "Supports DAILY, WEEKLY, MONTHLY, and DATE types.",
-                "You can use time formats like 9, 9AM, 09:00, 21:00, etc.",
-                "Timezone is optional (defaults to system time)."
-        ));
-
         ZoneId zoneId = schedule.getZoneId();
         if (zoneId == null)
             zoneId = ZoneId.systemDefault();
@@ -84,6 +75,18 @@ public class ScheduleMapper implements AbstractMapper<Schedule> {
                 section.set(path + ".schedule." + dataKey, lines);
             }
         }
+
+        section.setComments(path + ".timezone", Arrays.asList(
+                "Time zone formats: \"America/New_York\", \"Europe/Berlin\", \"UTC\", or \"+01:00\""
+        ));
+
+        section.setComments(path + ".schedule", Arrays.asList(
+                "Schedule format reference:",
+                "https://github.com/SplitBN/SYSEngine?tab=readme-ov-file#config-format",
+                " ",
+                "Supports DAILY, WEEKLY, MONTHLY, and DATE types.",
+                "You can use time formats like 9, 9AM, 09:00, 21:00, etc."
+        ));
     }
 
     private static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
