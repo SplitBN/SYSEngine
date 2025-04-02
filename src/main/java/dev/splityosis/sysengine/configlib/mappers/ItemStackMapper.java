@@ -127,6 +127,10 @@ public class ItemStackMapper implements ConfigMapper<ItemStack> {
 
     @Override
     public void decompile(ConfigManager manager, ItemStack instance, ConfigurationSection section, String path) {
+        if (instance == null) {
+            section.createSection(path);
+            return;
+        }
         material = XMaterial.matchXMaterial(instance);
         amount = instance.getAmount();
 
@@ -185,6 +189,22 @@ public class ItemStackMapper implements ConfigMapper<ItemStack> {
         } else {
             customNbt = new NBTContainer();
         }
+    }
+
+    @Override
+    public void setInConfig(ConfigManager manager, ItemStack instance, ConfigurationSection section, String path) {
+        if (instance != null)
+            ConfigMapper.super.setInConfig(manager, instance, section, path);
+        else
+            section.createSection(path);
+    }
+
+    @Override
+    public ItemStack getFromConfig(ConfigManager manager, ConfigurationSection section, String path) {
+        ConfigurationSection configSection = section.getConfigurationSection(path);
+        if (configSection == null || configSection.getKeys(false).isEmpty())
+            return null;
+        return ConfigMapper.super.getFromConfig(manager, section, path);
     }
 
     public static class PotionProperties {
