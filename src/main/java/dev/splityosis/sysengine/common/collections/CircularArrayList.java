@@ -2,10 +2,10 @@ package dev.splityosis.sysengine.common.collections;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.concurrent.CopyOnWriteArrayList;
 
-public class CircularArrayList<T> extends CopyOnWriteArrayList<T> {
+public class CircularArrayList<T> extends ArrayList<T> {
 
     private int i = 0;
 
