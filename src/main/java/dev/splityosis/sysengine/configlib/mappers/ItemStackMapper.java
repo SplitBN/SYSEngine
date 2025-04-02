@@ -127,6 +127,10 @@ public class ItemStackMapper implements ConfigMapper<ItemStack> {
 
     @Override
     public void decompile(ConfigManager manager, ItemStack instance, ConfigurationSection section, String path) {
+        if (instance == null) {
+            section.createSection(path);
+            return;
+        }
         material = XMaterial.matchXMaterial(instance);
         amount = instance.getAmount();
 
