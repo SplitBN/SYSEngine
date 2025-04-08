@@ -22,7 +22,7 @@ public class LocationMapper implements AbstractMapper<Location> {
             return null;
         }
 
-        // Parse required components (world, x, y, z)
+        // Parse (world, x, y, z)
         String worldName = parts[0];
         double x = Double.parseDouble(parts[1]);
         double y = Double.parseDouble(parts[2]);
@@ -42,18 +42,18 @@ public class LocationMapper implements AbstractMapper<Location> {
         }
 
         String worldName = instance.getWorld().getName();
-        String x         = formatNumber(instance.getX());
-        String y         = formatNumber(instance.getY());
-        String z         = formatNumber(instance.getZ());
-        String yaw       = formatNumber(instance.getYaw());
-        String pitch     = formatNumber(instance.getPitch());
+        String x = formatNumber(instance.getX());
+        String y = formatNumber(instance.getY());
+        String z = formatNumber(instance.getZ());
+        String yaw = formatNumber(instance.getYaw());
+        String pitch = formatNumber(instance.getPitch());
 
         String locString = String.join(" ", worldName, x, y, z, yaw, pitch);
         section.set(path, locString);
     }
 
 
-    public static String formatNumber(double d) {
+    private static String formatNumber(double d) {
         DecimalFormat decimalFormat = new DecimalFormat("0.##");
         if (d == Math.floor(d))
             return String.valueOf((int) d);

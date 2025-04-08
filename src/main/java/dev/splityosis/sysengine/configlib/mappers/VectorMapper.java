@@ -5,6 +5,8 @@ import dev.splityosis.sysengine.configlib.manager.ConfigManager;
 import org.bukkit.util.Vector;
 import dev.splityosis.sysengine.configlib.bukkit.ConfigurationSection;
 
+import java.text.DecimalFormat;
+
 public class VectorMapper implements AbstractMapper<Vector> {
 
     @Override
@@ -33,7 +35,15 @@ public class VectorMapper implements AbstractMapper<Vector> {
             return;
         }
 
-        String vecString = String.format("%f %f %f", instance.getX(), instance.getY(), instance.getZ());
+        String vecString = String.format(formatNumber(instance.getX()), formatNumber(instance.getY()), formatNumber(instance.getZ()));
         section.set(path, vecString);
+    }
+
+    private static String formatNumber(double d) {
+        DecimalFormat decimalFormat = new DecimalFormat("0.##");
+        if (d == Math.floor(d))
+            return String.valueOf((int) d);
+        else
+            return decimalFormat.format(d);
     }
 }
