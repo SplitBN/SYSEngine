@@ -143,8 +143,11 @@ public class DefaultConfigManager implements ConfigManager {
 
         if (ymlProfile.getConfiguration() != null) {
             ConfigurationSection section = null;
-            if (path != null && !path.isEmpty())
-                section = config.createSection(path);
+            if (path != null && !path.isEmpty()) {
+                section = config.getConfigurationSection(path);
+                if (section == null)
+                    section = config.createSection(path);
+            }
 
             if (section == null)
                 section = config;
