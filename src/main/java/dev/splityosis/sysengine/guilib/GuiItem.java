@@ -1,11 +1,19 @@
 package dev.splityosis.sysengine.guilib;
 
+import dev.splityosis.sysengine.guilib.events.GuiItemClickEvent;
 import org.bukkit.inventory.ItemStack;
 
-public class GuiItem {
+import java.util.function.Consumer;
 
-    public ItemStack getItemStack() {
-        return null;
-    }
+public interface GuiItem {
 
+    ItemStack getItemStack();
+
+    Pane getParentPane();
+
+    GuiItem setItemStack(ItemStack itemStack);
+
+    GuiItem onClick(Consumer<GuiItemClickEvent> onClick);
+
+    GuiItem update();
 }

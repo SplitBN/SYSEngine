@@ -16,13 +16,21 @@ public interface Pane {
 
     boolean isVisible();
 
+    default boolean isAttached() {
+        return getParentPage() != null;
+    }
+
     Pane setVisible(boolean visible);
 
     Pane render();
 
+    Pane render(int slot);
+
     PaneLayout getLayout();
 
     GuiPage getParentPage();
+
+    int getSlot(GuiItem guiItem);
 
     Pane handleClick(InventoryClickEvent event);
 

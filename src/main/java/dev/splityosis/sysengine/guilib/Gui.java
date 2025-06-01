@@ -3,9 +3,6 @@ package dev.splityosis.sysengine.guilib;
 import dev.splityosis.sysengine.guilib.events.GuiCloseEvent;
 import dev.splityosis.sysengine.guilib.events.GuiOpenEvent;
 import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.event.inventory.InventoryOpenEvent;
 
 import java.util.Collection;
 import java.util.List;
@@ -36,10 +33,12 @@ public interface Gui {
 
     Collection<Player> getViewers();
 
-    Gui handleClick(InventoryClickEvent event);
-
     Gui setOnOpen(Consumer<GuiOpenEvent> onOpen);
 
     Gui setOnClose(Consumer<GuiCloseEvent> onClose);
+
+    Consumer<GuiOpenEvent> getOnOpen();
+
+    Consumer<GuiCloseEvent> getOnClose();
 
 }
