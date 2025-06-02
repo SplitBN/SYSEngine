@@ -1,17 +1,15 @@
 package dev.splityosis.sysengine.guilib.events;
 
-import dev.splityosis.sysengine.guilib.Gui;
+import dev.splityosis.sysengine.guilib.components.Gui;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
 
-public class GuiCloseEvent extends Event implements Cancellable {
+public class GuiCloseEvent extends Event {
 
     private static final HandlerList handlers = new HandlerList();
 
-    private boolean cancelled;
     private Gui gui;
     private Player player;
 
@@ -26,16 +24,6 @@ public class GuiCloseEvent extends Event implements Cancellable {
 
     public Player getPlayer() {
         return player;
-    }
-
-    @Override
-    public boolean isCancelled() {
-        return cancelled;
-    }
-
-    @Override
-    public void setCancelled(boolean b) {
-        this.cancelled = b;
     }
 
     @Override

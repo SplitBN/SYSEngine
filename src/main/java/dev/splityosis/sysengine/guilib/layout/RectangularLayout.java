@@ -1,7 +1,6 @@
 package dev.splityosis.sysengine.guilib.layout;
 
 import dev.splityosis.sysengine.guilib.InventoryTypeInfo;
-import dev.splityosis.sysengine.guilib.PaneLayout;
 import dev.splityosis.sysengine.guilib.intenral.AbstractPaneLayout;
 import org.bukkit.event.inventory.InventoryType;
 
@@ -29,8 +28,6 @@ public class RectangularLayout extends AbstractPaneLayout {
     private Map<Integer, Integer> localToRaw = new HashMap<>();
     private Map<Integer, Integer> rawToLocal = new HashMap<>();
 
-    private boolean initialized = false;
-
     /**
      * @param startSlot the raw slot index in the inventory where this region starts
      * @param width number of columns in the region
@@ -43,9 +40,8 @@ public class RectangularLayout extends AbstractPaneLayout {
     }
 
     @Override
-    public PaneLayout initialize(InventoryType type, int size) {
+    public void onInitialize(InventoryType type, int size) {
         this.guiWidth = InventoryTypeInfo.getWidth(type);
-        this.initialized = true;
 
         if (guiWidth < 1)
             throw new IllegalArgumentException("Layout doesn't support InventoryType '"+type.name()+"'");
@@ -72,33 +68,22 @@ public class RectangularLayout extends AbstractPaneLayout {
                 rawToLocal.put(raw, local);
                 local++;
             }
-
-        return this;
     }
 
     @Override
-    public boolean isInitialized() {
-        return initialized;
+    public OptionalInt convertToRawSlot(int localIndex) {
+        Integer rawSlot = localToRaw.get(localIndex);
+        return rawSlot == null ? OptionalInt.empty() : OptionalInt.of(rawSlot);
     }
 
     @Override
-    public OptionalInt toRawSlot(int localIndex) {
-        if (localIndex >= localToRaw.size() || localIndex < 0)
-            return OptionalInt.empty();
-
-        return OptionalInt.of(localToRaw.get(localIndex));
+    public OptionalInt convertToLocalSlot(int rawSlot) {
+        Integer localSlot = rawToLocal.get(rawSlot);
+        return localSlot == null ? OptionalInt.empty() : OptionalInt.of(localSlot);
     }
 
     @Override
-    public OptionalInt toLocalSlot(int rawSlot) {
-        if (rawSlot >= rawToLocal.size() || rawSlot < 0)
-            return OptionalInt.empty();
-
-        return OptionalInt.of(rawToLocal.get(rawSlot));
-    }
-
-    @Override
-    public int getSlotCapacity() {
+    public int getMaxCapacity() {
         return width*height;
     }
 }

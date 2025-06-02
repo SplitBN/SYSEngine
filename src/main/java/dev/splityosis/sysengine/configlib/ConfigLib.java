@@ -78,7 +78,7 @@ public class ConfigLib {
      * Initializes whatever needs to be initialized for ConfigLib.
      * You should never call this, look at {@link SYSEngine#initialize(JavaPlugin)}.
      */
-    public static void initialize(){
+    public static void initialize() {
         if (isInitialized) return;
         isInitialized = true;
 
@@ -102,12 +102,17 @@ public class ConfigLib {
                 new PotionPropertiesMapper(),
                 new FunctionMapper(),
                 new ZoneIdMapper(),
-                new ScheduleMapper()
+                new ScheduleMapper(),
+                new BigIntegerMapper()
         );
 
         if (VersionUtil.isServerAtLeast("1.11"))
             getMapperRegistry().registerMappers(
                     new PotionDataMapper()
             );
+    }
+
+    public static boolean isIsInitialized() {
+        return isInitialized;
     }
 }

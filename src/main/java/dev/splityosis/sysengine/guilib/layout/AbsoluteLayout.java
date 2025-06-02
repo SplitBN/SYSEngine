@@ -1,6 +1,6 @@
 package dev.splityosis.sysengine.guilib.layout;
 
-import dev.splityosis.sysengine.guilib.PaneLayout;
+import dev.splityosis.sysengine.guilib.components.PaneLayout;
 import dev.splityosis.sysengine.guilib.intenral.AbstractPaneLayout;
 import org.bukkit.event.inventory.InventoryType;
 
@@ -12,22 +12,15 @@ import java.util.OptionalInt;
 public class AbsoluteLayout extends AbstractPaneLayout {
 
     private int size;
-    private boolean initialized = false;
 
     @Override
-    public PaneLayout initialize(InventoryType type, int size) {
-        initialized = true;
+    public void onInitialize(InventoryType type, int size) {
         this.size = size;
-        return this;
     }
 
-    @Override
-    public boolean isInitialized() {
-        return initialized;
-    }
 
     @Override
-    public OptionalInt toRawSlot(int localIndex) {
+    public OptionalInt convertToRawSlot(int localIndex) {
         if (localIndex < 0 || localIndex >= size)
             return OptionalInt.empty();
 
@@ -35,7 +28,7 @@ public class AbsoluteLayout extends AbstractPaneLayout {
     }
 
     @Override
-    public OptionalInt toLocalSlot(int rawSlot) {
+    public OptionalInt convertToLocalSlot(int rawSlot) {
         if (rawSlot < 0 || rawSlot >= size)
             return OptionalInt.empty();
 
@@ -43,7 +36,7 @@ public class AbsoluteLayout extends AbstractPaneLayout {
     }
 
     @Override
-    public int getSlotCapacity() {
+    public int getMaxCapacity() {
         return size;
     }
 }

@@ -1,4 +1,4 @@
-package dev.splityosis.sysengine.guilib;
+package dev.splityosis.sysengine.guilib.components;
 
 import org.bukkit.event.inventory.InventoryType;
 
@@ -37,5 +37,5 @@ public interface PaneLayout {
     /**
      * Returns how many local indexes this layout supports.
      */
-    int getSlotCapacity();
+    int getCapacity();
 }

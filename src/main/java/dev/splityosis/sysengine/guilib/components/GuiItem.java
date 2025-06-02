@@ -1,9 +1,8 @@
-package dev.splityosis.sysengine.guilib;
+package dev.splityosis.sysengine.guilib.components;
 
+import dev.splityosis.sysengine.guilib.events.GuiEvent;
 import dev.splityosis.sysengine.guilib.events.GuiItemClickEvent;
 import org.bukkit.inventory.ItemStack;
-
-import java.util.function.Consumer;
 
 public interface GuiItem {
 
@@ -13,7 +12,11 @@ public interface GuiItem {
 
     GuiItem setItemStack(ItemStack itemStack);
 
-    GuiItem onClick(Consumer<GuiItemClickEvent> onClick);
+    GuiItem onClick(GuiEvent<GuiItemClickEvent> onClick);
+
+    GuiEvent<GuiItemClickEvent> getOnClick();
 
     GuiItem update();
+
+    GuiItem clone();
 }

@@ -1,8 +1,9 @@
 package dev.splityosis.sysengine.guilib.intenral;
 
-import dev.splityosis.sysengine.guilib.Gui;
-import dev.splityosis.sysengine.guilib.GuiPage;
+import dev.splityosis.sysengine.guilib.components.Gui;
+import dev.splityosis.sysengine.guilib.components.GuiPage;
 import dev.splityosis.sysengine.guilib.events.GuiCloseEvent;
+import dev.splityosis.sysengine.guilib.events.GuiEvent;
 import dev.splityosis.sysengine.guilib.events.GuiOpenEvent;
 import org.bukkit.entity.Player;
 
@@ -10,17 +11,16 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public abstract class AbstractGui implements Gui {
 
     private int currentPageIndex;
-    private List<GuiPage> pages = new ArrayList<>();
-    private GuiPage currentPage;
+    private List<AbstractGuiPage> pages = new ArrayList<>();
+    private AbstractGuiPage currentPage;
 
-    private Consumer<GuiOpenEvent> onOpen = e->{};
-    private Consumer<GuiCloseEvent> onClose = e->{};
+    private GuiEvent<GuiOpenEvent> onOpen = e->{};
+    private GuiEvent<GuiCloseEvent> onClose = e->{};
 
     @Override
     public int getCurrentPageIndex() {
@@ -63,7 +63,15 @@ public abstract class AbstractGui implements Gui {
 
     @Override
     public Gui addPage(GuiPage page) {
-        pages.add(page);
+        if (! (page instanceof AbstractGuiPage))
+            throw new IllegalArgumentException("page must be an instance of AbstractGuiPage");
+
+        AbstractGuiPage abstractGuiPage = (AbstractGuiPage) page;
+        if (abstractGuiPage.getParentGui() != null)
+            throw new IllegalArgumentException("page already has parent gui");
+
+        abstractGuiPage.setParentGui(this);
+        pages.add(abstractGuiPage);
         if (currentPage == null)
             setCurrentPage(0);
 
@@ -78,8 +86,8 @@ public abstract class AbstractGui implements Gui {
     @Override
     public Gui open(Player player) {
         GuiOpenEvent event = new GuiOpenEvent(this, player);
+        onOpen.call(event);
 
-        onOpen.accept(event);
         if (!event.isCancelled())
             currentPage.open(player);
 
@@ -96,24 +104,24 @@ public abstract class AbstractGui implements Gui {
     }
 
     @Override
-    public Gui setOnOpen(Consumer<GuiOpenEvent> onOpen) {
+    public Gui onOpen(GuiEvent<GuiOpenEvent> onOpen) {
         this.onOpen = onOpen;
         return this;
     }
 
     @Override
-    public Gui setOnClose(Consumer<GuiCloseEvent> onClose) {
+    public Gui onClose(GuiEvent<GuiCloseEvent> onClose) {
         this.onClose = onClose;
         return this;
     }
 
     @Override
-    public Consumer<GuiCloseEvent> getOnClose() {
+    public GuiEvent<GuiCloseEvent> getOnClose() {
         return onClose;
     }
 
     @Override
-    public Consumer<GuiOpenEvent> getOnOpen() {
+    public GuiEvent<GuiOpenEvent> getOnOpen() {
         return onOpen;
     }
 }

@@ -1,6 +1,6 @@
 package dev.splityosis.sysengine.guilib.events;
 
-import dev.splityosis.sysengine.guilib.GuiPage;
+import dev.splityosis.sysengine.guilib.components.GuiPage;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;

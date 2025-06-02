@@ -1,6 +1,7 @@
-package dev.splityosis.sysengine.guilib;
+package dev.splityosis.sysengine.guilib.components;
 
 import dev.splityosis.sysengine.guilib.events.GuiCloseEvent;
+import dev.splityosis.sysengine.guilib.events.GuiEvent;
 import dev.splityosis.sysengine.guilib.events.GuiOpenEvent;
 import org.bukkit.entity.Player;
 
@@ -33,12 +34,12 @@ public interface Gui {
 
     Collection<Player> getViewers();
 
-    Gui setOnOpen(Consumer<GuiOpenEvent> onOpen);
+    Gui onOpen(GuiEvent<GuiOpenEvent> onOpen);
 
-    Gui setOnClose(Consumer<GuiCloseEvent> onClose);
+    Gui onClose(GuiEvent<GuiCloseEvent> onClose);
 
-    Consumer<GuiOpenEvent> getOnOpen();
+    GuiEvent<GuiOpenEvent> getOnOpen();
 
-    Consumer<GuiCloseEvent> getOnClose();
+    GuiEvent<GuiCloseEvent> getOnClose();
 
 }

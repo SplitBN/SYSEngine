@@ -1,4 +1,4 @@
-package dev.splityosis.sysengine.guilib;
+package dev.splityosis.sysengine.guilib.components;
 
 import java.util.HashMap;
 import java.util.Map;

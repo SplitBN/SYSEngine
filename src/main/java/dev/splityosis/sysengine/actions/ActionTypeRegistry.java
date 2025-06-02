@@ -149,6 +149,10 @@ public class ActionTypeRegistry {
         );
     }
 
+    public static boolean isInitialized() {
+        return instance != null;
+    }
+
     /**
      * Registers an ActionType under the given identifier for all applicable parameter counts.
      */

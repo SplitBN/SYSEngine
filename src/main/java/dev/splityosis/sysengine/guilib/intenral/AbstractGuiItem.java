@@ -1,19 +1,18 @@
 package dev.splityosis.sysengine.guilib.intenral;
 
-import dev.splityosis.sysengine.guilib.GuiItem;
-import dev.splityosis.sysengine.guilib.Pane;
+import dev.splityosis.sysengine.guilib.components.GuiItem;
+import dev.splityosis.sysengine.guilib.components.Pane;
+import dev.splityosis.sysengine.guilib.events.GuiEvent;
 import dev.splityosis.sysengine.guilib.events.GuiItemClickEvent;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.function.Consumer;
-
-public abstract class AbstractGuiItem implements GuiItem {
+public abstract class AbstractGuiItem implements GuiItem, Cloneable {
 
     private AbstractPane parentPane;
 
     private ItemStack itemStack = new ItemStack(Material.AIR);
-    private Consumer<GuiItemClickEvent> onClick = e->{};
+    private GuiEvent<GuiItemClickEvent> onClick = e->{};
 
     public AbstractGuiItem(ItemStack itemStack) {
         this.itemStack = itemStack;
@@ -57,8 +56,24 @@ public abstract class AbstractGuiItem implements GuiItem {
     }
 
     @Override
-    public GuiItem onClick(Consumer<GuiItemClickEvent> onClick) {
+    public GuiItem onClick(GuiEvent<GuiItemClickEvent> onClick) {
         this.onClick = onClick;
         return this;
+    }
+
+    @Override
+    public GuiEvent<GuiItemClickEvent> getOnClick() {
+        return onClick;
+    }
+
+    @Override
+    public GuiItem clone() {
+        try {
+            AbstractGuiItem guiItem = (AbstractGuiItem) super.clone();
+            guiItem.setParentPane(null);
+            return guiItem;
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

@@ -1,15 +1,10 @@
 package dev.splityosis.sysengine.guilib.intenral;
 
-import dev.splityosis.sysengine.guilib.GuiItem;
-import dev.splityosis.sysengine.guilib.GuiPage;
-import dev.splityosis.sysengine.guilib.Pane;
-import dev.splityosis.sysengine.guilib.PaneLayout;
-import dev.splityosis.sysengine.guilib.events.PaneClickEvent;
-import dev.splityosis.sysengine.guilib.events.PaneCloseEvent;
-import dev.splityosis.sysengine.guilib.events.PaneOpenEvent;
-import org.bukkit.event.inventory.InventoryClickEvent;
-
-import java.util.function.Consumer;
+import dev.splityosis.sysengine.guilib.components.GuiItem;
+import dev.splityosis.sysengine.guilib.components.GuiPage;
+import dev.splityosis.sysengine.guilib.components.Pane;
+import dev.splityosis.sysengine.guilib.components.PaneLayout;
+import dev.splityosis.sysengine.guilib.events.*;
 
 public abstract class AbstractPane implements Pane {
 
@@ -18,9 +13,10 @@ public abstract class AbstractPane implements Pane {
     private int weight = 0;
     private boolean visible = true;
 
-    private Consumer<PaneClickEvent> onClick =e->{};
-    private Consumer<PaneOpenEvent>  onOpen =e->{};
-    private Consumer<PaneCloseEvent> onClose =e->{};
+    private GuiEvent<PaneClickEvent> onClick =e->{};
+    private GuiEvent<PaneOpenEvent>  onOpen =e->{};
+    private GuiEvent<PaneCloseEvent> onClose = e->{};
+    private GuiEvent<GuiItemPreClickEvent> onItemPreClick = e->{};
 
     public AbstractPane(PaneLayout layout) {
         if (! (layout instanceof AbstractPaneLayout))
@@ -100,30 +96,50 @@ public abstract class AbstractPane implements Pane {
     }
 
     @Override
-    public Pane handleClick(InventoryClickEvent event) {
-        // TODO figure out if this method is even needed, since it needs to know if the item is at the top before calling it, so might as well let page do it
-        return null;
-    }
-
-    @Override
-    public Pane setOnClick(Consumer<PaneClickEvent> onClick) {
+    public Pane onClick(GuiEvent<PaneClickEvent> onClick) {
         this.onClick = onClick;
         return this;
     }
 
     @Override
-    public Pane setOnOpen(Consumer<PaneOpenEvent> onOpen) {
+    public Pane onOpen(GuiEvent<PaneOpenEvent> onOpen) {
         this.onOpen = onOpen;
         return this;
     }
 
     @Override
-    public Pane setOnClose(Consumer<PaneCloseEvent> onClose) {
+    public Pane onClose(GuiEvent<PaneCloseEvent> onClose) {
         this.onClose = onClose;
         return this;
     }
 
-//    protected void validateLocalSlot(int slot) {
+    @Override
+    public Pane setOnItemPreClick(GuiEvent<GuiItemPreClickEvent> onItemClick) {
+        this.onItemPreClick = onItemClick;
+        return this;
+    }
+
+    @Override
+    public GuiEvent<PaneClickEvent> getOnClick() {
+        return onClick;
+    }
+
+    @Override
+    public GuiEvent<PaneCloseEvent> getOnClose() {
+        return onClose;
+    }
+
+    @Override
+    public GuiEvent<PaneOpenEvent> getOnOpen() {
+        return onOpen;
+    }
+
+    @Override
+    public GuiEvent<GuiItemPreClickEvent> getOnItemPreClick() {
+        return onItemPreClick;
+    }
+
+    //    protected void validateLocalSlot(int slot) {
 //        if (slot < 0 || slot >= getLayout().getSlotCapacity())
 //            throw new IllegalArgumentException("Invalid slot " + slot + " out of bounds for layout capacity "+getLayout().getSlotCapacity());
 //    }

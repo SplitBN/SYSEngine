@@ -1,8 +1,8 @@
 package dev.splityosis.sysengine.guilib.pane;
 
-import dev.splityosis.sysengine.guilib.GuiItem;
-import dev.splityosis.sysengine.guilib.GuiPage;
-import dev.splityosis.sysengine.guilib.PaneLayout;
+import dev.splityosis.sysengine.guilib.components.GuiItem;
+import dev.splityosis.sysengine.guilib.components.GuiPage;
+import dev.splityosis.sysengine.guilib.components.PaneLayout;
 import dev.splityosis.sysengine.guilib.intenral.AbstractPane;
 
 import java.util.LinkedHashMap;
@@ -14,12 +14,15 @@ public class StaticPane extends AbstractPane {
 
     public StaticPane(PaneLayout layout) {
         super(layout);
-        items = new LinkedHashMap<>(layout.getSlotCapacity());
+        items = new LinkedHashMap<>();
     }
 
     @Override
     public void onAttach(GuiPage page) {
-
+        // Once layout is initialized reconstruct the map with initial capacity for optimization
+        Map<Integer, GuiItem> temp = items;
+        items = new LinkedHashMap<>(getLayout().getCapacity());
+        items.putAll(temp);
     }
 
     @Override
@@ -80,7 +83,7 @@ public class StaticPane extends AbstractPane {
         if (from > to)
             throw new IllegalArgumentException("from > to");
 
-        if (from < 0 || to >= getLayout().getSlotCapacity())
+        if (from < 0 || to >= getLayout().getCapacity())
             throw new IndexOutOfBoundsException("Slot index out of bounds");
 
         for (int i = from; i <= to; i++) {
@@ -96,7 +99,7 @@ public class StaticPane extends AbstractPane {
      @return The first empty slot or -1 if none empty.
      */
     public int firstEmptySlot() {
-        return firstEmptySlot(0, getLayout().getSlotCapacity() -1);
+        return firstEmptySlot(0, getLayout().getCapacity() -1);
     }
 
 }

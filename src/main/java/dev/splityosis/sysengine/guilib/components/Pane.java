@@ -1,10 +1,8 @@
-package dev.splityosis.sysengine.guilib;
+package dev.splityosis.sysengine.guilib.components;
 
 import dev.splityosis.sysengine.guilib.events.*;
-import org.bukkit.event.inventory.InventoryClickEvent;
 
 import java.util.Map;
-import java.util.function.Consumer;
 
 public interface Pane {
 
@@ -32,12 +30,20 @@ public interface Pane {
 
     int getSlot(GuiItem guiItem);
 
-    Pane handleClick(InventoryClickEvent event);
+    Pane onClick(GuiEvent<PaneClickEvent> onClick);
 
-    Pane setOnClick(Consumer<PaneClickEvent> onClick);
+    Pane onOpen(GuiEvent<PaneOpenEvent> onOpen);
 
-    Pane setOnOpen(Consumer<PaneOpenEvent> onOpen);
+    Pane onClose(GuiEvent<PaneCloseEvent> onClose);
 
-    Pane setOnClose(Consumer<PaneCloseEvent> onClose);
+    Pane setOnItemPreClick(GuiEvent<GuiItemPreClickEvent> onItemClick);
+
+    GuiEvent<PaneClickEvent> getOnClick();
+
+    GuiEvent<PaneOpenEvent> getOnOpen();
+
+    GuiEvent<PaneCloseEvent> getOnClose();
+
+    GuiEvent<GuiItemPreClickEvent> getOnItemPreClick();
 
 }

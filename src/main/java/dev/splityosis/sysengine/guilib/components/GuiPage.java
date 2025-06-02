@@ -1,5 +1,7 @@
-package dev.splityosis.sysengine.guilib;
+package dev.splityosis.sysengine.guilib.components;
 
+import dev.splityosis.sysengine.guilib.events.GuiEvent;
+import dev.splityosis.sysengine.guilib.events.GuiPageClickEvent;
 import dev.splityosis.sysengine.guilib.events.GuiPageCloseEvent;
 import dev.splityosis.sysengine.guilib.events.GuiPageOpenEvent;
 import org.bukkit.entity.Player;
@@ -51,16 +53,18 @@ public interface GuiPage {
 
     List<Player> getViewers();
 
-    GuiPage open(Player player);
-
     GuiPage handleClick(InventoryClickEvent event);
 
-    GuiPage setOnOpen(Consumer<GuiPageOpenEvent> onOpen);
+    GuiPage onOpen(GuiEvent<GuiPageOpenEvent> onOpen);
 
-    GuiPage setOnClose(Consumer<GuiPageCloseEvent> onClose);
+    GuiPage onClose(GuiEvent<GuiPageCloseEvent> onClose);
 
-    Consumer<GuiPageOpenEvent> getOnOpen();
+    GuiPage onClick(GuiEvent<GuiPageClickEvent> onClick);
 
-    Consumer<GuiPageCloseEvent> getOnClose();
+    GuiEvent<GuiPageOpenEvent> getOnOpen();
+
+    GuiEvent<GuiPageCloseEvent> getOnClose();
+
+    GuiEvent<GuiPageClickEvent> getOnClick();
 
 }

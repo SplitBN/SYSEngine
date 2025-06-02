@@ -1,8 +1,7 @@
 package dev.splityosis.sysengine.guilib.intenral;
 
-import dev.splityosis.sysengine.guilib.*;
-import dev.splityosis.sysengine.guilib.events.GuiPageCloseEvent;
-import dev.splityosis.sysengine.guilib.events.GuiPageOpenEvent;
+import dev.splityosis.sysengine.guilib.components.*;
+import dev.splityosis.sysengine.guilib.events.*;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -11,18 +10,18 @@ import org.bukkit.inventory.InventoryHolder;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public abstract class AbstractGuiPage implements GuiPage, InventoryHolder {
 
-    private Gui parentGui;
+    private AbstractGui parentGui;
     private Inventory inventory;
 
     private List<PaneLayer> paneLayers = new ArrayList<>();
 
-    private Consumer<GuiPageOpenEvent> onOpen = e->{};
-    private Consumer<GuiPageCloseEvent> onClose = e->{};
+    private GuiEvent<GuiPageOpenEvent> onOpen = e->{};
+    private GuiEvent<GuiPageCloseEvent> onClose = e->{};
+    private GuiEvent<GuiPageClickEvent> onClick = e->{};
 
     private String title = getInventoryType().getDefaultTitle();
 
@@ -34,7 +33,9 @@ public abstract class AbstractGuiPage implements GuiPage, InventoryHolder {
      * Sets the current Gui containing this Pane. Intended for internal use.
      */
     protected void setParentGui(Gui parentGui) {
-        this.parentGui = parentGui;
+        if (! (parentGui instanceof AbstractGui))
+            throw new IllegalStateException("Parent Gui has to be an instance of AbstractGui");
+        this.parentGui = (AbstractGui) parentGui;
     }
 
     protected void onPanesListChange(boolean clear) {
@@ -131,7 +132,7 @@ public abstract class AbstractGuiPage implements GuiPage, InventoryHolder {
             throw new IllegalArgumentException("pane is not apart of this GuiPage");
 
         paneLayer.updateAll();
-        for (int localSlot = 0; localSlot < pane.getLayout().getSlotCapacity(); localSlot++)
+        for (int localSlot = 0; localSlot < pane.getLayout().getCapacity(); localSlot++)
             pane.getLayout().toRawSlot(localSlot).ifPresent(this::redrawItemInSlot);
 
         return this;
@@ -180,13 +181,19 @@ public abstract class AbstractGuiPage implements GuiPage, InventoryHolder {
         return inventory.getViewers().stream().map(humanEntity -> (Player) humanEntity).collect(Collectors.toList());
     }
 
-    @Override
-    public GuiPage open(Player player) {
-        GuiPageOpenEvent event = new GuiPageOpenEvent(this, player);
-        onOpen.accept(event);
 
-        if (!event.isCancelled())
+    protected GuiPage open(Player player) {
+        GuiPageOpenEvent event = new GuiPageOpenEvent(this, player);
+        onOpen.call(event);
+
+        if (!event.isCancelled()) {
+            for (int i = getPanes().size() - 1; i >= 0; i--) {
+                Pane pane = getPanes().get(i);
+                PaneOpenEvent paneCloseEvent = new PaneOpenEvent(pane, player);
+                pane.getOnOpen().call(paneCloseEvent);
+            }
             player.openInventory(inventory);
+        }
 
         return this;
     }
@@ -216,14 +223,20 @@ public abstract class AbstractGuiPage implements GuiPage, InventoryHolder {
     }
 
     @Override
-    public GuiPage setOnOpen(Consumer<GuiPageOpenEvent> onOpen) {
+    public GuiPage onOpen(GuiEvent<GuiPageOpenEvent> onOpen) {
         this.onOpen = onOpen;
         return this;
     }
 
     @Override
-    public GuiPage setOnClose(Consumer<GuiPageCloseEvent> onClose) {
+    public GuiPage onClose(GuiEvent<GuiPageCloseEvent> onClose) {
         this.onClose = onClose;
+        return this;
+    }
+
+    @Override
+    public GuiPage onClick(GuiEvent<GuiPageClickEvent> onClick) {
+        this.onClick = onClick;
         return this;
     }
 
@@ -271,19 +284,59 @@ public abstract class AbstractGuiPage implements GuiPage, InventoryHolder {
 
     @Override
     public GuiPage handleClick(InventoryClickEvent event) {
+        GuiItem guiItem = getItem(event.getSlot());
 
-        // TODO for which slot is clicked get panes of that slot and call handleClick
+        Player player = (Player) event.getWhoClicked();
+        int rawSlot = event.getSlot();
+
+        GuiPageClickEvent pageClickEvent = new GuiPageClickEvent(this, player, event, guiItem, rawSlot);
+        onClick.call(pageClickEvent);
+
+        if (pageClickEvent.isCancelled())
+            return this;
+
+        for (int i = paneLayers.size() - 1; i >= 0; i--) {
+            PaneLayer paneLayer = paneLayers.get(i);
+            int localSlot = paneLayer.getPane().getLayout().toLocalSlot(rawSlot).orElse(-1);
+            System.out.println("Raw slot " + rawSlot + " local slot " + localSlot);
+
+            if (!paneLayer.getPane().isVisible() || localSlot == -1)
+                continue;
+
+            System.out.println("calling pane click event");
+
+            PaneClickEvent paneClickEvent = new PaneClickEvent(paneLayer.getPane(), player, event, localSlot, rawSlot);
+            paneLayer.getPane().getOnClick().call(paneClickEvent);
+        }
+
+        if (guiItem != null) {
+            int localSlot = guiItem.getParentPane().getLayout().toLocalSlot(rawSlot).orElse(-1);
+            GuiItemPreClickEvent guiItemPreClickEvent = new GuiItemPreClickEvent(guiItem.getParentPane(), player, event, localSlot, rawSlot, guiItem);
+
+            guiItem.getParentPane().getOnItemPreClick().call(guiItemPreClickEvent);
+
+            if (guiItemPreClickEvent.isCancelled())
+                return this;
+
+            GuiItemClickEvent guiItemClickEvent = new GuiItemClickEvent(player, event, localSlot, rawSlot, guiItem);
+            guiItem.getOnClick().call(guiItemClickEvent);
+        }
 
         return this;
     }
 
     @Override
-    public Consumer<GuiPageCloseEvent> getOnClose() {
+    public GuiEvent<GuiPageCloseEvent> getOnClose() {
         return onClose;
     }
 
     @Override
-    public Consumer<GuiPageOpenEvent> getOnOpen() {
+    public GuiEvent<GuiPageOpenEvent> getOnOpen() {
         return onOpen;
+    }
+
+    @Override
+    public GuiEvent<GuiPageClickEvent> getOnClick() {
+        return onClick;
     }
 }
