@@ -5,6 +5,9 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class GuiLib {
 
+    // TODO make VerticalScrollPane, HorizontalScrollPane, PaginatedPane
+    // TODO make guiitem builder and gui builders and look into fillers
+
     private static boolean isInitialized = false;
 
     /**

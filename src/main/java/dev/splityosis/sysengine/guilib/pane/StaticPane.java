@@ -8,7 +8,10 @@ import dev.splityosis.sysengine.guilib.intenral.AbstractPane;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class StaticPane extends AbstractPane {
+/**
+ * Stores GuiItems in fixed slots. Items are set using local slot indexes similar to a bukkit inventory.
+ */
+public class StaticPane extends AbstractPane<StaticPane> {
 
     private Map<Integer, GuiItem> items;
 
@@ -41,6 +44,23 @@ public class StaticPane extends AbstractPane {
             removeItem(slot);
         else
             items.put(slot, item);
+        return this;
+    }
+
+    /**
+     * Adds an item in the first empty slot
+     * @return The slot the item was set to or -1 if pane is full.
+     */
+    public int addItemAndGetSlot(GuiItem item) {
+        int slot = firstEmptySlot();
+        if (slot == -1)
+            return -1;
+        setItem(slot, item);
+        return slot;
+    }
+
+    public StaticPane addItem(GuiItem item) {
+        addItemAndGetSlot(item);
         return this;
     }
 

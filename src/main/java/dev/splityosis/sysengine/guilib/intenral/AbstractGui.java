@@ -11,24 +11,31 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-public abstract class AbstractGui implements Gui {
+public abstract class AbstractGui<T extends AbstractGui<?>> implements Gui {
+
+    private T self = (T) this;
 
     private int currentPageIndex;
-    private List<AbstractGuiPage> pages = new ArrayList<>();
-    private AbstractGuiPage currentPage;
+    private final List<AbstractGuiPage<?>> pages = new ArrayList<>();
+    private AbstractGuiPage<?> currentPage;
 
     private GuiEvent<GuiOpenEvent> onOpen = e->{};
     private GuiEvent<GuiCloseEvent> onClose = e->{};
 
+    public T self() {
+        return self;
+    }
+
     @Override
-    public int getCurrentPageIndex() {
+    public int getActivePageIndex() {
         return currentPageIndex;
     }
 
     @Override
-    public int getPagesAmount() {
+    public int getPageCount() {
         return pages.size();
     }
 
@@ -40,12 +47,12 @@ public abstract class AbstractGui implements Gui {
     }
 
     @Override
-    public GuiPage getCurrentPage() {
+    public GuiPage getActivePage() {
         return currentPage;
     }
 
     @Override
-    public Gui setCurrentPage(int index) {
+    public T setActivePage(int index) {
         if (index < 0 || index >= pages.size())
             throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + pages.size());
 
@@ -58,24 +65,30 @@ public abstract class AbstractGui implements Gui {
             for (Player viewer : oldPage.getViewers())
                 open(viewer);
 
-        return this;
+        return self;
     }
 
     @Override
-    public Gui addPage(GuiPage page) {
+    public T addPage(GuiPage page) {
         if (! (page instanceof AbstractGuiPage))
             throw new IllegalArgumentException("page must be an instance of AbstractGuiPage");
 
-        AbstractGuiPage abstractGuiPage = (AbstractGuiPage) page;
+        AbstractGuiPage<?> abstractGuiPage = (AbstractGuiPage<?>) page;
         if (abstractGuiPage.getParentGui() != null)
             throw new IllegalArgumentException("page already has parent gui");
 
         abstractGuiPage.setParentGui(this);
         pages.add(abstractGuiPage);
         if (currentPage == null)
-            setCurrentPage(0);
+            setActivePage(0);
 
-        return this;
+        return self;
+    }
+
+    @Override
+    public <E extends GuiPage> T addPage(E page, Consumer<E> setup) {
+        setup.accept(page);
+        return addPage(page);
     }
 
     @Override
@@ -84,14 +97,9 @@ public abstract class AbstractGui implements Gui {
     }
 
     @Override
-    public Gui open(Player player) {
-        GuiOpenEvent event = new GuiOpenEvent(this, player);
-        onOpen.call(event);
-
-        if (!event.isCancelled())
-            currentPage.open(player);
-
-        return this;
+    public T open(Player player) {
+        currentPage.open(player);
+        return self;
     }
 
     @Override
@@ -104,15 +112,15 @@ public abstract class AbstractGui implements Gui {
     }
 
     @Override
-    public Gui onOpen(GuiEvent<GuiOpenEvent> onOpen) {
+    public T onOpen(GuiEvent<GuiOpenEvent> onOpen) {
         this.onOpen = onOpen;
-        return this;
+        return self;
     }
 
     @Override
-    public Gui onClose(GuiEvent<GuiCloseEvent> onClose) {
+    public T onClose(GuiEvent<GuiCloseEvent> onClose) {
         this.onClose = onClose;
-        return this;
+        return self;
     }
 
     @Override

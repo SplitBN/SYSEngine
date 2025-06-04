@@ -4,38 +4,44 @@ import dev.splityosis.sysengine.guilib.components.*;
 import dev.splityosis.sysengine.guilib.events.*;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-public abstract class AbstractGuiPage implements GuiPage, InventoryHolder {
+public abstract class AbstractGuiPage<T extends AbstractGuiPage<?>> implements GuiPage, InventoryHolder {
 
-    private AbstractGui parentGui;
+    private T self = (T) this;
+
+    private AbstractGui<?> parentGui;
     private Inventory inventory;
-
-    private List<PaneLayer> paneLayers = new ArrayList<>();
+    private final List<PaneLayer> paneLayers = new ArrayList<>();
 
     private GuiEvent<GuiPageOpenEvent> onOpen = e->{};
+
     private GuiEvent<GuiPageCloseEvent> onClose = e->{};
     private GuiEvent<GuiPageClickEvent> onClick = e->{};
-
     private String title = getInventoryType().getDefaultTitle();
 
     public AbstractGuiPage() {
 
     }
 
+    public T self() {
+        return self;
+    }
+
     /**
      * Sets the current Gui containing this Pane. Intended for internal use.
      */
-    protected void setParentGui(Gui parentGui) {
-        if (! (parentGui instanceof AbstractGui))
-            throw new IllegalStateException("Parent Gui has to be an instance of AbstractGui");
-        this.parentGui = (AbstractGui) parentGui;
+    protected void setParentGui(AbstractGui<?> parentGui) {
+        this.parentGui = parentGui;
     }
 
     protected void onPanesListChange(boolean clear) {
@@ -45,16 +51,16 @@ public abstract class AbstractGuiPage implements GuiPage, InventoryHolder {
             inventory.clear();
 
         for (PaneLayer paneLayer : paneLayers)
-            render(paneLayer.getPane());
+            refresh(paneLayer.getPane());
     }
 
     protected abstract Inventory createInventory(String title, InventoryHolder holder);
 
     @Override
-    public GuiPage addPane(Pane pane) {
+    public T addPane(Pane pane) {
         if (! (pane instanceof AbstractPane))
             throw new IllegalArgumentException("pane is not an instance of AbstractPane");
-        AbstractPane abstractPane = (AbstractPane) pane;
+        AbstractPane<?> abstractPane = (AbstractPane<?>) pane;
         if (abstractPane.getParentPage() != null)
             throw new IllegalArgumentException("pane already has parent page");
         abstractPane.setParentGuiPage(this);
@@ -66,14 +72,20 @@ public abstract class AbstractGuiPage implements GuiPage, InventoryHolder {
 
         paneLayers.add(new PaneLayer(pane));
         onPanesListChange(false);
-        return this;
+        return self;
     }
 
     @Override
-    public GuiPage removePane(Pane pane) {
+    public <E extends Pane> T addPane(E pane, Consumer<E> setup) {
+        setup.accept(pane);
+        return addPane(pane);
+    }
+
+    @Override
+    public T removePane(Pane pane) {
         if (! (pane instanceof AbstractPane))
             throw new IllegalArgumentException("pane is not an instance of AbstractPane");
-        AbstractPane abstractPane = (AbstractPane) pane;
+        AbstractPane<?> abstractPane = (AbstractPane<?>) pane;
         if (!abstractPane.getParentPage().equals(this))
             throw new IllegalArgumentException("pane is not apart of this page");
         abstractPane.setParentGuiPage(null);
@@ -81,16 +93,16 @@ public abstract class AbstractGuiPage implements GuiPage, InventoryHolder {
         paneLayers.removeIf(paneLayer -> paneLayer.getPane().equals(pane));
 
         onPanesListChange(true);
-        return this;
+        return self;
     }
 
     @Override
-    public int getPanesAmount() {
+    public int getPaneCount() {
         return paneLayers.size();
     }
 
     @Override
-    public GuiPage render() {
+    public T refresh() {
         // This completely refills layeredSlots and the entire inventory
         Map<Integer, GuiItem> finalLayer = new HashMap<>();
 
@@ -100,7 +112,10 @@ public abstract class AbstractGuiPage implements GuiPage, InventoryHolder {
             if (!pane.isVisible()) continue;
 
             paneLayer.updateAll(); // pull the latest data from the pane
-            finalLayer.putAll(paneLayer.getRawToItemMap());
+            paneLayer.getRawToItemMap().entrySet().stream()
+                    .filter(entry -> entry.getValue().isVisible())
+                    .forEach(entry -> finalLayer.put(entry.getKey(), entry.getValue()));
+
         }
 
         // place final layer which is what should be showing
@@ -116,11 +131,11 @@ public abstract class AbstractGuiPage implements GuiPage, InventoryHolder {
             humanEntity.openInventory(inventory);
         });
 
-        return this;
+        return self;
     }
 
     @Override
-    public GuiPage render(Pane pane) {
+    public T refresh(Pane pane) {
         PaneLayer paneLayer = null;
         for (PaneLayer layer : paneLayers)
             if (layer.getPane().equals(pane)) {
@@ -135,16 +150,16 @@ public abstract class AbstractGuiPage implements GuiPage, InventoryHolder {
         for (int localSlot = 0; localSlot < pane.getLayout().getCapacity(); localSlot++)
             pane.getLayout().toRawSlot(localSlot).ifPresent(this::redrawItemInSlot);
 
-        return this;
+        return self;
     }
 
     @Override
-    public GuiPage render(int slot) {
+    public T refresh(int slot) {
         for (PaneLayer paneLayer : paneLayers)
             paneLayer.updateRawSlot(slot);
 
         redrawItemInSlot(slot);
-        return null;
+        return self;
     }
 
     @Override
@@ -161,7 +176,7 @@ public abstract class AbstractGuiPage implements GuiPage, InventoryHolder {
         for (PaneLayer paneLayer : paneLayers) {
             if (!paneLayer.getPane().isVisible()) return null;
             GuiItem item = paneLayer.getItemAtRawSlot(slot);
-            if (item != null)
+            if (item != null && item.isVisible())
                 top = item;
         }
 
@@ -181,21 +196,9 @@ public abstract class AbstractGuiPage implements GuiPage, InventoryHolder {
         return inventory.getViewers().stream().map(humanEntity -> (Player) humanEntity).collect(Collectors.toList());
     }
 
-
-    protected GuiPage open(Player player) {
-        GuiPageOpenEvent event = new GuiPageOpenEvent(this, player);
-        onOpen.call(event);
-
-        if (!event.isCancelled()) {
-            for (int i = getPanes().size() - 1; i >= 0; i--) {
-                Pane pane = getPanes().get(i);
-                PaneOpenEvent paneCloseEvent = new PaneOpenEvent(pane, player);
-                pane.getOnOpen().call(paneCloseEvent);
-            }
-            player.openInventory(inventory);
-        }
-
-        return this;
+    protected T open(Player player) {
+        player.openInventory(inventory);
+        return self;
     }
 
     /**
@@ -223,21 +226,21 @@ public abstract class AbstractGuiPage implements GuiPage, InventoryHolder {
     }
 
     @Override
-    public GuiPage onOpen(GuiEvent<GuiPageOpenEvent> onOpen) {
+    public T onOpen(GuiEvent<GuiPageOpenEvent> onOpen) {
         this.onOpen = onOpen;
-        return this;
+        return self;
     }
 
     @Override
-    public GuiPage onClose(GuiEvent<GuiPageCloseEvent> onClose) {
+    public T onClose(GuiEvent<GuiPageCloseEvent> onClose) {
         this.onClose = onClose;
-        return this;
+        return self;
     }
 
     @Override
-    public GuiPage onClick(GuiEvent<GuiPageClickEvent> onClick) {
+    public T onClick(GuiEvent<GuiPageClickEvent> onClick) {
         this.onClick = onClick;
-        return this;
+        return self;
     }
 
     @Override
@@ -256,10 +259,10 @@ public abstract class AbstractGuiPage implements GuiPage, InventoryHolder {
     }
 
     @Override
-    public GuiPage setTitle(String title) {
+    public T setTitle(String title) {
         this.title = title;
         // Make new inventory and open it for the viewers
-        if (inventory == null) return this;
+        if (inventory == null) return self;
 
         List<HumanEntity> viewers = inventory.getViewers();
         inventory = createInventory(getTitle(), this);
@@ -269,7 +272,7 @@ public abstract class AbstractGuiPage implements GuiPage, InventoryHolder {
             humanEntity.openInventory(inventory);
         });
 
-        return this;
+        return self;
     }
 
     @Override
@@ -282,47 +285,309 @@ public abstract class AbstractGuiPage implements GuiPage, InventoryHolder {
         return paneLayers;
     }
 
-    @Override
-    public GuiPage handleClick(InventoryClickEvent event) {
-        GuiItem guiItem = getItem(event.getSlot());
 
+    @Override
+    public T handleClick(InventoryClickEvent event) {
         Player player = (Player) event.getWhoClicked();
+        Inventory clickedInv = event.getClickedInventory();
+        Inventory guiInv = this.inventory;
         int rawSlot = event.getSlot();
 
-        GuiPageClickEvent pageClickEvent = new GuiPageClickEvent(this, player, event, guiItem, rawSlot);
-        onClick.call(pageClickEvent);
+        // 1) Click outside any inventory
+        if (clickedInv == null) {
+//            System.out.println("[DEBUG] Click was outside of inventory");
+            // TODO perhaps an onOutsideClick
+            return self;
+        }
 
-        if (pageClickEvent.isCancelled())
-            return this;
+        boolean isItemPlace = GuiInteraction.ITEM_PLACE.matches(event);
 
+        // 2) Click in player's own inventory
+        if (!clickedInv.equals(guiInv)) {
+            // TODO perhaps onPlayerInventoryClick or sum like that
+
+            if (!isItemPlace) {
+                // player doing stuff in their inventory we don't care
+                return self;
+            }
+
+            // So the player is trying to shift click an item in
+            int firstEmpty = guiInv.firstEmpty();
+
+            if (firstEmpty == -1) // no space in inv anyways doesnt matter
+                return self;
+
+            // Find the pane that owns the slot that the item is being put into and check if it allows it
+            Pane topPane = getTopPaneAt(firstEmpty);
+            if (topPane == null || !topPane.isInteractionAllowed(GuiInteraction.ITEM_PLACE)) {
+//                System.out.println("[DEBUG] Pane doesn't allow item place, canceling");
+                event.setCancelled(true);
+                event.setResult(Event.Result.DENY);
+            }
+
+            return self;
+        }
+
+        // 3) Click inside GUI
+        GuiItem clickedItem = getItem(rawSlot);
+        boolean hasClickedItem = (clickedItem != null);
+//        System.out.println("[DEBUG] Gui was clicked, the item is " + (hasClickedItem ? clickedItem.getItemStack() : "null"));
+
+        // 3a) Page‐level event
+        GuiPageClickEvent pageEvt = new GuiPageClickEvent(this, player, event, clickedItem, rawSlot);
+        getOnClick().call(pageEvt);
+        if (pageEvt.isCancelled()) {
+//            System.out.println("[DEBUG] GuiPageClickEvent was cancelled");
+            return self;
+        }
+
+        // 3b) Find interaction owner pane
+        Pane interactionOwner = null;
+        if (hasClickedItem) {
+            interactionOwner = clickedItem.getParentPane();
+//            System.out.println("[DEBUG] Interaction owner = clickedItem.parentPane");
+        } else {
+            interactionOwner = getTopPaneAt(rawSlot);
+//            System.out.println("[DEBUG] Interaction owner = topPaneAt(" + rawSlot + ") → " + interactionOwner);
+        }
+
+        if (interactionOwner == null) {
+//            System.out.println("[DEBUG] No pane covers this slot. cancelling");
+            event.setCancelled(true);
+            event.setResult(Event.Result.DENY);
+            return self; // Return cuz no item and no pane was clicked
+        }
+
+        // 3c) Check pane's allowedInteractions
+        GuiInteraction matchedInteraction = null;
+        // TODO perhaps handle each specific interaction and make an onItemPlace onItemDrop etc...
+        for (GuiInteraction gi : interactionOwner.getAllowedInteractions())
+            if (gi.matches(event)) {
+                matchedInteraction = gi;
+                break;
+            }
+
+        if (matchedInteraction == null) {
+//            System.out.println("[DEBUG] Pane " + interactionOwner + " does not allow this interaction → cancelling");
+            event.setCancelled(true);
+            event.setResult(Event.Result.DENY);
+        }
+//        else
+//            System.out.println("[DEBUG] Pane " + interactionOwner + " allows " + matchedInteraction);
+
+        // 3d) Fire PaneClickEvent for every pane covering rawSlot (top→bottom)
         for (int i = paneLayers.size() - 1; i >= 0; i--) {
-            PaneLayer paneLayer = paneLayers.get(i);
-            int localSlot = paneLayer.getPane().getLayout().toLocalSlot(rawSlot).orElse(-1);
-            System.out.println("Raw slot " + rawSlot + " local slot " + localSlot);
+            PaneLayer layer = paneLayers.get(i);
+            Pane pane = layer.getPane();
+            if (!pane.isVisible()) continue;
 
-            if (!paneLayer.getPane().isVisible() || localSlot == -1)
+            OptionalInt maybeLocal = pane.getLayout().toLocalSlot(rawSlot);
+            if (!maybeLocal.isPresent()) continue;
+            int local = maybeLocal.getAsInt();
+
+//            System.out.println("[DEBUG] calling pane click event since pane covers this slot, local: " + local);
+
+            PaneClickEvent paneEvt = new PaneClickEvent(pane, player, event, local, rawSlot);
+            pane.getOnClick().call(paneEvt);
+        }
+
+        // 3e) If there was a clickedItem, fire pre‐click then item‐click
+        if (hasClickedItem) {
+            Pane parentPane = clickedItem.getParentPane();
+            int local = parentPane.getLayout().toLocalSlot(rawSlot).orElse(-1);
+//            System.out.println("[DEBUG] Preparing to fire GuiItemPreClickEvent for local=" + local);
+
+            GuiItemPreClickEvent preEvt = new GuiItemPreClickEvent(
+                    parentPane, player, event, local, rawSlot, clickedItem
+            );
+            parentPane.getOnItemPreClick().call(preEvt);
+            if (preEvt.isCancelled()) {
+//                System.out.println("[DEBUG] GuiItemPreClickEvent was cancelled. stopping");
+                return self;
+            }
+//            System.out.println("[DEBUG] GuiItemPreClickEvent allowed firing item click event");
+
+            GuiItemClickEvent itemEvt = new GuiItemClickEvent(player, event, local, rawSlot, clickedItem);
+            clickedItem.getOnClick().call(itemEvt);
+//            System.out.println("[Debug] GuiItemClickEvent fired for " + clickedItem);
+        }
+//        else {
+//            System.out.println("[DEBUG] no item was clicked");
+//        }
+
+        return self;
+    }
+
+    @Override
+    public T handleDrag(InventoryDragEvent event) {
+        if (!GuiInteraction.ITEM_DRAG.matches(event)) {
+//            System.out.println("[DEBUG] handleDrag: not ITEM_DRAG → ignoring");
+            return self;
+        }
+
+        int guiSize = event.getView().getTopInventory().getSize();
+        Set<Integer> guiSlots = event.getRawSlots().stream()
+                .filter(slot -> slot < guiSize)
+                .collect(Collectors.toSet());
+//        System.out.println("[DEBUG] Drag affected GUI slots: " + guiSlots);
+
+        if (guiSlots.isEmpty()) {
+//            System.out.println("[DEBUG] No GUI slots in drag → ALLOWING");
+            return self;
+        }
+
+
+        for (int raw : guiSlots) {
+            Pane topPane = getTopPaneAt(raw);
+//            System.out.println("[DEBUG] Checking drag at raw=" + raw + ", topPane=" + topPane);
+            // Cancel if drag affected a slot with no pane or a pane that doesn't allow dragging
+            if (topPane == null || !topPane.isInteractionAllowed(GuiInteraction.ITEM_DRAG)) {
+//                System.out.println("[DEBUG] Pane " + topPane + " disallows ITEM_DRAG → cancelling");
+                event.setCancelled(true);
+                event.setResult(Event.Result.DENY);
+                return self;
+            }
+        }
+
+//        System.out.println("[DEBUG] All panes allow ITEM_DRAG; letting drag proceed");
+
+        return self;
+    }
+
+
+
+//    @Override
+//    public GuiPage handleClick(InventoryClickEvent event) {
+//        if (event.getClickedInventory() == null) // For now return later maybe add onOutsideClick
+//            return this;
+//
+//        if (!event.getClickedInventory().equals(inventory)) {
+//            if (GuiInteraction.ITEM_PLACE.matches(event)) {
+//                // the player is trying to shift click an item in
+//                int firstEmpty = inventory.firstEmpty();
+//                if (firstEmpty != -1) {
+//                    Pane interactionOwner = getTopPaneAt(firstEmpty);
+//                    if (interactionOwner == null || !interactionOwner.isInteractionAllowed(GuiInteraction.ITEM_PLACE)) {
+//                        event.setCancelled(true);
+//                        event.setResult(Event.Result.DENY);
+//                    }
+//                    // TODO Item was shift clicked in, perhaps an onItemPlace event
+//                }
+//            }
+//
+//            return this;
+//        }
+//
+//        GuiItem guiItem = getItem(event.getSlot());
+//        boolean guiItemNotNull = guiItem != null;
+//
+//        Player player = (Player) event.getWhoClicked();
+//        int rawSlot = event.getSlot();
+//
+//        GuiPageClickEvent pageClickEvent = new GuiPageClickEvent(this, player, event, guiItem, rawSlot);
+//        onClick.call(pageClickEvent);
+//
+//        if (pageClickEvent.isCancelled())
+//            return this;
+//
+//        // Handle interaction
+//        Pane interactionOwner = null;
+//
+//        if (guiItemNotNull) {
+//            interactionOwner = guiItem.getParentPane();
+//            if (!interactionOwner.getAllowedInteractions().isEmpty())
+//                for (GuiInteraction allowedInteraction : interactionOwner.getAllowedInteractions())
+//                    if (allowedInteraction.matches(event))
+//                        break;
+//            event.setCancelled(true);
+//            event.setResult(Event.Result.DENY);
+//        }
+//
+//        for (int i = paneLayers.size() - 1; i >= 0; i--) {
+//            PaneLayer paneLayer = paneLayers.get(i);
+//            int localSlot = paneLayer.getPane().getLayout().toLocalSlot(rawSlot).orElse(-1);
+//
+//            if (!paneLayer.getPane().isVisible() || localSlot == -1) // check if this pane is relevant for this slot
+//                continue;
+//
+//            if (interactionOwner == null) { // It is the first relevant pane
+//                interactionOwner = paneLayer.getPane();
+//                if (!interactionOwner.getAllowedInteractions().isEmpty())
+//                    for (GuiInteraction allowedInteraction : interactionOwner.getAllowedInteractions())
+//                        if (allowedInteraction.matches(event))
+//                            break;
+//                event.setCancelled(true);
+//                event.setResult(Event.Result.DENY);
+//            }
+//
+//            PaneClickEvent paneClickEvent = new PaneClickEvent(paneLayer.getPane(), player, event, localSlot, rawSlot);
+//            paneLayer.getPane().getOnClick().call(paneClickEvent);
+//        }
+//
+//        if (interactionOwner == null) {
+//            for (GuiInteraction allowedInteraction : GuiInteraction.values())
+//                if (allowedInteraction.matches(event))
+//                    break;
+//            event.setCancelled(true);
+//            event.setResult(Event.Result.DENY);
+//        }
+//
+//        if (guiItemNotNull) {
+//            int localSlot = guiItem.getParentPane().getLayout().toLocalSlot(rawSlot).orElse(-1);
+//            GuiItemPreClickEvent guiItemPreClickEvent = new GuiItemPreClickEvent(guiItem.getParentPane(), player, event, localSlot, rawSlot, guiItem);
+//
+//            guiItem.getParentPane().getOnItemPreClick().call(guiItemPreClickEvent);
+//
+//            if (guiItemPreClickEvent.isCancelled())
+//                return this;
+//
+//            GuiItemClickEvent guiItemClickEvent = new GuiItemClickEvent(player, event, localSlot, rawSlot, guiItem);
+//            guiItem.getOnClick().call(guiItemClickEvent);
+//        }
+//
+//        return this;
+//    }
+//
+//    @Override
+//    public GuiPage handleDrag(InventoryDragEvent event) {
+//        if (!GuiInteraction.ITEM_DRAG.matches(event))
+//            return this;
+//
+//        boolean affected = false;
+//
+//        for (Integer inventorySlot : event.getInventorySlots()) {
+//            if (inventorySlot == null) continue;
+//            Pane topPane = getTopPaneAt(inventorySlot);
+//            if (topPane != null) {
+//                affected = true;
+//                if (!topPane.isInteractionAllowed(GuiInteraction.ITEM_DRAG)) {
+//                    event.setCancelled(true);
+//                    event.setResult(Event.Result.DENY);
+//                    return this;
+//                }
+//            }
+//        }
+//
+//        if (!affected) {
+//            event.setCancelled(true);
+//            event.setResult(Event.Result.DENY);
+//        }
+//
+//        return null;
+//    }
+
+    private Pane getTopPaneAt(int rawSlot) {
+        for (int i = paneLayers.size()-1; i >= 0; i--) {
+            PaneLayer paneLayer = paneLayers.get(i);
+            Pane pane = paneLayer.getPane();
+
+            if (!pane.isVisible() || !pane.getLayout().containsRawSlot(rawSlot))
                 continue;
 
-            System.out.println("calling pane click event");
-
-            PaneClickEvent paneClickEvent = new PaneClickEvent(paneLayer.getPane(), player, event, localSlot, rawSlot);
-            paneLayer.getPane().getOnClick().call(paneClickEvent);
+            return pane;
         }
 
-        if (guiItem != null) {
-            int localSlot = guiItem.getParentPane().getLayout().toLocalSlot(rawSlot).orElse(-1);
-            GuiItemPreClickEvent guiItemPreClickEvent = new GuiItemPreClickEvent(guiItem.getParentPane(), player, event, localSlot, rawSlot, guiItem);
-
-            guiItem.getParentPane().getOnItemPreClick().call(guiItemPreClickEvent);
-
-            if (guiItemPreClickEvent.isCancelled())
-                return this;
-
-            GuiItemClickEvent guiItemClickEvent = new GuiItemClickEvent(player, event, localSlot, rawSlot, guiItem);
-            guiItem.getOnClick().call(guiItemClickEvent);
-        }
-
-        return this;
+        return null;
     }
 
     @Override

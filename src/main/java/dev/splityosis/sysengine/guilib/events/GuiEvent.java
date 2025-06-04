@@ -9,8 +9,8 @@ public interface GuiEvent<T extends Event> {
     void functional(T event);
 
     default void call(T event) {
-        functional(event);
         Bukkit.getPluginManager().callEvent(event);
+        functional(event);
     };
 
 }

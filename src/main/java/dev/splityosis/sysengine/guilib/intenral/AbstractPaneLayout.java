@@ -5,9 +5,14 @@ import org.bukkit.event.inventory.InventoryType;
 
 import java.util.OptionalInt;
 
-public abstract class AbstractPaneLayout implements PaneLayout {
+public abstract class AbstractPaneLayout<T extends AbstractPaneLayout<?>> implements PaneLayout {
 
+    private T self = (T) this;
     private boolean initialized;
+
+    public T self() {
+        return self;
+    }
 
     @Override
     public final boolean isInitialized() {
@@ -15,10 +20,10 @@ public abstract class AbstractPaneLayout implements PaneLayout {
     }
 
     @Override
-    public final PaneLayout initialize(InventoryType type, int size) {
+    public final T initialize(InventoryType type, int size) {
         initialized = true;
         onInitialize(type, size);
-        return this;
+        return self;
     }
 
     @Override
@@ -30,11 +35,11 @@ public abstract class AbstractPaneLayout implements PaneLayout {
     }
 
     @Override
-    public final OptionalInt toRawSlot(int localIndex) {
+    public final OptionalInt toRawSlot(int localSlot) {
         if (!isInitialized())
             throw new IllegalStateException("Layout not initialized, Layout gets initialized upon attachment to a GuiPage");
 
-        return convertToRawSlot(localIndex);
+        return convertToRawSlot(localSlot);
     }
 
     @Override
@@ -45,15 +50,29 @@ public abstract class AbstractPaneLayout implements PaneLayout {
         return getMaxCapacity();
     }
 
+    @Override
+    public boolean containsLocalSlot(int localSlot) {
+        if (!isInitialized())
+            throw new IllegalStateException("Layout not initialized, Layout gets initialized upon attachment to a GuiPage");
+        return localSlot >= 0 && localSlot < getMaxCapacity();
+    }
+
+    @Override
+    public boolean containsRawSlot(int rawSlot) {
+        if (!isInitialized())
+            throw new IllegalStateException("Layout not initialized, Layout gets initialized upon attachment to a GuiPage");
+        return convertToLocalSlot(rawSlot).isPresent();
+    }
+
     protected abstract void onInitialize(InventoryType type, int size);
 
     /**
      * Converts a local index (from the pane) to a raw inventory slot.
      *
-     * @param localIndex index provided by the pane
+     * @param localSlot index provided by the pane
      * @return raw inventory slot, or empty if not part of the layout
      */
-    protected abstract OptionalInt convertToRawSlot(int localIndex);
+    protected abstract OptionalInt convertToRawSlot(int localSlot);
 
     /**
      * Converts a raw inventory slot to a local index, if this layout handles it.

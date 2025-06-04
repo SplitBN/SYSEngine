@@ -7,19 +7,26 @@ import dev.splityosis.sysengine.guilib.events.GuiItemClickEvent;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
-public abstract class AbstractGuiItem implements GuiItem, Cloneable {
+public abstract class AbstractGuiItem<T extends AbstractGuiItem<?>> implements GuiItem, Cloneable {
 
-    private AbstractPane parentPane;
+    private T self = (T) this;
+    private AbstractPane<?> parentPane;
 
     private ItemStack itemStack = new ItemStack(Material.AIR);
     private GuiEvent<GuiItemClickEvent> onClick = e->{};
+
+    private boolean isVisible = true;
 
     public AbstractGuiItem(ItemStack itemStack) {
         this.itemStack = itemStack;
     }
 
     public AbstractGuiItem() {
+        this(null);
+    }
 
+    public T self() {
+        return self;
     }
 
     @Override
@@ -27,7 +34,7 @@ public abstract class AbstractGuiItem implements GuiItem, Cloneable {
         return parentPane;
     }
 
-    protected void setParentPane(AbstractPane parentPane) {
+    protected void setParentPane(AbstractPane<?> parentPane) {
         this.parentPane = parentPane;
     }
 
@@ -37,28 +44,28 @@ public abstract class AbstractGuiItem implements GuiItem, Cloneable {
     }
 
     @Override
-    public GuiItem setItemStack(ItemStack itemStack) {
+    public T setItemStack(ItemStack itemStack) {
         this.itemStack = itemStack;
-        return this;
+        return self;
     }
 
     @Override
-    public GuiItem update() {
+    public T refresh() {
         if (parentPane != null) {
-            AbstractGuiPage page = parentPane.getParentPage();
+            AbstractGuiPage<?> page = parentPane.getParentPage();
             if (page != null) {
                 int slot = page.getSlot(this);
                 if (slot != -1)
                     page.redrawItemInSlot(slot);
             }
         }
-        return this;
+        return self;
     }
 
     @Override
-    public GuiItem onClick(GuiEvent<GuiItemClickEvent> onClick) {
+    public T onClick(GuiEvent<GuiItemClickEvent> onClick) {
         this.onClick = onClick;
-        return this;
+        return self;
     }
 
     @Override
@@ -67,13 +74,24 @@ public abstract class AbstractGuiItem implements GuiItem, Cloneable {
     }
 
     @Override
-    public GuiItem clone() {
+    public T clone() {
         try {
-            AbstractGuiItem guiItem = (AbstractGuiItem) super.clone();
+            T guiItem = (T) super.clone();
             guiItem.setParentPane(null);
             return guiItem;
         } catch (CloneNotSupportedException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public T setVisible(boolean visible) {
+        isVisible = visible;
+        return self;
+    }
+
+    @Override
+    public boolean isVisible() {
+        return isVisible;
     }
 }

@@ -6,7 +6,7 @@ import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 
-public class ChestPage extends AbstractGuiPage {
+public class ChestPage extends AbstractGuiPage<ChestPage> {
 
     private int size;
 

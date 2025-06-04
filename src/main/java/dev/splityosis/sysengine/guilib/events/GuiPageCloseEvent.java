@@ -14,6 +14,7 @@ public class GuiPageCloseEvent extends Event {
     private GuiPage page;
     private Player player;
 
+
     public GuiPageCloseEvent(GuiPage page, Player player) {
         this.page = page;
         this.player = player;

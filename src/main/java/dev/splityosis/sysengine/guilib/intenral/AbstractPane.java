@@ -1,17 +1,23 @@
 package dev.splityosis.sysengine.guilib.intenral;
 
-import dev.splityosis.sysengine.guilib.components.GuiItem;
-import dev.splityosis.sysengine.guilib.components.GuiPage;
-import dev.splityosis.sysengine.guilib.components.Pane;
-import dev.splityosis.sysengine.guilib.components.PaneLayout;
+import dev.splityosis.sysengine.guilib.components.*;
 import dev.splityosis.sysengine.guilib.events.*;
 
-public abstract class AbstractPane implements Pane {
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.Set;
 
-    private AbstractGuiPage parentGuiPage;
-    private AbstractPaneLayout layout;
+public abstract class AbstractPane<T extends AbstractPane<?>> implements Pane {
+
+    private T self = (T) this;
+
+    private AbstractGuiPage<?> parentGuiPage;
+    private final AbstractPaneLayout<?> layout;
     private int weight = 0;
     private boolean visible = true;
+    private final Set<GuiInteraction> allowedInteractions = GuiInteraction.ALLOWED_BY_DEFAULT.isEmpty() ?
+            EnumSet.noneOf(GuiInteraction.class) :
+            EnumSet.copyOf(GuiInteraction.ALLOWED_BY_DEFAULT);
 
     private GuiEvent<PaneClickEvent> onClick =e->{};
     private GuiEvent<PaneOpenEvent>  onOpen =e->{};
@@ -21,7 +27,11 @@ public abstract class AbstractPane implements Pane {
     public AbstractPane(PaneLayout layout) {
         if (! (layout instanceof AbstractPaneLayout))
             throw new IllegalArgumentException("layout must be instance of AbstractPaneLayout");
-        this.layout = (AbstractPaneLayout) layout;
+        this.layout = (AbstractPaneLayout<?>) layout;
+    }
+
+    public T self() {
+        return self;
     }
 
     /**
@@ -34,16 +44,16 @@ public abstract class AbstractPane implements Pane {
     /**
      * Sets the current Gui containing this Pane. Intended for internal use.
      */
-    protected void setParentGuiPage(AbstractGuiPage parentGuiPage) {
+    protected void setParentGuiPage(AbstractGuiPage<?> parentGuiPage) {
         this.parentGuiPage = parentGuiPage;
     }
 
     @Override
-    public Pane setWeight(int weight) {
+    public T setWeight(int weight) {
         this.weight = weight;
         if (parentGuiPage != null)
             parentGuiPage.onPanesListChange(false);
-        return this;
+        return self;
     }
 
     @Override
@@ -57,66 +67,97 @@ public abstract class AbstractPane implements Pane {
     }
 
     @Override
-    public Pane setVisible(boolean visible) {
+    public T setVisible(boolean visible) {
         if (visible != this.visible) { // A change in state
             this.visible = visible;
-            render();
+            refresh();
         }
 
-        return this;
+        return self;
     }
 
     @Override
-    public Pane render() {
+    public T refresh() {
         if (parentGuiPage == null)
             throw new NullPointerException("Pane must be a part of a Page to be rendered");
-        parentGuiPage.render(this);
-        return this;
+        parentGuiPage.refresh(this);
+        return self;
     }
 
     @Override
-    public Pane render(int slot) {
+    public T refresh(int slot) {
         if (parentGuiPage == null)
             throw new NullPointerException("Pane must be a part of a Page to be rendered");
 
         getLayout().toRawSlot(slot).ifPresent(rawSlot -> {
-            parentGuiPage.render(rawSlot);
+            parentGuiPage.refresh(rawSlot);
         });
-        return this;
+        return self;
     }
 
     @Override
-    public AbstractPaneLayout getLayout() {
+    public T allowInteraction(GuiInteraction interaction) {
+        allowedInteractions.add(interaction);
+        return self;
+    }
+
+    @Override
+    public T disallowInteraction(GuiInteraction interaction) {
+        allowedInteractions.remove(interaction);
+        return self;
+    }
+
+    @Override
+    public boolean isInteractionAllowed(GuiInteraction interaction) {
+        return allowedInteractions.contains(interaction);
+    }
+
+    @Override
+    public Set<GuiInteraction> getAllowedInteractions() {
+        return Collections.unmodifiableSet(allowedInteractions);
+    }
+
+    @Override
+    public T setInteractionAllowed(GuiInteraction interaction, boolean allowed) {
+        if (allowed)
+            allowInteraction(interaction);
+        else
+            disallowInteraction(interaction);
+        return self;
+    }
+
+    @Override
+    public AbstractPaneLayout<?> getLayout() {
         return layout;
     }
 
     @Override
-    public AbstractGuiPage getParentPage() {
+    public AbstractGuiPage<?> getParentPage() {
         return parentGuiPage;
     }
 
     @Override
-    public Pane onClick(GuiEvent<PaneClickEvent> onClick) {
+    public T onClick(GuiEvent<PaneClickEvent> onClick) {
         this.onClick = onClick;
-        return this;
+        return self;
     }
 
     @Override
-    public Pane onOpen(GuiEvent<PaneOpenEvent> onOpen) {
+    public T onOpen(GuiEvent<PaneOpenEvent> onOpen) {
         this.onOpen = onOpen;
-        return this;
+        return self;
     }
 
     @Override
-    public Pane onClose(GuiEvent<PaneCloseEvent> onClose) {
+    public T onClose(GuiEvent<PaneCloseEvent> onClose) {
         this.onClose = onClose;
-        return this;
+        return self;
     }
 
     @Override
-    public Pane setOnItemPreClick(GuiEvent<GuiItemPreClickEvent> onItemClick) {
+    public T onItemPreClick(GuiEvent<GuiItemPreClickEvent> onItemClick) {
         this.onItemPreClick = onItemClick;
-        return this;
+        return self;
     }
 
     @Override
@@ -151,7 +192,7 @@ public abstract class AbstractPane implements Pane {
     protected void registerItem(GuiItem guiItem) {
         if (! (guiItem instanceof AbstractGuiItem))
             throw new IllegalArgumentException("item is not an instance of AbstractGuiItem");
-        AbstractGuiItem abstractGuiItem = (AbstractGuiItem) guiItem;
+        AbstractGuiItem<?> abstractGuiItem = (AbstractGuiItem<?>) guiItem;
         if (abstractGuiItem.getParentPane() != null)
             throw new IllegalArgumentException("item already has parent pane");
         abstractGuiItem.setParentPane(this);
@@ -164,13 +205,10 @@ public abstract class AbstractPane implements Pane {
     protected void unregisterItem(GuiItem guiItem) {
         if (! (guiItem instanceof AbstractGuiItem))
             throw new IllegalArgumentException("item is not an instance of AbstractGuiItem");
-        AbstractGuiItem abstractGuiItem = (AbstractGuiItem) guiItem;
+        AbstractGuiItem<?> abstractGuiItem = (AbstractGuiItem<?>) guiItem;
         if (!abstractGuiItem.getParentPane().equals(this))
             throw new IllegalArgumentException("item is not apart of this pane");
         abstractGuiItem.setParentPane(null);
     }
-
-
-
 
 }
