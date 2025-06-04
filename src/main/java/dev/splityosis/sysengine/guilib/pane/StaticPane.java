@@ -59,6 +59,9 @@ public class StaticPane extends AbstractPane<StaticPane> {
         return slot;
     }
 
+    /**
+     * Adds an item in the first empty slot if it exists
+     */
     public StaticPane addItem(GuiItem item) {
         addItemAndGetSlot(item);
         return this;

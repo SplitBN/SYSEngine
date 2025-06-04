@@ -57,10 +57,10 @@ public class BoxLayout extends AbstractPaneLayout<BoxLayout> {
         this.startCol = startRawSlot % guiWidth;
 
         if (startRow + height > guiHeight)
-            throw new IllegalArgumentException("Layout out of bounds for row '"+(startRow + height));
+            throw new IllegalArgumentException("Layout out of bounds for row "+(startRow + height));
 
         if (startCol + width > guiWidth)
-            throw new IllegalArgumentException("Layout out of bounds for col '"+(startCol + width));
+            throw new IllegalArgumentException("Layout out of bounds for col "+(startCol + width));
 
         localToRaw.clear();
         rawToLocal.clear();

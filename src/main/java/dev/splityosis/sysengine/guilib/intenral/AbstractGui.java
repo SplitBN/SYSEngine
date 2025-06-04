@@ -70,6 +70,11 @@ public abstract class AbstractGui<T extends AbstractGui<?>> implements Gui {
 
     @Override
     public T addPage(GuiPage page) {
+        return addPage(page, guiPage -> {});
+    }
+
+    @Override
+    public <E extends GuiPage> T addPage(E page, Consumer<E> setup) {
         if (! (page instanceof AbstractGuiPage))
             throw new IllegalArgumentException("page must be an instance of AbstractGuiPage");
 
@@ -79,16 +84,12 @@ public abstract class AbstractGui<T extends AbstractGui<?>> implements Gui {
 
         abstractGuiPage.setParentGui(this);
         pages.add(abstractGuiPage);
+        setup.accept(page);
+
         if (currentPage == null)
             setActivePage(0);
 
         return self;
-    }
-
-    @Override
-    public <E extends GuiPage> T addPage(E page, Consumer<E> setup) {
-        setup.accept(page);
-        return addPage(page);
     }
 
     @Override

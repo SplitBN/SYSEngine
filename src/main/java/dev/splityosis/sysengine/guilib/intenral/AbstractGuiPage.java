@@ -58,27 +58,29 @@ public abstract class AbstractGuiPage<T extends AbstractGuiPage<?>> implements G
 
     @Override
     public T addPane(Pane pane) {
+        return addPane(pane, guiPage -> {});
+    }
+
+    @Override
+    public <E extends Pane> T addPane(E pane, Consumer<E> setup) {
         if (! (pane instanceof AbstractPane))
             throw new IllegalArgumentException("pane is not an instance of AbstractPane");
         AbstractPane<?> abstractPane = (AbstractPane<?>) pane;
         if (abstractPane.getParentPage() != null)
             throw new IllegalArgumentException("pane already has parent page");
+
         abstractPane.setParentGuiPage(this);
         abstractPane.getLayout().initialize(getInventoryType(), getInventorySize());
         abstractPane.onAttach(this);
+        paneLayers.add(new PaneLayer(pane));
+
+        setup.accept(pane);
 
         if (inventory == null)
             inventory = createInventory(getTitle(), this);
 
-        paneLayers.add(new PaneLayer(pane));
         onPanesListChange(false);
         return self;
-    }
-
-    @Override
-    public <E extends Pane> T addPane(E pane, Consumer<E> setup) {
-        setup.accept(pane);
-        return addPane(pane);
     }
 
     @Override
@@ -264,7 +266,7 @@ public abstract class AbstractGuiPage<T extends AbstractGuiPage<?>> implements G
         // Make new inventory and open it for the viewers
         if (inventory == null) return self;
 
-        List<HumanEntity> viewers = inventory.getViewers();
+        List<HumanEntity> viewers = new ArrayList<>(inventory.getViewers());
         inventory = createInventory(getTitle(), this);
         redrawAllItems();
 
