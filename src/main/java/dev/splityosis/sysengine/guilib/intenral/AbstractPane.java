@@ -2,6 +2,8 @@ package dev.splityosis.sysengine.guilib.intenral;
 
 import dev.splityosis.sysengine.guilib.components.*;
 import dev.splityosis.sysengine.guilib.events.*;
+import dev.splityosis.sysengine.guilib.exceptions.UnsupportedPaneOperationException;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.EnumSet;
@@ -39,7 +41,48 @@ public abstract class AbstractPane<T extends AbstractPane<?>> implements Pane {
      * When this is called, {@link Pane#getParentPage()} isn't null and {@link Pane#getLayout()} gets initialized
      * @param page The page this got attached to
      */
-    public abstract void onAttach(GuiPage page);
+    protected abstract void onAttach(GuiPage page);
+
+    /**
+     * Sets the given {@link GuiItem} in the specified local slot.
+     * Called internally after sync has been verified.
+     *
+     * @param localSlot the local slot index in the pane
+     * @param item the item to set, or {@code null} to clear the slot
+     * @throws UnsupportedPaneOperationException if this pane doesn't support item setting
+     */
+    protected abstract void onDirectItemSet(int localSlot, GuiItem item) throws UnsupportedPaneOperationException;
+
+    /**
+     * Sets the given {@link GuiItem} in the specified local slot.
+     * Verifies that the slot is synced with the rendered state before applying.
+     *
+     * @param localSlot the local slot index in the pane
+     * @param item the item to set, or {@code null} to clear the slot
+     * @throws UnsupportedPaneOperationException if this pane doesn't support item setting
+     * @throws IllegalStateException if the slot is out of sync with the rendered state
+     */
+    public void setItemDirectly(int localSlot, @Nullable GuiItem item) throws UnsupportedPaneOperationException {
+        if (parentGuiPage == null || isSynced(localSlot, item))
+            onDirectItemSet(localSlot, item);
+        else
+            throw new IllegalStateException("Pane is internally out of sync with rendered form, interactions require the pane/slot being refreshed! local slot: " + localSlot);
+    }
+
+    private boolean isSynced(int localSlot, GuiItem item) {
+        if (parentGuiPage == null)
+            return true;
+
+        PaneLayer paneLayer = parentGuiPage.getPaneLayer(this);
+        if (paneLayer == null)
+            return true;
+
+        GuiItem rendered = paneLayer.getItemAtLocalSlot(localSlot);
+        if (rendered == null)
+            return item == null;
+        else
+            return rendered.equals(item);
+    }
 
     /**
      * Sets the current Gui containing this Pane. Intended for internal use.

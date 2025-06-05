@@ -13,7 +13,7 @@ import java.util.Set;
 public interface Pane {
 
     /**
-     * Returns the map of currently registered GUI items within this pane,
+     * Returns the map of local GUIItems within this pane,
      * indexed by their local slot (layout index).
      * <p>
      *     Note: This isn't necessarily what is shown on the gui.

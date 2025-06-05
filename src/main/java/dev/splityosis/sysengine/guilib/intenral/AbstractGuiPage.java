@@ -578,7 +578,11 @@ public abstract class AbstractGuiPage<T extends AbstractGuiPage<?>> implements G
 //        return null;
 //    }
 
-    private Pane getTopPaneAt(int rawSlot) {
+    public PaneLayer getPaneLayer(Pane pane) {
+        return paneLayers.stream().filter(layer -> layer.getPane().equals(pane)).findFirst().orElse(null);
+    }
+
+    public Pane getTopPaneAt(int rawSlot) {
         for (int i = paneLayers.size()-1; i >= 0; i--) {
             PaneLayer paneLayer = paneLayers.get(i);
             Pane pane = paneLayer.getPane();

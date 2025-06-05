@@ -10,7 +10,8 @@ import java.util.OptionalInt;
 public class PaneLayer {
 
     private final Pane pane;
-    private final Map<Integer,GuiItem> rawToItemMap = new HashMap<>();
+    private final Map<Integer, GuiItem> localToItemMap = new HashMap<>();
+    private final Map<Integer, GuiItem> rawToItemMap = new HashMap<>();
 
     public PaneLayer(Pane pane) {
         this.pane = pane;
@@ -21,14 +22,17 @@ public class PaneLayer {
     }
 
     public GuiItem getItemAtLocalSlot(int localSlot) {
-        int raw = pane.getLayout().toRawSlot(localSlot).orElse(-1);
-        return getItemAtRawSlot(raw);
+        return localToItemMap.get(localSlot);
     }
 
     public void updateAll() {
         rawToItemMap.clear();
+        localToItemMap.clear();
 
-        for (Map.Entry<Integer, GuiItem> e : pane.getLocalItems().entrySet()) {
+        localToItemMap.putAll(pane.getLocalItems());
+
+        // Translate local to raw
+        for (Map.Entry<Integer, GuiItem> e : localToItemMap.entrySet()) {
             int local = e.getKey();
             GuiItem item = e.getValue();
             pane.getLayout().toRawSlot(local).ifPresent(raw -> rawToItemMap.put(raw, item));
@@ -36,33 +40,39 @@ public class PaneLayer {
     }
 
     public void updateRawSlot(int rawSlot) {
-        OptionalInt maybeLocal = pane.getLayout().toLocalSlot(rawSlot);
-
-        if (maybeLocal.isPresent()) {
-
-            int local = maybeLocal.getAsInt();
+        pane.getLayout().toLocalSlot(rawSlot).ifPresent(local -> {
             GuiItem item = pane.getLocalItems().get(local);
-            if (item == null)
+            if (item == null) {
                 rawToItemMap.remove(rawSlot);
-            else
+                localToItemMap.remove(local);
+            }
+            else {
                 rawToItemMap.put(rawSlot, item);
-
-        } else
-            rawToItemMap.remove(rawSlot);
+                localToItemMap.put(local, item);
+            }
+        });
     }
 
     public void updateLocalSlot(int localSlot) {
         pane.getLayout().toRawSlot(localSlot).ifPresent(rawSlot -> {
             GuiItem item = pane.getLocalItems().get(localSlot);
-            if (item == null)
+            if (item == null) {
                 rawToItemMap.remove(rawSlot);
-            else
+                localToItemMap.remove(localSlot);
+            }
+            else {
                 rawToItemMap.put(rawSlot, item);
+                localToItemMap.put(localSlot, item);
+            }
         });
     }
 
     public Map<Integer, GuiItem> getRawToItemMap() {
         return rawToItemMap;
+    }
+
+    public Map<Integer, GuiItem> getLocalToItemMap() {
+        return localToItemMap;
     }
 
     public Pane getPane() {

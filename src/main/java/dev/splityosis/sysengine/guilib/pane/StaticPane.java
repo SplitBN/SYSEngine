@@ -3,7 +3,10 @@ package dev.splityosis.sysengine.guilib.pane;
 import dev.splityosis.sysengine.guilib.components.GuiItem;
 import dev.splityosis.sysengine.guilib.components.GuiPage;
 import dev.splityosis.sysengine.guilib.components.PaneLayout;
+import dev.splityosis.sysengine.guilib.exceptions.UnsupportedPaneOperationException;
 import dev.splityosis.sysengine.guilib.intenral.AbstractPane;
+import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -21,7 +24,7 @@ public class StaticPane extends AbstractPane<StaticPane> {
     }
 
     @Override
-    public void onAttach(GuiPage page) {
+    protected void onAttach(GuiPage page) {
         // Once layout is initialized reconstruct the map with initial capacity for optimization
         Map<Integer, GuiItem> temp = items;
         items = new LinkedHashMap<>(getLayout().getCapacity());
@@ -29,8 +32,24 @@ public class StaticPane extends AbstractPane<StaticPane> {
     }
 
     @Override
+    protected void onDirectItemSet(int localSlot, GuiItem item) {
+        setItem(localSlot, item);
+    }
+
+    @Override
     public Map<Integer, GuiItem> getLocalItems() {
         return items;
+    }
+
+
+    /**
+     * Clears all items in the pane.
+     * @return This pane.
+     */
+    public StaticPane clear() {
+        items.values().forEach(this::unregisterItem);
+        items.clear();
+        return this;
     }
 
     /**
