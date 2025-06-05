@@ -79,12 +79,12 @@ public interface Pane {
     /**
      * Allows a specific interaction type within this pane.
      */
-    Pane allowInteraction(GuiInteraction interaction);
+//    Pane allowInteraction(GuiInteraction interaction);
 
     /**
      * Disallows a specific interaction type within this pane.
      */
-    Pane disallowInteraction(GuiInteraction interaction);
+//    Pane disallowInteraction(GuiInteraction interaction);
 
     /**
      * Returns if the specified interaction type is currently allowed.
@@ -99,7 +99,7 @@ public interface Pane {
     /**
      * Sets whether a specific interaction type is allowed.
      */
-    Pane setInteractionAllowed(GuiInteraction interaction, boolean allowed);
+//    Pane setInteractionAllowed(GuiInteraction interaction, boolean allowed);
 
     /**
      * Sets a callback to be triggered when this pane is clicked.

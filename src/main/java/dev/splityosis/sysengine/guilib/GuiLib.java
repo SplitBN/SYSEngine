@@ -7,6 +7,7 @@ public class GuiLib {
 
     // TODO make VerticalScrollPane, HorizontalScrollPane, PaginatedPane
     // TODO make guiitem builder and gui builders and look into fillers
+    // TODO redo interactions
 
     private static boolean isInitialized = false;
 

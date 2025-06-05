@@ -138,17 +138,17 @@ public abstract class AbstractPane<T extends AbstractPane<?>> implements Pane {
         return self;
     }
 
-    @Override
-    public T allowInteraction(GuiInteraction interaction) {
-        allowedInteractions.add(interaction);
-        return self;
-    }
-
-    @Override
-    public T disallowInteraction(GuiInteraction interaction) {
-        allowedInteractions.remove(interaction);
-        return self;
-    }
+//    @Override
+//    public T allowInteraction(GuiInteraction interaction) {
+//        allowedInteractions.add(interaction);
+//        return self;
+//    }
+//
+//    @Override
+//    public T disallowInteraction(GuiInteraction interaction) {
+//        allowedInteractions.remove(interaction);
+//        return self;
+//    }
 
     @Override
     public boolean isInteractionAllowed(GuiInteraction interaction) {
@@ -160,14 +160,14 @@ public abstract class AbstractPane<T extends AbstractPane<?>> implements Pane {
         return Collections.unmodifiableSet(allowedInteractions);
     }
 
-    @Override
-    public T setInteractionAllowed(GuiInteraction interaction, boolean allowed) {
-        if (allowed)
-            allowInteraction(interaction);
-        else
-            disallowInteraction(interaction);
-        return self;
-    }
+//    @Override
+//    public T setInteractionAllowed(GuiInteraction interaction, boolean allowed) {
+//        if (allowed)
+//            allowInteraction(interaction);
+//        else
+//            disallowInteraction(interaction);
+//        return self;
+//    }
 
     @Override
     public AbstractPaneLayout<?> getLayout() {
