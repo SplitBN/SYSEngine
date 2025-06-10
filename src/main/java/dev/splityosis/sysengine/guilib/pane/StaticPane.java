@@ -23,6 +23,7 @@ public class StaticPane extends AbstractPane<StaticPane> {
         items = new LinkedHashMap<>();
     }
 
+
     @Override
     protected void onAttach(GuiPage page) {
         // Once layout is initialized reconstruct the map with initial capacity for optimization
@@ -106,7 +107,6 @@ public class StaticPane extends AbstractPane<StaticPane> {
         return items.entrySet().removeIf(e -> e.getValue().equals(item));
     }
 
-    @Override
     public int getSlot(GuiItem item) {
         return items.entrySet().stream()
                 .filter(e -> e.getValue().equals(item))

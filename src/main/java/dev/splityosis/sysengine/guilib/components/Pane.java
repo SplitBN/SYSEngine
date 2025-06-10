@@ -2,6 +2,8 @@ package dev.splityosis.sysengine.guilib.components;
 
 import dev.splityosis.sysengine.guilib.events.*;
 
+import org.jetbrains.annotations.Contract;
+
 import java.util.Map;
 import java.util.Set;
 
@@ -24,6 +26,7 @@ public interface Pane {
     /**
      * Sets the rendering weight of this pane. Higher weights render later (on top).
      */
+    @Contract("_ -> this")
     Pane setWeight(int weight);
 
     /**
@@ -40,18 +43,18 @@ public interface Pane {
     /**
      * Returns whether this pane is currently attached to a {@link GuiPage}.
      */
-    default boolean isAttached() {
-        return getParentPage() != null;
-    }
+    boolean isAttached();
 
     /**
      * Sets the visibility of this pane.
      */
+    @Contract("_ -> this")
     Pane setVisible(boolean visible);
 
     /**
      * Triggers a full refresh of the pane’s content.
      */
+    @Contract("-> this")
     Pane refresh();
 
     /**
@@ -59,6 +62,7 @@ public interface Pane {
      *
      * @param slot the local layout slot to refresh
      */
+    @Contract("_ -> this")
     Pane refresh(int slot);
 
     /**
@@ -72,21 +76,6 @@ public interface Pane {
     GuiPage getParentPage();
 
     /**
-     * Returns the local slot index of the given GUI item, or -1 if empty.
-     */
-    int getSlot(GuiItem guiItem);
-
-    /**
-     * Allows a specific interaction type within this pane.
-     */
-//    Pane allowInteraction(GuiInteraction interaction);
-
-    /**
-     * Disallows a specific interaction type within this pane.
-     */
-//    Pane disallowInteraction(GuiInteraction interaction);
-
-    /**
      * Returns if the specified interaction type is currently allowed.
      */
     boolean isInteractionAllowed(GuiInteraction interaction);
@@ -97,29 +86,28 @@ public interface Pane {
     Set<GuiInteraction> getAllowedInteractions();
 
     /**
-     * Sets whether a specific interaction type is allowed.
-     */
-//    Pane setInteractionAllowed(GuiInteraction interaction, boolean allowed);
-
-    /**
      * Sets a callback to be triggered when this pane is clicked.
      */
+    @Contract("_ -> this")
     Pane onClick(GuiEvent<PaneClickEvent> onClick);
 
     /**
      * Sets a callback to be triggered when this pane is opened.
      */
+    @Contract("_ -> this")
     Pane onOpen(GuiEvent<PaneOpenEvent> onOpen);
 
     /**
      * Sets a callback to be triggered when this pane is closed.
      */
+    @Contract("_ -> this")
     Pane onClose(GuiEvent<PaneCloseEvent> onClose);
 
     /**
      * Sets a callback that fires before a GUI item within this pane is clicked.
      * Can be used for conditional behavior or early cancellation.
      */
+    @Contract("_ -> this")
     Pane onItemPreClick(GuiEvent<GuiItemPreClickEvent> onItemClick);
 
     /**

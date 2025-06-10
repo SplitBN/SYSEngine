@@ -5,7 +5,9 @@ import dev.splityosis.sysengine.guilib.components.GuiPage;
 import dev.splityosis.sysengine.guilib.events.GuiCloseEvent;
 import dev.splityosis.sysengine.guilib.events.GuiEvent;
 import dev.splityosis.sysengine.guilib.events.GuiOpenEvent;
+import dev.splityosis.sysengine.guilib.page.DefaultPage;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryType;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -71,6 +73,32 @@ public abstract class AbstractGui<T extends AbstractGui<?>> implements Gui {
     @Override
     public T addPage(GuiPage page) {
         return addPage(page, guiPage -> {});
+    }
+
+    @Override
+    public Gui addPage(int rows, Consumer<GuiPage> setup) {
+        return addPage(new DefaultPage(rows*9), setup);
+    }
+
+    @Override
+    public Gui addPage(InventoryType inventoryType, Consumer<GuiPage> setup) {
+        return addPage(new DefaultPage(inventoryType), setup);
+    }
+
+    @Override
+    public Gui addPage(String title, int rows, Consumer<GuiPage> setup) {
+        return addPage(new DefaultPage(rows*9), defaultPage -> {
+            defaultPage.setTitle(title);
+            setup.accept(defaultPage);
+        });
+    }
+
+    @Override
+    public Gui addPage(String title, InventoryType type, Consumer<GuiPage> setup) {
+        return addPage(new DefaultPage(type), defaultPage -> {
+            defaultPage.setTitle(title);
+            setup.accept(defaultPage);
+        });
     }
 
     @Override

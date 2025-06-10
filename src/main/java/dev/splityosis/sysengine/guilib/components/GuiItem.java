@@ -3,6 +3,7 @@ package dev.splityosis.sysengine.guilib.components;
 import dev.splityosis.sysengine.guilib.events.GuiEvent;
 import dev.splityosis.sysengine.guilib.events.GuiItemClickEvent;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.Contract;
 
 /**
  * Represents an item displayed within a pane in the GUI.
@@ -29,6 +30,7 @@ public interface GuiItem {
      * @param itemStack the item to display
      * @return this GuiItem instance
      */
+    @Contract("_ -> this")
     GuiItem setItemStack(ItemStack itemStack);
 
     /**
@@ -37,6 +39,7 @@ public interface GuiItem {
      * @param onClick the click event consumer
      * @return this GuiItem instance
      */
+    @Contract("_ -> this")
     GuiItem onClick(GuiEvent<GuiItemClickEvent> onClick);
 
     /**
@@ -51,6 +54,7 @@ public interface GuiItem {
      *
      * @return this GuiItem instance
      */
+    @Contract("-> this")
     GuiItem refresh();
 
     /**
@@ -58,6 +62,7 @@ public interface GuiItem {
      *
      * @return the cloned GuiItem
      */
+    @Contract("-> new")
     GuiItem clone();
 
     /**
@@ -67,6 +72,7 @@ public interface GuiItem {
      * @param visible true to make visible, false to hide
      * @return this GuiItem instance
      */
+    @Contract("_ -> this")
     GuiItem setVisible(boolean visible);
 
     /**

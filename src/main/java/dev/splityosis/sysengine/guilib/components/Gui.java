@@ -4,6 +4,8 @@ import dev.splityosis.sysengine.guilib.events.GuiCloseEvent;
 import dev.splityosis.sysengine.guilib.events.GuiEvent;
 import dev.splityosis.sysengine.guilib.events.GuiOpenEvent;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryType;
+import org.jetbrains.annotations.Contract;
 
 import java.util.Collection;
 import java.util.List;
@@ -42,22 +44,59 @@ public interface Gui {
      *
      * @param index the page index to activate
      */
+    @Contract("_ -> this")
     Gui setActivePage(int index);
+
+    /**
+     * Adds a new DefaultPage to this GUI.
+     *
+     * @param rows The amount of rows from 1-6.
+     * @param setup a consumer for configuring the page
+     */
+    @Contract("_, _, _ -> this")
+    Gui addPage(String title, int rows, Consumer<GuiPage> setup);
+
+    /**
+     * Adds a new DefaultPage to this GUI.
+     *
+     * @param rows The amount of rows from 1-6.
+     * @param setup a consumer for configuring the page
+     */
+    @Contract("_, _ -> this")
+    Gui addPage(int rows, Consumer<GuiPage> setup);
+
+    /**
+     * Adds a new DefaultPage to this GUI.
+     *
+     * @param setup a consumer for configuring the page
+     */
+    @Contract("_, _, _ -> this")
+    Gui addPage(String title, InventoryType type, Consumer<GuiPage> setup);
+
+    /**
+     * Adds a new DefaultPage to this GUI.
+     *
+     * @param setup a consumer for configuring the page
+     */
+    @Contract("_, _ -> this")
+    Gui addPage(InventoryType type, Consumer<GuiPage> setup);
 
     /**
      * Adds a new page to this GUI.
      *
      * @param page the page to add
      */
+    @Contract("_ -> this")
     Gui addPage(GuiPage page);
 
     /**
      * Adds a new page and applies the given configuration.
      *
-     * @param page  the page to add
+     * @param page the page to add
      * @param setup a consumer for configuring the page
-     * @param <E>   the type of the page
+     * @param <E> the type of the page
      */
+    @Contract("_, _ -> this")
     <E extends GuiPage> Gui addPage(E page, Consumer<E> setup);
 
     /**
@@ -70,6 +109,7 @@ public interface Gui {
      *
      * @param player the player to open the GUI for
      */
+    @Contract("_ -> this")
     Gui open(Player player);
 
     /**
@@ -80,11 +120,13 @@ public interface Gui {
     /**
      * Sets the callback to run when this GUI is opened.
      */
+    @Contract("_ -> this")
     Gui onOpen(GuiEvent<GuiOpenEvent> onOpen);
 
     /**
      * Sets the callback to run when this GUI is closed.
      */
+    @Contract("_ -> this")
     Gui onClose(GuiEvent<GuiCloseEvent> onClose);
 
     /**

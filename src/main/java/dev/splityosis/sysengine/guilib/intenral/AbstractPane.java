@@ -110,6 +110,11 @@ public abstract class AbstractPane<T extends AbstractPane<?>> implements Pane {
     }
 
     @Override
+    public boolean isAttached() {
+        return getParentPage() != null;
+    }
+
+    @Override
     public T setVisible(boolean visible) {
         if (visible != this.visible) { // A change in state
             this.visible = visible;
