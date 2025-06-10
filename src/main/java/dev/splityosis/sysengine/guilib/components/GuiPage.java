@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryType;
+import org.jetbrains.annotations.Contract;
 
 import java.util.List;
 import java.util.Map;
@@ -42,6 +43,7 @@ public interface GuiPage {
     /**
      * Sets the title of this page.
      */
+    @Contract("_ -> this")
     GuiPage setTitle(String title);
 
     /**
@@ -52,16 +54,19 @@ public interface GuiPage {
     /**
      * Adds a pane to the page.
      */
+    @Contract("_ -> this")
     GuiPage addPane(Pane pane);
 
     /**
      * Adds a pane and allows further configuration using the provided consumer.
      */
+    @Contract("_, _ -> this")
     <T extends Pane> GuiPage addPane(T pane, Consumer<T> setup);
 
     /**
      * Removes a pane from the page.
      */
+    @Contract("_ -> this")
     GuiPage removePane(Pane pane);
 
     /**
@@ -77,16 +82,19 @@ public interface GuiPage {
     /**
      * Refreshes the entire page.
      */
+    @Contract("-> this")
     GuiPage refresh();
 
     /**
      * Refreshes only the given pane.
      */
+    @Contract("_ -> this")
     GuiPage refresh(Pane pane);
 
     /**
      * Refreshes the slot at the given index.
      */
+    @Contract("_ -> this")
     GuiPage refresh(int slot);
 
     /**
@@ -113,26 +121,31 @@ public interface GuiPage {
     /**
      * Handles an inventory click event targeted at this page.
      */
+    @Contract("_ -> this")
     GuiPage handleClick(InventoryClickEvent event);
 
     /**
      * Handles an inventory drag event targeted at this page.
      */
+    @Contract("_ -> this")
     GuiPage handleDrag(InventoryDragEvent event);
 
     /**
      * Sets a callback to be triggered when this page is opened.
      */
+    @Contract("_ -> this")
     GuiPage onOpen(GuiEvent<GuiPageOpenEvent> onOpen);
 
     /**
      * Sets a callback to be triggered when this page is closed.
      */
+    @Contract("_ -> this")
     GuiPage onClose(GuiEvent<GuiPageCloseEvent> onClose);
 
     /**
      * Sets a callback to be triggered when this page is clicked.
      */
+    @Contract("_ -> this")
     GuiPage onClick(GuiEvent<GuiPageClickEvent> onClick);
 
     /**
