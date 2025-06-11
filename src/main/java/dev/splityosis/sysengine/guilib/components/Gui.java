@@ -3,6 +3,7 @@ package dev.splityosis.sysengine.guilib.components;
 import dev.splityosis.sysengine.guilib.events.GuiCloseEvent;
 import dev.splityosis.sysengine.guilib.events.GuiEvent;
 import dev.splityosis.sysengine.guilib.events.GuiOpenEvent;
+import dev.splityosis.sysengine.guilib.gui.DefaultGui;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryType;
 import org.jetbrains.annotations.Contract;
@@ -138,4 +139,8 @@ public interface Gui {
      * Returns the current close callback.
      */
     GuiEvent<GuiCloseEvent> getOnClose();
+
+    static Gui create() {
+        return new DefaultGui();
+    }
 }

@@ -5,6 +5,7 @@ import dev.splityosis.sysengine.guilib.components.GuiPage;
 import dev.splityosis.sysengine.guilib.components.PaneLayout;
 import dev.splityosis.sysengine.guilib.exceptions.UnsupportedPaneOperationException;
 import dev.splityosis.sysengine.guilib.intenral.AbstractPane;
+import dev.splityosis.sysengine.guilib.layout.FullLayout;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
@@ -21,6 +22,10 @@ public class StaticPane extends AbstractPane<StaticPane> {
     public StaticPane(PaneLayout layout) {
         super(layout);
         items = new LinkedHashMap<>();
+    }
+
+    public StaticPane() {
+        this(new FullLayout());
     }
 
 

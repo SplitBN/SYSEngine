@@ -2,12 +2,9 @@ package dev.splityosis.sysengine.commandlib.exception;
 
 /**
  * This exception is thrown when a command requirement is not met.
- * It serves as a generic indication that a specific requirement was not fulfilled
- * before executing the command.
+ * It serves as a generic indication that a specific requirement was not fulfilled.
  */
 public class RequirementNotMetException extends Exception {
-
-    private String failReason;
 
     /**
      * Constructs a new {@code RequirementNotMetException} with a default message.
@@ -18,8 +15,7 @@ public class RequirementNotMetException extends Exception {
      *                   this can be used to provide more specific feedback or context for the failure.
      */
     public RequirementNotMetException(String failReason) {
-        super("Command requirement not met! You should never see this message, let the developer know.");
-        this.failReason = failReason;
+        super(failReason);
     }
 
     /**
@@ -28,7 +24,7 @@ public class RequirementNotMetException extends Exception {
      * If this exception is triggered, it suggests an unmet requirement for the command to proceed.
      */
     public RequirementNotMetException() {
-        super("Command requirement not met! You should never see this message, let the developer know.");
+
     }
 
     /**
@@ -37,15 +33,15 @@ public class RequirementNotMetException extends Exception {
      * @return a string representing the reason for failure.
      */
     public String getFailReason() {
-        return failReason;
+        return getMessage();
     }
 
-    /**
-     * Sets the reason the requirement was not met.
-     *
-     * @param failReason a string representing the reason for failure.
-     */
-    public void setFailReason(String failReason) {
-        this.failReason = failReason;
-    }
+//    /**
+//     * Sets the reason the requirement was not met.
+//     *
+//     * @param failReason a string representing the reason for failure.
+//     */
+//    public void setFailReason(String failReason) {
+//
+//    }
 }

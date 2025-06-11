@@ -1,9 +1,12 @@
 package dev.splityosis.sysengine.guilib.components;
 
+import dev.splityosis.sysengine.guilib.builder.item.GuiItemBuilder;
 import dev.splityosis.sysengine.guilib.events.GuiEvent;
 import dev.splityosis.sysengine.guilib.events.GuiItemClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Contract;
+
+import java.util.function.Supplier;
 
 /**
  * Represents an item displayed within a pane in the GUI.
@@ -81,4 +84,18 @@ public interface GuiItem {
      * @return true if visible, false otherwise
      */
     boolean isVisible();
+
+    /**
+     * Start a builder from a fixed item.
+     */
+    static GuiItemBuilder of(ItemStack stack) {
+        return GuiItemBuilder.of(stack);
+    }
+
+    /**
+     * Start a builder from a supplier.
+     */
+    static GuiItemBuilder of(Supplier<ItemStack> supplier) {
+        return GuiItemBuilder.of(supplier);
+    }
 }

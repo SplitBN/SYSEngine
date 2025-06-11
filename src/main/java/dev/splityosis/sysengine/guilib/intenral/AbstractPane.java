@@ -3,6 +3,7 @@ package dev.splityosis.sysengine.guilib.intenral;
 import dev.splityosis.sysengine.guilib.components.*;
 import dev.splityosis.sysengine.guilib.events.*;
 import dev.splityosis.sysengine.guilib.exceptions.UnsupportedPaneOperationException;
+import dev.splityosis.sysengine.guilib.layout.FullLayout;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
@@ -30,6 +31,10 @@ public abstract class AbstractPane<T extends AbstractPane<?>> implements Pane {
         if (! (layout instanceof AbstractPaneLayout))
             throw new IllegalArgumentException("layout must be instance of AbstractPaneLayout");
         this.layout = (AbstractPaneLayout<?>) layout;
+    }
+
+    public AbstractPane() {
+        this(new FullLayout());
     }
 
     public T self() {
