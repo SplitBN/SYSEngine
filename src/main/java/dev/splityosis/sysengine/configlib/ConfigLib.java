@@ -103,7 +103,8 @@ public class ConfigLib {
                 new FunctionMapper(),
                 new ZoneIdMapper(),
                 new ScheduleMapper(),
-                new BigIntegerMapper()
+                new BigIntegerMapper(),
+                new ConfigurationSectionMapper()
         );
 
         if (VersionUtil.isServerAtLeast("1.11"))
