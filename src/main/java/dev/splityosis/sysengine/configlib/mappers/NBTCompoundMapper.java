@@ -281,7 +281,7 @@ public final class NBTCompoundMapper implements AbstractMapper<NBTCompound> {
 
     private static void loadByteGroup(ConfigurationSection sec, NBTCompound compound) {
         if (sec == null) return;
-        for (String key : sec.getKeys(false)) {
+        for (String key : getFlattenedPaths(sec)) {
             byte val = (byte) sec.getInt(key);
             compound.setByte(key, val);
         }
@@ -289,7 +289,7 @@ public final class NBTCompoundMapper implements AbstractMapper<NBTCompound> {
 
     private static void loadShortGroup(ConfigurationSection sec, NBTCompound compound) {
         if (sec == null) return;
-        for (String key : sec.getKeys(false)) {
+        for (String key : getFlattenedPaths(sec)) {
             short val = (short) sec.getInt(key);
             compound.setShort(key, val);
         }
@@ -297,7 +297,7 @@ public final class NBTCompoundMapper implements AbstractMapper<NBTCompound> {
 
     private static void loadIntGroup(ConfigurationSection sec, NBTCompound compound) {
         if (sec == null) return;
-        for (String key : sec.getKeys(false)) {
+        for (String key : getFlattenedPaths(sec)) {
             int val = sec.getInt(key);
             compound.setInteger(key, val);
         }
@@ -305,7 +305,7 @@ public final class NBTCompoundMapper implements AbstractMapper<NBTCompound> {
 
     private static void loadLongGroup(ConfigurationSection sec, NBTCompound compound) {
         if (sec == null) return;
-        for (String key : sec.getKeys(false)) {
+        for (String key : getFlattenedPaths(sec)) {
             long val = sec.getLong(key);
             compound.setLong(key, val);
         }
@@ -313,7 +313,7 @@ public final class NBTCompoundMapper implements AbstractMapper<NBTCompound> {
 
     private static void loadFloatGroup(ConfigurationSection sec, NBTCompound compound) {
         if (sec == null) return;
-        for (String key : sec.getKeys(false)) {
+        for (String key : getFlattenedPaths(sec)) {
             float val = (float) sec.getDouble(key);
             compound.setFloat(key, val);
         }
@@ -321,7 +321,7 @@ public final class NBTCompoundMapper implements AbstractMapper<NBTCompound> {
 
     private static void loadDoubleGroup(ConfigurationSection sec, NBTCompound compound) {
         if (sec == null) return;
-        for (String key : sec.getKeys(false)) {
+        for (String key : getFlattenedPaths(sec)) {
             double val = sec.getDouble(key);
             compound.setDouble(key, val);
         }
@@ -329,7 +329,7 @@ public final class NBTCompoundMapper implements AbstractMapper<NBTCompound> {
 
     private static void loadStringGroup(ConfigurationSection sec, NBTCompound compound) {
         if (sec == null) return;
-        for (String key : sec.getKeys(false)) {
+        for (String key : getFlattenedPaths(sec)) {
             String val = sec.getString(key, "");
             compound.setString(key, val);
         }
@@ -337,7 +337,7 @@ public final class NBTCompoundMapper implements AbstractMapper<NBTCompound> {
 
     private static void loadByteArrayGroup(ConfigurationSection sec, NBTCompound compound) {
         if (sec == null) return;
-        for (String key : sec.getKeys(false)) {
+        for (String key : getFlattenedPaths(sec)) {
             String base64 = sec.getString(key, "");
             byte[] decoded = Base64.getDecoder().decode(base64);
             compound.setByteArray(key, decoded);
@@ -346,7 +346,7 @@ public final class NBTCompoundMapper implements AbstractMapper<NBTCompound> {
 
     private static void loadIntArrayGroup(ConfigurationSection sec, NBTCompound compound) {
         if (sec == null) return;
-        for (String key : sec.getKeys(false)) {
+        for (String key : getFlattenedPaths(sec)) {
             List<Integer> intList = sec.getIntegerList(key);
             int[] arr = intList.stream().mapToInt(Integer::intValue).toArray();
             compound.setIntArray(key, arr);
@@ -355,7 +355,7 @@ public final class NBTCompoundMapper implements AbstractMapper<NBTCompound> {
 
     private static void loadLongArrayGroup(ConfigurationSection sec, NBTCompound compound) {
         if (sec == null) return;
-        for (String key : sec.getKeys(false)) {
+        for (String key : getFlattenedPaths(sec)) {
             List<Long> longList = new ArrayList<>();
             for (Object o : sec.getList(key, Collections.emptyList())) {
                 if (o instanceof Number) {
@@ -546,6 +546,27 @@ public final class NBTCompoundMapper implements AbstractMapper<NBTCompound> {
             else {
                 // It's a primitive (String, Number, Boolean, etc.) => store directly
                 section.set(key, value);
+            }
+        }
+    }
+
+    public static List<String> getFlattenedPaths(ConfigurationSection section) {
+        List<String> result = new ArrayList<>();
+        flatten(section, "", result);
+        return result;
+    }
+
+    private static void flatten(ConfigurationSection section, String prefix, List<String> result) {
+        if (section == null) return;
+
+        for (String key : section.getKeys(false)) {
+            String fullKey = prefix.isEmpty() ? key : prefix + "." + key;
+            Object value = section.get(key);
+
+            if (value instanceof ConfigurationSection) {
+                flatten((ConfigurationSection) value, fullKey, result);
+            } else {
+                result.add(fullKey);
             }
         }
     }
