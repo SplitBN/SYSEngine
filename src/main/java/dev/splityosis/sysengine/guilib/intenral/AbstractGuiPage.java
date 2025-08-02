@@ -123,7 +123,7 @@ public abstract class AbstractGuiPage<T extends AbstractGuiPage<?>> implements G
         }
 
         // place final layer which is what should be showing
-        List<HumanEntity> viewers = inventory.getViewers();
+        List<HumanEntity> viewers = new ArrayList<>(inventory.getViewers());
         inventory = createInventory(getTitle(), this);
         for (int i = 0; i < inventory.getSize(); i++) {
             GuiItem gi = finalLayer.get(i);
