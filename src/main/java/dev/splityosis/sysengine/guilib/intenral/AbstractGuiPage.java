@@ -178,7 +178,8 @@ public abstract class AbstractGuiPage<T extends AbstractGuiPage<?>> implements G
     public GuiItem getItem(int slot) {
         GuiItem top = null;
         for (PaneLayer paneLayer : paneLayers) {
-            if (!paneLayer.getPane().isVisible()) return null;
+            if (!paneLayer.getPane().isVisible())
+                continue;
             GuiItem item = paneLayer.getItemAtRawSlot(slot);
             if (item != null && item.isVisible())
                 top = item;
@@ -383,6 +384,7 @@ public abstract class AbstractGuiPage<T extends AbstractGuiPage<?>> implements G
         for (int i = paneLayers.size() - 1; i >= 0; i--) {
             PaneLayer layer = paneLayers.get(i);
             Pane pane = layer.getPane();
+            System.out.println("clickedpane.isvisible = "+ pane.isVisible());
             if (!pane.isVisible()) continue;
 
             OptionalInt maybeLocal = pane.getLayout().toLocalSlot(rawSlot);
@@ -395,29 +397,30 @@ public abstract class AbstractGuiPage<T extends AbstractGuiPage<?>> implements G
             pane.getOnClick().call(paneEvt);
         }
 
+        System.out.println("[DEBUG] No pane event was cancelled, allowed to handle item");
         // 3e) If there was a clickedItem, fire pre‐click then item‐click
         if (hasClickedItem) {
             Pane parentPane = clickedItem.getParentPane();
             int local = parentPane.getLayout().toLocalSlot(rawSlot).orElse(-1);
-//            System.out.println("[DEBUG] Preparing to fire GuiItemPreClickEvent for local=" + local);
+            System.out.println("[DEBUG] Preparing to fire GuiItemPreClickEvent for local=" + local);
 
             GuiItemPreClickEvent preEvt = new GuiItemPreClickEvent(
                     parentPane, player, event, local, rawSlot, clickedItem
             );
             parentPane.getOnItemPreClick().call(preEvt);
             if (preEvt.isCancelled()) {
-//                System.out.println("[DEBUG] GuiItemPreClickEvent was cancelled. stopping");
+                System.out.println("[DEBUG] GuiItemPreClickEvent was cancelled. stopping");
                 return self;
             }
-//            System.out.println("[DEBUG] GuiItemPreClickEvent allowed firing item click event");
+            System.out.println("[DEBUG] GuiItemPreClickEvent allowed firing item click event");
 
             GuiItemClickEvent itemEvt = new GuiItemClickEvent(player, event, local, rawSlot, clickedItem);
             clickedItem.getOnClick().call(itemEvt);
-//            System.out.println("[Debug] GuiItemClickEvent fired for " + clickedItem);
+            System.out.println("[Debug] GuiItemClickEvent fired for " + clickedItem);
         }
-//        else {
-//            System.out.println("[DEBUG] no item was clicked");
-//        }
+        else {
+            System.out.println("[DEBUG] no item was clicked");
+        }
 
         return self;
     }
