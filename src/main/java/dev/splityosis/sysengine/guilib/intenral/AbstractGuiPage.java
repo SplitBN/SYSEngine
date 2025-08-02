@@ -47,11 +47,13 @@ public abstract class AbstractGuiPage<T extends AbstractGuiPage<?>> implements G
     protected void onPanesListChange(boolean clear) {
         paneLayers.sort(Comparator.comparing(paneLayer -> paneLayer.getPane().getWeight()));
 
-        if (clear)
-            inventory.clear();
+        if (inventory != null) {
+            if (clear)
+                inventory.clear();
 
-        for (PaneLayer paneLayer : paneLayers)
-            refresh(paneLayer.getPane());
+            for (PaneLayer paneLayer : paneLayers)
+                refresh(paneLayer.getPane());
+        }
     }
 
     protected abstract Inventory createInventory(String title, InventoryHolder holder);
