@@ -6,7 +6,7 @@
 
     <groupId>dev.splityosis</groupId>
     <artifactId>sysengine</artifactId>
-    <version>1.4.1</version>
+    <version>1.4.2</version>
     <packaging>jar</packaging>
 
     <name>SYSEngine</name>
@@ -134,7 +134,7 @@
         <dependency>
             <groupId>de.tr7zw</groupId>
             <artifactId>item-nbt-api</artifactId>
-            <version>2.14.1</version>
+            <version>2.15.2-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
 

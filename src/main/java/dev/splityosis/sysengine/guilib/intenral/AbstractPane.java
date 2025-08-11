@@ -239,14 +239,13 @@ public abstract class AbstractPane<T extends AbstractPane<?>> implements Pane {
 //    }
 
     /**
-     * Must be called before associating an item with a pane.
      * This internally sets this pane as the item's parent
      */
     protected void registerItem(GuiItem guiItem) {
         if (! (guiItem instanceof AbstractGuiItem))
             throw new IllegalArgumentException("item is not an instance of AbstractGuiItem");
         AbstractGuiItem<?> abstractGuiItem = (AbstractGuiItem<?>) guiItem;
-        if (abstractGuiItem.getParentPane() != null)
+        if (abstractGuiItem.getParentPane() != null && !this.equals(abstractGuiItem.getParentPane()))
             throw new IllegalArgumentException("item already has parent pane");
         abstractGuiItem.setParentPane(this);
     }

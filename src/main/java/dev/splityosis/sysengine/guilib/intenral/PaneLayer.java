@@ -1,20 +1,25 @@
-package dev.splityosis.sysengine.guilib.components;
+package dev.splityosis.sysengine.guilib.intenral;
+
+import dev.splityosis.sysengine.guilib.components.GuiItem;
+import dev.splityosis.sysengine.guilib.components.Pane;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.OptionalInt;
 
 /**
  * A data class that holds "The GuiItems that the GuiPage recognizes from the Pane".
  */
 public class PaneLayer {
 
-    private final Pane pane;
+    private final AbstractPane<?> pane;
     private final Map<Integer, GuiItem> localToItemMap = new HashMap<>();
     private final Map<Integer, GuiItem> rawToItemMap = new HashMap<>();
 
     public PaneLayer(Pane pane) {
-        this.pane = pane;
+        if (pane instanceof AbstractPane<?>)
+            this.pane = (AbstractPane<?>) pane;
+        else
+            throw new IllegalArgumentException("pane must be instance of AbstractPane");
     }
 
     public GuiItem getItemAtRawSlot(int rawSlot) {
@@ -29,7 +34,9 @@ public class PaneLayer {
         rawToItemMap.clear();
         localToItemMap.clear();
 
-        localToItemMap.putAll(pane.getLocalItems());
+        Map<Integer, GuiItem> localItems = pane.getLocalItems();
+        localItems.values().forEach(pane::registerItem);
+        localToItemMap.putAll(localItems);
 
         // Translate local to raw
         for (Map.Entry<Integer, GuiItem> e : localToItemMap.entrySet()) {

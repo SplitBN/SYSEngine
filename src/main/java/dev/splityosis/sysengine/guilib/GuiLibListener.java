@@ -3,7 +3,6 @@ package dev.splityosis.sysengine.guilib;
 import dev.splityosis.sysengine.guilib.components.Gui;
 import dev.splityosis.sysengine.guilib.components.GuiPage;
 import dev.splityosis.sysengine.guilib.components.Pane;
-import dev.splityosis.sysengine.guilib.components.PaneLayer;
 import dev.splityosis.sysengine.guilib.events.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -26,6 +25,8 @@ public class GuiLibListener implements Listener {
         if (holder == null) return;
         if (! (holder instanceof GuiPage)) return;
         GuiPage page = (GuiPage) holder;
+
+//        System.out.println("Got the page, calling handleClick()");
 
         // Let page handle rest
         page.handleClick(event);
