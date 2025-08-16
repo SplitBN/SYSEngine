@@ -1,5 +1,6 @@
 package dev.splityosis.sysengine;
 
+import com.cryptomorin.xseries.XEntityType;
 import de.tr7zw.changeme.nbtapi.NBT;
 import dev.splityosis.sysengine.actions.ActionTypeRegistry;
 import dev.splityosis.sysengine.commandlib.CommandLib;
@@ -47,11 +48,11 @@ public final class SYSEngine extends JavaPlugin {
         if (isInitialized) return;
         isInitialized = true;
 
-        if (!NBT.preloadApi()) {
-            plugin.getLogger().warning("NBT-API wasn't initialized properly, disabling the plugin");
-            plugin.getPluginLoader().disablePlugin(plugin);
-            return;
-        }
+//        if (!NBT.preloadApi()) {
+//            plugin.getLogger().warning("NBT-API wasn't initialized properly, disabling the plugin");
+//            plugin.getPluginLoader().disablePlugin(plugin);
+//            return;
+//        }
 
         ConfigLib.initialize();
         ActionTypeRegistry.initialize();
