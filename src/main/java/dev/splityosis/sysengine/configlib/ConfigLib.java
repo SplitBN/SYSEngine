@@ -104,7 +104,8 @@ public class ConfigLib {
                 new ZoneIdMapper(),
                 new ScheduleMapper(),
                 new BigIntegerMapper(),
-                new ConfigurationSectionMapper()
+                new ConfigurationSectionMapper(),
+                new XSoundMapper()
         );
 
         if (VersionUtil.isServerAtLeast("1.11"))

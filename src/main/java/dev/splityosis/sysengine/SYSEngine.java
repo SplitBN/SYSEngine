@@ -1,7 +1,5 @@
 package dev.splityosis.sysengine;
 
-import com.cryptomorin.xseries.XEntityType;
-import de.tr7zw.changeme.nbtapi.NBT;
 import dev.splityosis.sysengine.actions.ActionTypeRegistry;
 import dev.splityosis.sysengine.commandlib.CommandLib;
 import dev.splityosis.sysengine.commandlib.manager.CommandManager;
