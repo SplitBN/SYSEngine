@@ -123,14 +123,17 @@ public class ColorUtil {
      * @return The hex-colorized string.
      */
     public static String colorizeHex(String str) {
-        Matcher matcher = HEX_PATTERN.matcher(str);
-        StringBuilder buffer = new StringBuilder();
+        Matcher m = HEX_PATTERN.matcher(str);
+        StringBuffer out = new StringBuffer();
 
-        while (matcher.find())
-            matcher.appendReplacement(new StringBuffer(buffer), net.md_5.bungee.api.ChatColor.of(matcher.group(1)).toString());
-
-        return matcher.appendTail(new StringBuffer(buffer)).toString();
+        while (m.find()) {
+            String repl = net.md_5.bungee.api.ChatColor.of(m.group(1)).toString();
+            m.appendReplacement(out, Matcher.quoteReplacement(repl));
+        }
+        m.appendTail(out);
+        return out.toString();
     }
+
 
     /**
      * Colorizes a list of strings by converting hex color codes with '&' prefix
