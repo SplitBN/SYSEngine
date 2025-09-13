@@ -27,6 +27,7 @@ public abstract class AbstractGuiPage<T extends AbstractGuiPage<?>> implements G
 
     private GuiEvent<GuiPageCloseEvent> onClose = e->{};
     private GuiEvent<GuiPageClickEvent> onClick = e->{};
+    private GuiEvent<GuiPagePlayerInventoryClickEvent> onPlayerInvClick = event -> {};
     private String title = getInventoryType().getDefaultTitle();
 
     public AbstractGuiPage() {
@@ -249,6 +250,12 @@ public abstract class AbstractGuiPage<T extends AbstractGuiPage<?>> implements G
     }
 
     @Override
+    public GuiPage onPlayerInvClick(GuiEvent<GuiPagePlayerInventoryClickEvent> onPlayerInvClick) {
+        this.onPlayerInvClick = onPlayerInvClick;
+        return self;
+    }
+
+    @Override
     public @NotNull Inventory getInventory() {
         return inventory;
     }
@@ -309,7 +316,8 @@ public abstract class AbstractGuiPage<T extends AbstractGuiPage<?>> implements G
 
         // 2) Click in player's own inventory
         if (!clickedInv.equals(guiInv)) {
-            // TODO perhaps onPlayerInventoryClick or sum like that
+            // Call onPlayerInventoryClick or sum like that
+            this.onPlayerInvClick.call(new GuiPagePlayerInventoryClickEvent(this, player, event));
 
             if (!isItemPlace) {
                 // player doing stuff in their inventory we don't care

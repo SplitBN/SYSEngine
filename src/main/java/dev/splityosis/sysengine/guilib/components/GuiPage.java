@@ -1,9 +1,6 @@
 package dev.splityosis.sysengine.guilib.components;
 
-import dev.splityosis.sysengine.guilib.events.GuiEvent;
-import dev.splityosis.sysengine.guilib.events.GuiPageClickEvent;
-import dev.splityosis.sysengine.guilib.events.GuiPageCloseEvent;
-import dev.splityosis.sysengine.guilib.events.GuiPageOpenEvent;
+import dev.splityosis.sysengine.guilib.events.*;
 import dev.splityosis.sysengine.guilib.intenral.PaneLayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -148,6 +145,12 @@ public interface GuiPage {
      */
     @Contract("_ -> this")
     GuiPage onClick(GuiEvent<GuiPageClickEvent> onClick);
+
+    /**
+     * Sets a callback to be triggered when the player's inventory is clicked.
+     */
+    @Contract("_ -> this")
+    GuiPage onPlayerInvClick(GuiEvent<GuiPagePlayerInventoryClickEvent> onPlayerInvClick);
 
     /**
      * Returns the current on open callback.
