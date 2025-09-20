@@ -75,7 +75,8 @@ public class ItemStackMapper implements ConfigMapper<ItemStack> {
                 PotionMeta pm = (PotionMeta) meta;
 
                 if (potionData != null) {
-                    pm.setBasePotionData(potionData.basePotionData);
+                    if (potionData.basePotionData != null)
+                        pm.setBasePotionData(potionData.basePotionData);
                     if (potionData.customEffects != null)
                         for (PotionEffect effect : potionData.customEffects)
                             if (effect != null)
